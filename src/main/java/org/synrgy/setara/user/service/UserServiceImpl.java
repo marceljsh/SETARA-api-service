@@ -1,8 +1,6 @@
 package org.synrgy.setara.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.user.model.User;
@@ -14,47 +12,26 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-  private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-
   private final UserRepository userRepo;
-
   private final PasswordEncoder passwordEncoder;
 
   @Override
   public void seedUser() {
-    final String email = "kdot@tde.com";
-    final String signature = "KDOT604T";
-    final String accountNumber = "1122334455";
-    final String nik = "1272051706870001";
-    final String phoneNumber = "+6281234567890";
-
-    boolean userExists = userRepo.existsByEmail(email) ||
-        userRepo.existsBySignature(signature) ||
-        userRepo.existsByAccountNumber(accountNumber) ||
-        userRepo.existsByNik(nik) ||
-        userRepo.existsByPhoneNumber(phoneNumber);
-
-    if (userExists) {
-      log.info("kdot already exists in the system");
-      return;
-    }
 
     User user = User.builder()
-        .email(email)
-        .signature(signature)
-        .accountNumber(accountNumber)
-        .name("Kendrick Lamar")
-        .password(passwordEncoder.encode("itsjustbigme"))
-        .imagePath("kendrick.jpg")
-        .nik(nik)
-        .phoneNumber(phoneNumber)
-        .address("Compton, CA")
-        .balance(BigDecimal.ZERO)
-        .mpin("170687")
-        .build();
+            .email("andhika157@gmail.com")
+            .signature("ADTP604T")
+            .accountNumber("2891376451")
+            .name("Andhika Putra")
+            .password(passwordEncoder.encode("andika12345"))
+            .imagePath("kendrick.jpg")
+            .nik("1272051706870001")
+            .phoneNumber("081234567890")
+            .address("Bandung")
+            .balance(BigDecimal.valueOf(1000000))
+            .mpin(passwordEncoder.encode("170687"))
+            .build();
 
     userRepo.save(user);
-    log.info("kdot has been added to the system");
   }
-
 }

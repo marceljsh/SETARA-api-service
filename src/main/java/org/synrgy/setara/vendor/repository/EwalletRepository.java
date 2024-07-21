@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.vendor.model.Ewallet;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,4 +21,5 @@ public interface EwalletRepository extends JpaRepository<Ewallet, UUID> {
   @Query("UPDATE Ewallet e SET e.deletedAt = null WHERE e.id = :id")
   void restoreById(@Param("id") UUID id);
 
+  Optional<Ewallet> findByName(String name);
 }

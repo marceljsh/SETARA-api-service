@@ -1,0 +1,159 @@
+package org.synrgy.setara.transaction.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.synrgy.setara.common.utils.GenericResponse;
+import org.synrgy.setara.common.utils.TransactionUtils;
+import org.synrgy.setara.transaction.dto.TransactionRequest;
+import org.synrgy.setara.transaction.dto.TransactionResponse;
+import org.synrgy.setara.transaction.model.Transaction;
+import org.synrgy.setara.transaction.model.TransactionType;
+import org.synrgy.setara.transaction.repository.TransactionRepository;
+import org.synrgy.setara.user.model.EwalletUser;
+import org.synrgy.setara.user.model.User;
+import org.synrgy.setara.user.repository.EwalletUserRepository;
+import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.contact.model.SavedEwalletUser;
+import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class TransactionServiceImpl implements TransactionService {
+
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final EwalletUserRepository ewalletUserRepository;
+    private final SavedEwalletUserRepository savedEwalletUserRepository;
+    private final PasswordEncoder passwordEncoder;
+    private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
+
+    @Override
+    public TransactionResponse topUp(TransactionRequest request, String token) {
+        try {
+            String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            User user = userRepository.findBySignature(signature)
+                    .orElseThrow(() -> {
+                        log.error("User with signature {} not found", signature);
+                        throw new RuntimeException("User not found");
+                    });
+
+            validateMpin(request.getMpin(), user);
+            BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
+            checkSufficientBalance(user, totalAmount);
+            Optional<EwalletUser> destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber());
+
+            if (destinationEwalletUser.isEmpty()) {
+                log.error("Destination e-wallet user not found for phone number {}", request.getDestinationPhoneNumber());
+                throw new RuntimeException("Destination e-wallet user not found");
+            }
+
+            Transaction transaction = createTransaction(request, user, destinationEwalletUser.get(), totalAmount);
+
+            updateBalances(user, destinationEwalletUser.get(), request.getAmount(), totalAmount);
+            transactionRepository.save(transaction);
+
+            if (request.isSavedAccount()) {
+                saveEwalletUser(user, destinationEwalletUser.get());
+            }
+
+            return createTransactionResponse(transaction, destinationEwalletUser.get());
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Invalid MPIN")) {
+                throw new RuntimeException("Invalid MPIN");
+            } else if (e.getMessage().equals("Insufficient balance")) {
+                throw new RuntimeException("Insufficient balance");
+            } else if (e.getMessage().equals("Destination e-wallet user not found")) {
+                throw new RuntimeException("Destination e-wallet user not found");
+            } else {
+                throw new RuntimeException("An unexpected error occurred");
+            }
+        } catch (Exception e) {
+            log.error("Failed to process top-up transaction: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process top-up transaction");
+        }
+    }
+
+    private void validateMpin(String mpin, User user) {
+        if (!passwordEncoder.matches(mpin, user.getMpin())) {
+            throw new RuntimeException("Invalid MPIN");
+        }
+    }
+
+    private void checkSufficientBalance(User user, BigDecimal totalAmount) {
+        if (user.getBalance().compareTo(totalAmount) < 0) {
+            throw new RuntimeException("Insufficient balance");
+        }
+    }
+
+    private ResponseEntity<GenericResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
+        GenericResponse<Void> response = GenericResponse.error(status, message);
+        return new ResponseEntity<>(response, status);
+    }
+
+    private Transaction createTransaction(TransactionRequest request, User user, EwalletUser destinationEwalletUser, BigDecimal totalAmount) {
+        String referenceNumber = TransactionUtils.generateReferenceNumber();
+        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
+
+        return Transaction.builder()
+                .user(user)
+                .ewallet(destinationEwalletUser.getEwallet())
+                .type(TransactionType.TOP_UP)
+                .destinationPhoneNumber(request.getDestinationPhoneNumber())
+                .amount(request.getAmount())
+                .adminFee(ADMIN_FEE)
+                .totalamount(totalAmount)
+                .uniqueCode(uniqueCode)
+                .referenceNumber(referenceNumber)
+                .note(request.getNote())
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    private void updateBalances(User user, EwalletUser destinationEwalletUser, BigDecimal amount, BigDecimal totalAmount) {
+        user.setBalance(user.getBalance().subtract(totalAmount));
+        destinationEwalletUser.setBalance(destinationEwalletUser.getBalance().add(amount));
+        userRepository.save(user);
+        ewalletUserRepository.save(destinationEwalletUser);
+    }
+
+    private void saveEwalletUser(User owner, EwalletUser ewalletUser) {
+        SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
+                .owner(owner)
+                .ewalletUser(ewalletUser)
+                .favorite(false)
+                .build();
+        savedEwalletUserRepository.save(savedEwalletUser);
+    }
+
+    private TransactionResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
+        return TransactionResponse.builder()
+                .user(TransactionResponse.UserDto.builder()
+                        .accountNumber(transaction.getUser().getAccountNumber())
+                        .name(transaction.getUser().getName())
+                        .imagePath(transaction.getUser().getImagePath())
+                        .bank("TAHAPAN BCA")
+                        .build())
+                .userEwallet(TransactionResponse.UserEwalletDto.builder()
+                        .name(destinationEwalletUser.getName())
+                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
+                        .ewallet(TransactionResponse.EwalletDto.builder()
+                                .name(transaction.getEwallet().getName())
+                                .build())
+                        .build())
+                .amount(transaction.getAmount())
+                .totalAmount(transaction.getTotalamount())
+                .adminFee(transaction.getAdminFee())
+                .build();
+    }
+}
