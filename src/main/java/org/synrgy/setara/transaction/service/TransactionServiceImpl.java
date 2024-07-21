@@ -2,15 +2,15 @@ package org.synrgy.setara.transaction.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.common.utils.GenericResponse;
 import org.synrgy.setara.common.utils.TransactionUtils;
+import org.synrgy.setara.contact.model.SavedEwalletUser;
+import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
 import org.synrgy.setara.transaction.dto.TransactionRequest;
 import org.synrgy.setara.transaction.dto.TransactionResponse;
+import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.model.TransactionType;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
@@ -18,12 +18,9 @@ import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
-import org.synrgy.setara.contact.model.SavedEwalletUser;
-import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,66 +36,40 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponse topUp(TransactionRequest request, String token) {
-        try {
-            String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findBySignature(signature)
+                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 
-            User user = userRepository.findBySignature(signature)
-                    .orElseThrow(() -> {
-                        log.error("User with signature {} not found", signature);
-                        throw new RuntimeException("User not found");
-                    });
+        validateMpin(request.getMpin(), user);
 
-            validateMpin(request.getMpin(), user);
-            BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
-            checkSufficientBalance(user, totalAmount);
-            Optional<EwalletUser> destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber());
+        BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
+        checkSufficientBalance(user, totalAmount);
 
-            if (destinationEwalletUser.isEmpty()) {
-                log.error("Destination e-wallet user not found for phone number {}", request.getDestinationPhoneNumber());
-                throw new RuntimeException("Destination e-wallet user not found");
-            }
+        EwalletUser destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber())
+                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for phone number " + request.getDestinationPhoneNumber()));
 
-            Transaction transaction = createTransaction(request, user, destinationEwalletUser.get(), totalAmount);
+        Transaction transaction = createTransaction(request, user, destinationEwalletUser, totalAmount);
 
-            updateBalances(user, destinationEwalletUser.get(), request.getAmount(), totalAmount);
-            transactionRepository.save(transaction);
+        updateBalances(user, destinationEwalletUser, request.getAmount(), totalAmount);
+        transactionRepository.save(transaction);
 
-            if (request.isSavedAccount()) {
-                saveEwalletUser(user, destinationEwalletUser.get());
-            }
-
-            return createTransactionResponse(transaction, destinationEwalletUser.get());
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("Invalid MPIN")) {
-                throw new RuntimeException("Invalid MPIN");
-            } else if (e.getMessage().equals("Insufficient balance")) {
-                throw new RuntimeException("Insufficient balance");
-            } else if (e.getMessage().equals("Destination e-wallet user not found")) {
-                throw new RuntimeException("Destination e-wallet user not found");
-            } else {
-                throw new RuntimeException("An unexpected error occurred");
-            }
-        } catch (Exception e) {
-            log.error("Failed to process top-up transaction: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to process top-up transaction");
+        if (request.isSavedAccount()) {
+            saveEwalletUser(user, destinationEwalletUser);
         }
+
+        return createTransactionResponse(transaction, destinationEwalletUser);
     }
 
     private void validateMpin(String mpin, User user) {
         if (!passwordEncoder.matches(mpin, user.getMpin())) {
-            throw new RuntimeException("Invalid MPIN");
+            throw new TransactionExceptions.InvalidMpinException("Invalid MPIN");
         }
     }
 
     private void checkSufficientBalance(User user, BigDecimal totalAmount) {
         if (user.getBalance().compareTo(totalAmount) < 0) {
-            throw new RuntimeException("Insufficient balance");
+            throw new TransactionExceptions.InsufficientBalanceException("Insufficient balance");
         }
-    }
-
-    private ResponseEntity<GenericResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
-        GenericResponse<Void> response = GenericResponse.error(status, message);
-        return new ResponseEntity<>(response, status);
     }
 
     private Transaction createTransaction(TransactionRequest request, User user, EwalletUser destinationEwalletUser, BigDecimal totalAmount) {

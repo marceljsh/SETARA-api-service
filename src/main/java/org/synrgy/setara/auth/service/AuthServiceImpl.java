@@ -1,6 +1,5 @@
 package org.synrgy.setara.auth.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +36,14 @@ public class AuthServiceImpl implements AuthService {
     return userRepo.findBySignature(signature)
             .orElseThrow(() -> {
               log.error("User with signature {} not found", signature);
-              return new EntityNotFoundException("User not found");
+              return new RuntimeException("User not found");
             });
   }
 
   private void validatePassword(String rawPassword, String encodedPassword) {
     if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
       log.error("Invalid password");
-      throw new IllegalArgumentException("Invalid password");
+      throw new RuntimeException("Invalid password");
     }
   }
 

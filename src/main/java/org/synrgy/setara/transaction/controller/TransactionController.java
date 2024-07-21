@@ -19,27 +19,8 @@ public class TransactionController {
 
     @PostMapping("/topup")
     public ResponseEntity<GenericResponse<TransactionResponse>> topUp(@RequestBody TransactionRequest request, @RequestHeader("Authorization") String token) {
-        try {
-            String authToken = token.substring(7);
-            TransactionResponse response = transactionService.topUp(request, authToken);
-            return ResponseEntity.ok(GenericResponse.success(HttpStatus.OK, "Top-up successful", response));
-        } catch (RuntimeException e) {
-            HttpStatus status;
-            String message = e.getMessage();
-
-            if (message.contains("Invalid MPIN")) {
-                status = HttpStatus.BAD_REQUEST;
-            } else if (message.contains("Insufficient balance")) {
-                status = HttpStatus.BAD_REQUEST;
-            } else if (message.contains("Destination e-wallet user not found")) {
-                status = HttpStatus.NOT_FOUND;
-            } else {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-            }
-
-            log.error("Error processing top-up request: {}", message);
-            return ResponseEntity.status(status).body(GenericResponse.error(status, message));
-        }
+        String authToken = token.substring(7);
+        TransactionResponse response = transactionService.topUp(request, authToken);
+        return ResponseEntity.ok(GenericResponse.success(HttpStatus.OK, "Top-up successful", response));
     }
-
 }

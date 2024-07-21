@@ -1,49 +1,45 @@
 package org.synrgy.setara.common.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 import org.synrgy.setara.common.utils.GenericResponse;
-import jakarta.persistence.EntityNotFoundException;
-
-import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<GenericResponse<Void>> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest request) {
-        log.error("Entity not found exception: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "Resource not found");
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<GenericResponse<Void>> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
-        log.error("Authentication exception: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Authentication failed");
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<GenericResponse<Void>> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        log.error("Access denied exception: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.FORBIDDEN, "Access denied");
+    public ResponseEntity<GenericResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(GenericResponse.error(HttpStatus.FORBIDDEN, "Access denied"));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<GenericResponse<Void>> handleBadCredentialsException(BadCredentialsException ex) {
+        log.error("Bad credentials: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(GenericResponse.error(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<GenericResponse<Void>> handleRuntimeException(RuntimeException ex) {
+        log.error("Runtime exception occurred: {}", ex.getMessage(), ex);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String message = ex.getMessage() != null ? ex.getMessage() : "An error occurred";
+        return ResponseEntity.status(status)
+                .body(GenericResponse.error(status, message));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<GenericResponse<Void>> handleGlobalException(Exception ex, WebRequest request) {
-        log.error("Internal server error: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred");
-    }
-
-    private ResponseEntity<GenericResponse<Void>> buildErrorResponse(HttpStatus status, String message) {
-        GenericResponse<Void> response = GenericResponse.error(status, message);
-        return new ResponseEntity<>(response, status);
+    public ResponseEntity<GenericResponse<Void>> handleException(Exception ex) {
+        log.error("Unexpected exception occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(GenericResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
     }
 }
