@@ -44,6 +44,7 @@ public class TransactionResponse {
     public static class UserEwalletDto {
         private String name;
         private String phoneNumber;
+        private String imagePath;
         private EwalletDto ewallet;
     }
 }

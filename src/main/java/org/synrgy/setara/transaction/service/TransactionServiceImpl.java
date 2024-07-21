@@ -118,6 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .userEwallet(TransactionResponse.UserEwalletDto.builder()
                         .name(destinationEwalletUser.getName())
                         .phoneNumber(destinationEwalletUser.getPhoneNumber())
+                        .imagePath(destinationEwalletUser.getImagePath())
                         .ewallet(TransactionResponse.EwalletDto.builder()
                                 .name(transaction.getEwallet().getName())
                                 .build())
