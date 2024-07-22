@@ -24,7 +24,7 @@ import org.synrgy.setara.vendor.model.Bank;
 @Table(name = "tbl_saved_accounts")
 public class SavedAccount extends Auditable {
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
   @JoinColumn(
     name = "owner_id",
     nullable = false,

@@ -1,5 +1,6 @@
 package org.synrgy.setara.contact.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,7 @@ public interface SavedAccountRepository extends JpaRepository<SavedAccount, UUID
   @Query("SELECT sa FROM SavedAccount sa WHERE sa.owner.id = :ownerId AND (:favOnly = false OR sa.favorite = true)")
   List<SavedAccount> fetchAll(UUID ownerId, boolean favOnly);
 
+  @Modifying
+  @Query("UPDATE SavedAccount sa SET sa.favorite = :isFavorite WHERE sa.id = :id")
+  void putFavorite(@Param("id") UUID id, @Param("isFavorite") boolean isFavorite);
 }

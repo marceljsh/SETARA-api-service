@@ -6,11 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.synrgy.setara.contact.dto.PutFavoriteRequest;
 import org.synrgy.setara.contact.dto.SavedAccountResponse;
+import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.service.SavedAccountService;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
 
@@ -46,4 +45,20 @@ public class ContactController {
   /* Saved Ewallet User section */
   // use prefix "/saved-ewallet-users"
 
+  @PutMapping(
+    value = "/favorite-account",
+    produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity putFavoriteAccount(@RequestBody PutFavoriteRequest request) {
+    return ResponseEntity.ok(saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite()));
+  }
+
+  @PutMapping(
+          value = "/favorite-ewallet",
+          produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity putFavoriteWallet(@RequestBody PutFavoriteRequest request) {
+    saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());
+    return ResponseEntity.ok("success");
+  }
 }
