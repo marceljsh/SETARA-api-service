@@ -41,6 +41,12 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!--	spring starter	-->
 		<dependency>
@@ -64,6 +70,13 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!--	RandomString 	-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+
 		<!--	jwt		-->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -82,7 +95,9 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+
 	</dependencies>
+
 
 	<build>
 		<plugins>

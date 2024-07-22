@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,49 +15,57 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.synrgy.setara.security.filter.JwtAuthenticationFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
 
-  private static final String[] SWAGGER_WHITELIST = {
-    "/swagger-ui/**",
-    "/v3/api-docs/**",
-    "/swagger-resources/**",
-    "/swagger-resources"
-  };
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-resources"
+    };
 
-  private static final String[] AUTH_WHITELIST = {
-    "/api/v1/auth/sign-in"
-  };
+    private static final String[] AUTH_WHITELIST = {
+            "/api/v1/auth/sign-in" // Endpoints yang dapat diakses tanpa autentikasi
+    };
 
-  private final JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final AuthenticationProvider authProvider;
 
-  private final AuthenticationProvider authProvider;
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(withDefaults())
+                .authenticationProvider(authProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, AUTH_WHITELIST).permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .anyRequest().authenticated()) // Semua request selain whitelist memerlukan autentikasi
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-  private final ObjectMapper mapper;
+                            final Map<String, Object> body = new HashMap<>();
+                            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+                            body.put("error", "Unauthorized");
+                            body.put("message", authException.getMessage());
+                            body.put("path", request.getServletPath());
 
-  @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-      .csrf(AbstractHttpConfigurer::disable)
-      .cors(withDefaults())
-      .authenticationProvider(authProvider)
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-      .formLogin(withDefaults())
+                            final ObjectMapper mapper = new ObjectMapper();
+                            mapper.writeValue(response.getOutputStream(), body);
+                        }));
 
-      .sessionManagement(session -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers(HttpMethod.POST, AUTH_WHITELIST).permitAll()
-        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-        .anyRequest().authenticated());
-
-    return http.build();
-  }
-
+        return http.build();
+    }
 }
