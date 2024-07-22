@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.user.model.EwalletUser;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,4 +21,7 @@ public interface EwalletUserRepository extends JpaRepository<EwalletUser, UUID> 
   @Query("UPDATE EwalletUser eu SET eu.deletedAt = null WHERE eu.id = :id")
   void restoreById(@Param("id") UUID id);
 
+  Optional<EwalletUser> findByPhoneNumber(String phoneNumber);
+
+  boolean existsByNameAndPhoneNumber(String name, String phoneNumber);
 }

@@ -1,5 +1,6 @@
 package org.synrgy.setara.vendor.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -12,6 +13,7 @@ import org.synrgy.setara.common.model.Auditable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "tbl_ewallets")
 public class Ewallet extends Auditable {
 

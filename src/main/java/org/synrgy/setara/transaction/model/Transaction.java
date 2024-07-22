@@ -46,7 +46,7 @@ public class Transaction extends Auditable {
   )
   private Bank bank;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
     name = "ewallet_id",
     referencedColumnName = "id"
@@ -64,14 +64,18 @@ public class Transaction extends Auditable {
 
   private BigDecimal adminFee;
 
+  private BigDecimal totalamount;
+
   @Column(unique = true)
   private String uniqueCode;
 
   @Column(
-    name = "reference_n0",
+    name = "reference_no",
     unique = true
   )
   private String referenceNumber;
+
+  private String note;
 
   private LocalDateTime time;
 

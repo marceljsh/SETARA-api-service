@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.contact.dto.PutFavoriteRequest;
 import org.synrgy.setara.contact.dto.SavedAccountResponse;
 import org.synrgy.setara.contact.model.SavedAccount;
@@ -14,6 +15,7 @@ import org.synrgy.setara.contact.service.SavedAccountService;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Validated
@@ -50,15 +52,8 @@ public class ContactController {
     produces = MediaType.APPLICATION_JSON_VALUE
   )
   public ResponseEntity putFavoriteAccount(@RequestBody PutFavoriteRequest request) {
-    return ResponseEntity.ok(saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite()));
-  }
-
-  @PutMapping(
-          value = "/favorite-ewallet",
-          produces = MediaType.APPLICATION_JSON_VALUE
-  )
-  public ResponseEntity putFavoriteWallet(@RequestBody PutFavoriteRequest request) {
-    saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());
-    return ResponseEntity.ok("success");
+    Optional<SavedAccount> savedAccount = saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());
+    BaseResponse<Optional<SavedAccount>> response = BaseResponse.success(savedAccount, "Success update is favorite account");
+    return ResponseEntity.ok(response);
   }
 }
