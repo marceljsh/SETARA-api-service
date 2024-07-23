@@ -26,7 +26,7 @@ public class TransactionResponse {
         private String accountNumber;
         private String name;
         private String imagePath;
-        private String bank;
+        private String bankName;
     }
 
     @Data

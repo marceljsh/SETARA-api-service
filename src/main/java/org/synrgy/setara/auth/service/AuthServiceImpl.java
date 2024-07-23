@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.auth.dto.AuthResponse;
 import org.synrgy.setara.auth.dto.LoginRequest;
+import org.synrgy.setara.auth.exception.AuthenticationException;
 import org.synrgy.setara.security.service.JwtService;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
@@ -36,14 +37,14 @@ public class AuthServiceImpl implements AuthService {
     return userRepo.findBySignature(signature)
             .orElseThrow(() -> {
               log.error("User with signature {} not found", signature);
-              return new RuntimeException("User not found");
+              throw new AuthenticationException("User not found");
             });
   }
 
   private void validatePassword(String rawPassword, String encodedPassword) {
     if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
       log.error("Invalid password");
-      throw new RuntimeException("Invalid password");
+      throw new AuthenticationException("Invalid password");
     }
   }
 

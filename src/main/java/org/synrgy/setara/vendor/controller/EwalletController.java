@@ -3,6 +3,7 @@ package org.synrgy.setara.vendor.controller;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class EwalletController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<BaseResponse<List<Ewallet>>> getAllEwallets() {
         List<Ewallet> ewallets = ewalletService.getAllEwallets();
-        BaseResponse<List<Ewallet>> response = BaseResponse.success(ewallets, "Success Get All E-Wallet");
+        BaseResponse<List<Ewallet>> response = BaseResponse.success(HttpStatus.OK, ewallets, "Success Get All E-Wallet");
         return ResponseEntity.ok(response);
     }
 }

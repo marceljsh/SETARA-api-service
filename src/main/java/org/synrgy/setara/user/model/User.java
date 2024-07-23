@@ -1,9 +1,7 @@
 package org.synrgy.setara.user.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.synrgy.setara.common.model.Auditable;
+import org.synrgy.setara.vendor.model.Bank;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -26,6 +25,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(name = "tbl_users")
 public class User extends Auditable implements UserDetails {
+
+  @ManyToOne
+  @JoinColumn(name = "id_bank")
+  private Bank bank;
 
   @Column(
     unique = true,

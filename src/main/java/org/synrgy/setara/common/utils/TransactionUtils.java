@@ -6,8 +6,10 @@ import java.time.format.DateTimeFormatter;
 
 public class TransactionUtils {
 
+    private static final int REFERENCE_NUMBER_LENGTH = 5;
+
     public static String generateReferenceNumber() {
-        return RandomStringUtils.randomAlphanumeric(5).toUpperCase();
+        return RandomStringUtils.randomNumeric(REFERENCE_NUMBER_LENGTH);
     }
 
     public static String generateUniqueCode(String referenceNumber) {

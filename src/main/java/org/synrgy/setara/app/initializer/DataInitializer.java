@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
 import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
+import org.synrgy.setara.vendor.service.BankService;
 import org.synrgy.setara.vendor.service.EwalletService;
 
 @Component
@@ -16,9 +17,11 @@ public class DataInitializer implements CommandLineRunner {
   private final EwalletService ewalletService;
   private final EwalletUserService ewalletUserService;
   private final SavedEwalletUserService savedEwalletUserService;
+  private final BankService bankService;
 
   @Override
   public void run(String... args) throws Exception {
+    bankService.seedBank();
     userService.seedUser();
     ewalletService.seedEwallet();
     ewalletUserService.seedEwalletUsers();

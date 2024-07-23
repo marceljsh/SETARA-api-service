@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.auth.dto.AuthResponse;
 import org.synrgy.setara.auth.dto.LoginRequest;
 import org.synrgy.setara.auth.service.AuthService;
-import org.synrgy.setara.common.utils.GenericResponse;
+import org.synrgy.setara.common.dto.BaseResponse;
 
 @Validated
 @RestController
@@ -33,15 +33,16 @@ public class AuthController {
           consumes = MediaType.APPLICATION_JSON_VALUE,
           produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<GenericResponse<AuthResponse>> signIn(@RequestBody LoginRequest request) {
-
+  public ResponseEntity<BaseResponse<AuthResponse>> signIn(@RequestBody LoginRequest request) {
     authManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                     request.getSignature(), request.getPassword()));
 
     AuthResponse body = authService.authenticate(request);
 
-    return ResponseEntity.ok(GenericResponse.success(
-            HttpStatus.OK, "Authentication successful", body));
+    BaseResponse<AuthResponse> response = BaseResponse.success(
+            HttpStatus.OK, body, "Authentication successful");
+
+    return ResponseEntity.ok(response);
   }
 }

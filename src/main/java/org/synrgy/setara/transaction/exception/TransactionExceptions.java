@@ -25,4 +25,10 @@ public class TransactionExceptions {
             super(message);
         }
     }
+
+    public static class InvalidTopUpAmountException extends RuntimeException {
+        public InvalidTopUpAmountException(String message) {
+            super(message);
+        }
+    }
 }

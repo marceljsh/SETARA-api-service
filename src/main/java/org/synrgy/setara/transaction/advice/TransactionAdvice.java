@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 @RestControllerAdvice
-public class TransactionAdviceExceptionHandler {
+public class TransactionAdvice {
 
     @ExceptionHandler(TransactionExceptions.InvalidMpinException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidMpinException(TransactionExceptions.InvalidMpinException ex) {

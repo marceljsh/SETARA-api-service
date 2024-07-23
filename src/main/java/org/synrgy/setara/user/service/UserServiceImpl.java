@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.vendor.model.Bank;
+import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 
@@ -17,12 +19,16 @@ public class UserServiceImpl implements UserService {
   private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
   private final UserRepository userRepo;
-
   private final PasswordEncoder passwordEncoder;
+  private final BankRepository bankRepo;
 
   @Override
   public void seedUser() {
+    Bank tahapanBCA = bankRepo.findByName("Tahapan BCA")
+            .orElseThrow(() -> new RuntimeException("Bank Tahapan BCA not found"));
+
     createUserIfNotExists(
+            tahapanBCA,
             "kdot@tde.com",
             "KDOT604T",
             "1122334455",
@@ -37,6 +43,7 @@ public class UserServiceImpl implements UserService {
     );
 
     createUserIfNotExists(
+            tahapanBCA,
             "jane.doe@example.com",
             "JANE1234",
             "2233445566",
@@ -51,6 +58,7 @@ public class UserServiceImpl implements UserService {
     );
 
     createUserIfNotExists(
+            tahapanBCA,
             "john.smith@example.com",
             "JOHN5678",
             "3344556677",
@@ -62,10 +70,11 @@ public class UserServiceImpl implements UserService {
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
+
     );
   }
 
-  private void createUserIfNotExists(String email, String signature, String accountNumber, String nik,
+  private void createUserIfNotExists(Bank bank, String email, String signature, String accountNumber, String nik,
                                      String phoneNumber, String name, String password, String imagePath,
                                      String address, BigDecimal balance, String mpin) {
     boolean userExists = userRepo.existsByEmail(email) ||
@@ -80,6 +89,7 @@ public class UserServiceImpl implements UserService {
     }
 
     User user = User.builder()
+            .bank(bank)
             .email(email)
             .signature(signature)
             .accountNumber(accountNumber)
