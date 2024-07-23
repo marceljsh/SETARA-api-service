@@ -1,11 +1,9 @@
 package org.synrgy.setara.contact.service;
 
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
-import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.user.model.User;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface SavedEwalletUserService {
@@ -13,5 +11,5 @@ public interface SavedEwalletUserService {
 
     List<SavedEwalletUserResponse> getSavedEwalletUsersForUser(User user, Boolean favorite);
 
-    Optional<SavedEwalletUser> putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite);
+    SavedEwalletUser putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite);
 }

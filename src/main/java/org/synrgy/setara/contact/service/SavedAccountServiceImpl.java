@@ -1,5 +1,6 @@
 package org.synrgy.setara.contact.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +29,14 @@ public class SavedAccountServiceImpl implements SavedAccountService {
 
   @Override
   @Transactional
-  public Optional<SavedAccount> putFavoriteAccount(UUID idTersimpan, boolean isFavorite) {
-    saRepo.putFavorite(idTersimpan, isFavorite);
-    return saRepo.findById(idTersimpan);
+  public SavedAccount putFavoriteAccount(UUID idTersimpan, boolean isFavorite) {
+    Optional<SavedAccount> optionalSavedAccount = saRepo.findById(idTersimpan);
+    if (optionalSavedAccount.isPresent()) {
+      SavedAccount savedAccount = optionalSavedAccount.get();
+      savedAccount.setFavorite(isFavorite);
+      return saRepo.save(savedAccount);
+    } else {
+      throw new EntityNotFoundException("SavedAccount with id " + idTersimpan + " not found");
+    }
   }
 }

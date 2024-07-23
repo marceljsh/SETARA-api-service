@@ -11,5 +11,5 @@ public interface SavedAccountService {
 
   List<SavedAccountResponse> getSavedAccounts(UUID ownerId, boolean favOnly);
 
-  Optional<SavedAccount> putFavoriteAccount(UUID idTersimpan, boolean isFavorite);
+  SavedAccount putFavoriteAccount(UUID idTersimpan, boolean isFavorite);
 }

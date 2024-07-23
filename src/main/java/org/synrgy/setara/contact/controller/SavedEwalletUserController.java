@@ -1,5 +1,6 @@
 package org.synrgy.setara.contact.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,9 +62,17 @@ public class SavedEwalletUserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity putFavoriteEwallet(@RequestBody PutFavoriteRequest request) {
-        Optional<SavedEwalletUser> savedEwallet = savedEwalletUserService.putFavoriteEwalletUser(request.getIdTersimpan(), request.isFavorite());
-        BaseResponse<Optional<SavedEwalletUser>> response = BaseResponse.success(savedEwallet, "Success update is favorite ewallet");
-        return ResponseEntity.ok(response);
+        try {
+            SavedEwalletUser savedEwallet = savedEwalletUserService.putFavoriteEwalletUser(request.getIdTersimpan(), request.isFavorite());
+            BaseResponse<SavedEwalletUser> response = BaseResponse.success(savedEwallet, "Success update is favorite ewallet");
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(BaseResponse.failure(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+        }
     }
 
 }

@@ -1,8 +1,10 @@
 package org.synrgy.setara.contact.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -47,13 +49,18 @@ public class ContactController {
   /* Saved Ewallet User section */
   // use prefix "/saved-ewallet-users"
 
-  @PutMapping(
-    value = "/favorite-account",
-    produces = MediaType.APPLICATION_JSON_VALUE
-  )
-  public ResponseEntity putFavoriteAccount(@RequestBody PutFavoriteRequest request) {
-    Optional<SavedAccount> savedAccount = saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());
-    BaseResponse<Optional<SavedAccount>> response = BaseResponse.success(savedAccount, "Success update is favorite account");
-    return ResponseEntity.ok(response);
+  @PutMapping("/favorite-account")
+  public ResponseEntity<BaseResponse<SavedAccount>> putFavoriteAccount(@RequestBody PutFavoriteRequest request) {
+    try {
+      SavedAccount savedAccount = saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());
+      BaseResponse<SavedAccount> response = BaseResponse.success(savedAccount, "Success update is favorite account");
+      return ResponseEntity.ok(response);
+    } catch (EntityNotFoundException ex) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body(BaseResponse.failure(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    } catch (Exception ex) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body(BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+    }
   }
 }
