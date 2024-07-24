@@ -57,7 +57,7 @@ public class SavedEwalletUserController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Error occurred while fetching saved ewallets", e);
+            log.error("Error occurred while fetching saved ewallets: ", e);
             BaseResponse<List<SavedEwalletUserResponse>> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

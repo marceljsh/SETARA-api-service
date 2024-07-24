@@ -70,23 +70,28 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
 
     @Override
     public List<SavedEwalletUserResponse> getSavedEwalletUsersForUser(User user, Boolean favorite) {
-        List<SavedEwalletUser> savedEwalletUsers;
-        if (favorite != null) {
-            savedEwalletUsers = savedEwalletUserRepo.findByOwnerIdAndFavorite(user.getId(), favorite);
-        } else {
-            savedEwalletUsers = savedEwalletUserRepo.findByOwnerId(user.getId());
+        try {
+            List<SavedEwalletUser> savedEwalletUsers;
+            if (favorite != null) {
+                savedEwalletUsers = savedEwalletUserRepo.findByOwnerIdAndFavorite(user.getId(), favorite);
+            } else {
+                savedEwalletUsers = savedEwalletUserRepo.findByOwnerId(user.getId());
+            }
+            return savedEwalletUsers.stream()
+                    .map(saved -> new SavedEwalletUserResponse(
+                            saved.getId(),
+                            saved.getOwner().getId(),
+                            saved.getEwalletUser().getId(),
+                            saved.isFavorite(),
+                            saved.getEwalletUser().getName(),
+                            saved.getEwalletUser().getImagePath(),
+                            saved.getEwalletUser().getPhoneNumber(),
+                            saved.getEwalletUser().getEwallet().getName()
+                    ))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error occurred while fetching saved ewallet users for user {}: ", user.getId(), e);
+            throw e; // Re-throw to be handled by controller
         }
-        return savedEwalletUsers.stream()
-                .map(saved -> new SavedEwalletUserResponse(
-                        saved.getId(),
-                        saved.getOwner().getId(),
-                        saved.getEwalletUser().getId(),
-                        saved.isFavorite(),
-                        saved.getEwalletUser().getName(),
-                        saved.getEwalletUser().getImagePath(),
-                        saved.getEwalletUser().getPhoneNumber(),
-                        saved.getEwalletUser().getEwallet().getName()
-                ))
-                .collect(Collectors.toList());
     }
 }
