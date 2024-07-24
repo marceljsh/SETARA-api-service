@@ -1,5 +1,7 @@
 package org.synrgy.setara.contact.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.synrgy.setara.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,6 +95,20 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
         } catch (Exception e) {
             log.error("Error occurred while fetching saved ewallet users for user {}: ", user.getId(), e);
             throw e; // Re-throw to be handled by controller
+        }
+    }
+
+    @Override
+    @Transactional
+    public SavedEwalletUser putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite) {
+        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepo.findById(idTersimpan);
+        if (optionalSavedEwalletUser.isPresent())
+        {
+            SavedEwalletUser savedEwalletUser = optionalSavedEwalletUser.get();
+            savedEwalletUser.setFavorite(isFavorite);
+            return savedEwalletUserRepo.save(savedEwalletUser);
+        } else {
+            throw new EntityNotFoundException("ewalletSaved with id " + idTersimpan + " not found");
         }
     }
 }

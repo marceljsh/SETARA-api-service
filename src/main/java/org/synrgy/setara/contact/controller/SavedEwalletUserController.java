@@ -1,19 +1,21 @@
 package org.synrgy.setara.contact.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.contact.dto.PutFavoriteRequest;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
+import org.synrgy.setara.contact.model.SavedAccount;
+import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
@@ -62,4 +64,23 @@ public class SavedEwalletUserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PutMapping(
+            value = "/favorite-ewallet",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity putFavoriteEwallet(@RequestBody PutFavoriteRequest request) {
+        try {
+            SavedEwalletUser savedEwallet = savedEwalletUserService.putFavoriteEwalletUser(request.getIdTersimpan(), request.isFavorite());
+            BaseResponse<SavedEwalletUser> response = BaseResponse.success(savedEwallet, "Success update is favorite ewallet");
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(BaseResponse.failure(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+        }
+    }
+
 }

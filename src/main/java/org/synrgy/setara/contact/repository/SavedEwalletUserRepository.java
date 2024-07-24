@@ -47,4 +47,8 @@ public interface SavedEwalletUserRepository extends JpaRepository<SavedEwalletUs
   List<SavedEwalletUser> findByOwnerId(UUID id);
 
   List<SavedEwalletUser> findByOwnerIdAndFavorite(UUID ownerId, boolean favorite);
+
+  @Modifying
+  @Query("UPDATE SavedEwalletUser sa SET sa.favorite = :isFavorite WHERE sa.id = :id")
+  void putFavorite(@Param("id") UUID id, @Param("isFavorite") boolean isFavorite);
 }
