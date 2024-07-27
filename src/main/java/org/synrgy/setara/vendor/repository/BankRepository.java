@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.vendor.model.Bank;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,4 +21,8 @@ public interface BankRepository extends JpaRepository<Bank, UUID> {
   @Query("UPDATE Bank b SET b.deletedAt = null WHERE b.id = :id")
   void restoreById(@Param("id") UUID id);
 
+  @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Bank b WHERE b.name = :name")
+  boolean existsByName(@Param("name") String name);
+
+  Optional<Bank> findByName(String name);
 }

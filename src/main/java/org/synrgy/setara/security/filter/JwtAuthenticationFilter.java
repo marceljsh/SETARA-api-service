@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,16 +27,14 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
-
   private final UserDetailsService userDetailsService;
-
   private final ObjectMapper mapper;
 
   @Override
   protected void doFilterInternal(
-    @NonNull HttpServletRequest req,
-    @NonNull HttpServletResponse res,
-    @NonNull FilterChain filterChain) throws ServletException, IOException {
+          @NonNull HttpServletRequest req,
+          @NonNull HttpServletResponse res,
+          @NonNull FilterChain filterChain) throws ServletException, IOException {
 
     final String authHeader = req.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -46,7 +45,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     final String token = authHeader.substring(7);
 
     try {
-
       final String username = jwtService.extractUsername(token);
 
       if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -54,9 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (jwtService.isTokenValid(token, userDetails)) {
           UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            userDetails,
-            null,
-            userDetails.getAuthorities());
+                  userDetails,
+                  null,
+                  userDetails.getAuthorities());
 
           authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
           SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -67,7 +65,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-      ErrorResponse response = ErrorResponse.from("token expired");
+      ErrorResponse response = ErrorResponse.from("Token expired", HttpStatus.UNAUTHORIZED);
+      mapper.writeValue(res.getWriter(), response);
+
+      return;
+    } catch (Exception ex) {
+      res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+      ErrorResponse response = ErrorResponse.from("Authentication error", HttpStatus.UNAUTHORIZED);
       mapper.writeValue(res.getWriter(), response);
 
       return;
@@ -75,5 +81,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     filterChain.doFilter(req, res);
   }
-
 }

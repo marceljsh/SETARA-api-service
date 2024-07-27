@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.user.model.User;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
   Optional<User> findBySignature(String signature);
 
+  Optional<User> findByName(String name);
+
+  Optional<User> findByMpin(String mpin);
+
   boolean existsByEmail(String email);
 
   boolean existsBySignature(String signature);
@@ -35,4 +40,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
   boolean existsByNik(String nik);
 
+  Optional<User> findByAccountNumber(String destinationAccountNumber);
 }
