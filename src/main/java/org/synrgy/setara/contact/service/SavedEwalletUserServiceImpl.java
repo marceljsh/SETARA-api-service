@@ -64,13 +64,13 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
 
     @Override
     @Transactional
-    public SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(String authToken) {
+    public SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(String ewalletName) {
         String signature = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepo.findBySignature(signature)
                 .orElseThrow(() -> new SavedEwalletExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 
-        List<SavedEwalletUser> savedEwalletUsers = savedEwalletUserRepo.findByOwnerId(user.getId());
+        List<SavedEwalletUser> savedEwalletUsers = savedEwalletUserRepo.findByOwnerIdAndEwalletName(user.getId(), ewalletName);
 
         List<SavedEwalletUserResponse> favoriteEwalletUsers = savedEwalletUsers.stream()
                 .filter(SavedEwalletUser::isFavorite)

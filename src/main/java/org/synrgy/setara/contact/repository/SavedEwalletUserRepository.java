@@ -34,6 +34,13 @@ public interface SavedEwalletUserRepository extends JpaRepository<SavedEwalletUs
 
   List<SavedEwalletUser> findByOwnerIdAndFavorite(UUID ownerId, boolean favorite);
 
+  @Query("SELECT s FROM SavedEwalletUser s " +
+          "WHERE s.owner.id = :ownerId " +
+          "AND (:ewalletName IS NULL OR s.ewalletUser.ewallet.name = :ewalletName)")
+  List<SavedEwalletUser> findByOwnerIdAndEwalletName(
+          @Param("ownerId") UUID ownerId,
+          @Param("ewalletName") String ewalletName);
+
   @Query("SELECT COUNT(s) FROM SavedEwalletUser s WHERE s.owner.id = :ownerId AND s.favorite = true AND s.deletedAt IS NULL")
   Long countFavoriteByOwner(@Param("ownerId") UUID ownerId);
 

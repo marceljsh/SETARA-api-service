@@ -6,7 +6,7 @@ import org.synrgy.setara.user.model.User;
 public interface UserService {
 
   void seedUser();
-  UserBalanceResponse getBalance(String token);
+  UserBalanceResponse getBalance();
 
   User searchUserByNorek(String acount_no, String bank);
 }

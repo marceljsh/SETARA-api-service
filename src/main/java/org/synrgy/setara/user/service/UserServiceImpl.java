@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserBalanceResponse getBalance(String token) {
+  public UserBalanceResponse getBalance() {
     String signature = SecurityContextHolder.getContext().getAuthentication().getName();
     User user = userRepository.findBySignature(signature)
             .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
