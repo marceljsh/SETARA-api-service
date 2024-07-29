@@ -7,15 +7,11 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class BankContactAddRequest {
-
-  private UUID bankId;
+public class EwalletContactAddRequest {
 
   private String name;
 
-  private String accountNumber;
-
-  private String imagePath;
+  private UUID ewalletUserId;
 
   private boolean favorite;
 

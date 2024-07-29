@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.contact.model.EwalletContact;
+import org.synrgy.setara.user.model.User;
+import org.synrgy.setara.vendor.model.Ewallet;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,17 +28,18 @@ public interface EwalletContactRepository extends JpaRepository<EwalletContact, 
   void restoreById(@Param("id") UUID id);
 
   @Query("SELECT ec FROM EwalletContact ec " +
-          "WHERE ec.owner.id = :owner_id " +
+          "WHERE ec.owner = :owner " +
+          "AND ec.ewalletUser.ewallet = :ewallet " +
           "AND (:fav_only = false OR ec.favorite = true)")
-  List<EwalletContact> fetchAllByOwnerId(@Param("owner_id") UUID ownerId, @Param("fav_only") boolean favOnly);
-
-  @Query("SELECT ec FROM EwalletContact ec " +
-          "WHERE ec.owner.id = :ownerId " +
-          "AND ec.ewalletUser.ewallet.id = :ewallet_id " +
-          "AND (:fav_only = false OR ec.favorite = true)")
-  List<EwalletContact> findByOwnerIdAndEwalletName(@Param("owner_id") UUID ownerId, @Param("ewallet_id") UUID ewalletId, @Param("fav_only") boolean favOnly);
+  List<EwalletContact> fetchAllByOwnerAndEwallet(@Param("owner") User owner, @Param("ewallet") Ewallet ewallet, @Param("fav_only") boolean favOnly);
 
   @Modifying
-  @Query("UPDATE EwalletContact ec SET ec.favorite = :favorite WHERE ec.id = :id")
+  @Query("UPDATE EwalletContact ec " +
+      "SET ec.favorite = :favorite " +
+      "WHERE ec.id = :id")
   void updateFavorite(@Param("id") UUID id, @Param("favorite") boolean favorite);
+
+  @Query("SELECT COUNT(ec) > 0 FROM EwalletContact ec " +
+          "WHERE ec.id = :id AND ec.owner = :owner")
+  boolean belongsToOwner(@Param("ownerId") User owner, @Param("id") UUID id);
 }

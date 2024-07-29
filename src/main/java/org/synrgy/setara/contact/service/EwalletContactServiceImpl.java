@@ -1,108 +1,117 @@
 package org.synrgy.setara.contact.service;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
-import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
-import org.synrgy.setara.contact.exception.SavedEwalletExceptions;
-import org.synrgy.setara.contact.exception.SavedEwalletExceptions.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.synrgy.setara.app.util.Constants;
+import org.synrgy.setara.contact.dto.EwalletContactAddRequest;
+import org.synrgy.setara.contact.dto.EwalletContactResponse;
 import org.synrgy.setara.contact.model.EwalletContact;
 import org.synrgy.setara.contact.repository.EwalletContactRepository;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
-import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.vendor.model.Ewallet;
+import org.synrgy.setara.vendor.repository.EwalletRepository;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class EwalletContactServiceImpl implements EwalletContactService {
-    private final Logger log = LoggerFactory.getLogger(EwalletContactServiceImpl.class);
-    private final EwalletContactRepository savedEwalletUserRepo;
-    private final UserRepository userRepo;
-    private final EwalletUserRepository ewalletUserRepo;
 
-    @Override
-    public void seedSavedEwalletUsers() {
-        List<EwalletUser> ewalletUsers = ewalletUserRepo.findAll();
+  private final Logger log = LoggerFactory.getLogger(EwalletContactServiceImpl.class);
 
-        if (ewalletUsers.isEmpty()) {
-            log.warn("No e-wallet users found in the database.");
-            return;
-        }
+  private final EwalletContactRepository ecRepo;
 
-        Optional<User> optionalOwner = userRepo.findByName("Kendrick Lamar");
+  private final EwalletUserRepository euRepo;
 
-        if (optionalOwner.isEmpty()) {
-            log.warn("User with name 'Kendrick Lamar' not found.");
-            return;
-        }
+  private final EwalletRepository ewalletRepo;
 
-        User owner = optionalOwner.get();
+  @Override
+  @Transactional
+  public EwalletContactResponse save(User owner, EwalletContactAddRequest request) {
+    log.trace("Creating ewallet contact {} for User({})",
+        request.getName(), owner.getId());
 
-        for (EwalletUser ewalletUser : ewalletUsers) {
-            boolean exists = savedEwalletUserRepo.existsByOwnerAndEwalletUser(owner, ewalletUser);
-
-            if (!exists) {
-                EwalletContact ewalletContact = EwalletContact.builder()
-                        .owner(owner)
-                        .ewalletUser(ewalletUser)
-                        .favorite(false)
-                        .build();
-
-                savedEwalletUserRepo.save(ewalletContact);
-                log.info("EwalletContact with owner {} and ewalletUser {} has been added to the database", owner.getName(), ewalletUser.getName());
-            }
-        }
+    EwalletUser eu = euRepo.findById(request.getEwalletUserId()).orElse(null);
+    if (eu == null) {
+      log.error("EwalletUser({}) not found", request.getEwalletUserId());
+      throw new EntityNotFoundException(Constants.EWALLET_USER_NOT_FOUND);
     }
 
-    @Override
-    @Transactional
-    public SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(String ewalletName) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+    EwalletContact contact = EwalletContact.builder()
+        .name(request.getName())
+        .owner(owner)
+        .ewalletUser(eu)
+        .favorite(request.isFavorite())
+        .build();
 
-        User user = userRepo.findBySignature(signature)
-                .orElseThrow(() -> new SavedEwalletExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+    log.trace("Saving ewallet contact {} of {} for User({})",
+        contact.getName(), contact.getEwalletUser().getEwallet().getName(), owner.getId());
 
-        List<EwalletContact> ewalletContacts = savedEwalletUserRepo.findByOwnerIdAndEwalletName(user.getId(), ewalletName);
+    return EwalletContactResponse.from(ecRepo.save(contact));
+  }
 
-        List<SavedEwalletUserResponse> favoriteEwalletUsers = ewalletContacts.stream()
-                .filter(EwalletContact::isFavorite)
-                .map(SavedEwalletUserResponse::from)
-                .toList();
+  @Override
+  @Transactional(readOnly = true)
+  public List<EwalletContactResponse> fetchByOwnerAndEwalletId(User owner, UUID ewalletId, boolean favOnly) {
+    log.trace("Fetching ewallet contacts (fav={}) of User({}) for Ewallet({})",
+        favOnly, owner.getId(), ewalletId);
 
-        List<SavedEwalletUserResponse> nonFavoriteEwalletUsers = ewalletContacts.stream()
-                .filter(savedUser -> !savedUser.isFavorite())
-                .map(SavedEwalletUserResponse::from)
-                .toList();
-
-        long favoriteCount = favoriteEwalletUsers.size();
-        long nonFavoriteCount = nonFavoriteEwalletUsers.size();
-
-        return new SavedEwalletAndAccountFinalResponse<>(
-                favoriteCount,
-                nonFavoriteCount,
-                favoriteEwalletUsers,
-                nonFavoriteEwalletUsers
-        );
+    Ewallet ewallet = ewalletRepo.findById(ewalletId).orElse(null);
+    if (ewallet == null) {
+      log.error("Ewallet({}) not found", ewalletId);
+      throw new EntityNotFoundException(Constants.EWALLET_NOT_FOUND);
     }
 
-    @Override
-    @Transactional
-    public FavoriteResponse putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite) {
-        Optional<EwalletContact> optionalSavedEwalletUser = savedEwalletUserRepo.findById(idTersimpan);
-        if (optionalSavedEwalletUser.isPresent()) {
-            EwalletContact ewalletContact = optionalSavedEwalletUser.get();
-            ewalletContact.setFavorite(isFavorite);
-            savedEwalletUserRepo.save(ewalletContact);
-            return new FavoriteResponse(idTersimpan, isFavorite);
-        } else {
-            throw new EwalletUserNotFoundException("Saved e-wallet user with id " + idTersimpan + " not found");
-        }
+    List<EwalletContact> contacts = ecRepo.fetchAllByOwnerAndEwallet(owner, ewallet, favOnly);
+
+    log.trace("Fetched {} ewallet contacts (fav={}) of User({}) for Ewallet({})",
+        contacts.size(), favOnly, owner.getId(), ewalletId);
+
+    return contacts.stream()
+        .map(EwalletContactResponse::from)
+        .toList();
+  }
+
+  @Override
+  @Transactional
+  public void updateFavorite(User owner, UUID id, boolean favorite) {
+    log.trace("Updating favorite of EwalletContact({}) to {}",
+        id, favorite);
+
+    if (ecRepo.existsById(id) && ecRepo.belongsToOwner(owner, id)) {
+      log.trace("Proceeding to update favorite of EwalletContact({}) to {}",
+          id, favorite);
+      ecRepo.updateFavorite(id, favorite);
     }
+  }
+
+  @Override
+  @Transactional
+  public void archive(UUID id) {
+    log.trace("Archiving EwalletContact({})", id);
+
+    if (ecRepo.existsById(id)) {
+      log.trace("Proceeding to archive EwalletContact({})", id);
+      ecRepo.archiveById(id);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void restore(UUID id) {
+    log.trace("Restoring EwalletContact({})", id);
+
+    if (ecRepo.existsById(id)) {
+      log.trace("Proceeding to restore EwalletContact({})", id);
+      ecRepo.restoreById(id);
+    }
+  }
+
 }

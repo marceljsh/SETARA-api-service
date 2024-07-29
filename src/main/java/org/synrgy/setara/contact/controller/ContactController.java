@@ -9,8 +9,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.ApiResponse;
 import org.synrgy.setara.contact.dto.BankContactResponse;
+import org.synrgy.setara.contact.dto.EwalletContactFetchRequest;
+import org.synrgy.setara.contact.dto.EwalletContactResponse;
 import org.synrgy.setara.contact.dto.FavoriteUpdateRequest;
 import org.synrgy.setara.contact.service.BankContactService;
+import org.synrgy.setara.contact.service.EwalletContactService;
 import org.synrgy.setara.user.model.User;
 
 import java.util.List;
@@ -26,28 +29,56 @@ public class ContactController {
 
   private final BankContactService bcService;
 
+  private final EwalletContactService ewService;
+
   @GetMapping(
     value = "/my-bank-contacts",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
   public ResponseEntity<Object> getOwnBankContacts(User owner, @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
-    log.info("Request to get{} bank contacts for User({})",
+    log.info("Request to get{} bank contacts of User({})",
         favOnly ? " favorite" : "", owner.getId());
 
-    List<BankContactResponse> bankContacts = bcService.fetchByOwner(owner, favOnly);
+    List<BankContactResponse> contacts = bcService.fetchByOwner(owner, favOnly);
 
-    return ResponseEntity.ok(ApiResponse.success("OK", bankContacts));
+    return ResponseEntity.ok(ApiResponse.success("OK", contacts));
   }
 
   @PatchMapping(
     value = "/my-bank-contacts/{id}/favorite",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<Object> toggleFavorite(User owner, @PathVariable("id") UUID id, @RequestBody FavoriteUpdateRequest request) {
+  public ResponseEntity<Object> toggleFavoriteBankContact(User owner, @PathVariable("id") UUID id, @RequestBody FavoriteUpdateRequest request) {
     log.info("Request to update favorite status of BankContact({}) to {}",
         id, request.isFavorite());
 
     bcService.updateFavorite(owner, id, request.isFavorite());
+
+    return ResponseEntity.ok(ApiResponse.success("OK", null));
+  }
+
+  @GetMapping(
+    value = "/my-ewallet-contacts",
+    produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity<Object> getOwnEwalletContacts(User owner, @RequestBody EwalletContactFetchRequest request, @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
+    log.info("Request to fetch ewallet contacts (fav={}) of User({}) for Ewallet({})",
+        favOnly, owner.getId(), request.getEwalletId());
+
+    List<EwalletContactResponse> contacts = ewService.fetchByOwnerAndEwalletId(owner, request.getEwalletId(), favOnly);
+
+    return ResponseEntity.ok(ApiResponse.success("OK", contacts));
+  }
+
+  @PatchMapping(
+    value = "/my-ewallet-contacts/{id}/favorite",
+    produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity<Object> toggleFavoriteEwalletContact(User owner, @PathVariable("id") UUID id, @RequestBody FavoriteUpdateRequest request) {
+    log.info("Request to update favorite status of EwalletContact({}) to {}",
+        id, request.isFavorite());
+
+    ewService.updateFavorite(owner, id, request.isFavorite());
 
     return ResponseEntity.ok(ApiResponse.success("OK", null));
   }

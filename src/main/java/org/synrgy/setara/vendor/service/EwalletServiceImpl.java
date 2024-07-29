@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.vendor.dto.EwalletResponse;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 

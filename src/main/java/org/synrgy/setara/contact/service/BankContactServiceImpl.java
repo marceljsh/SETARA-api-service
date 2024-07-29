@@ -40,7 +40,7 @@ public class BankContactServiceImpl implements BankContactService {
       throw new EntityNotFoundException(Constants.BANK_NOT_FOUND);
     }
 
-    BankContact bankContact = BankContact.builder()
+    BankContact contact = BankContact.builder()
         .owner(owner)
         .bank(bank)
         .name(request.getName())
@@ -50,22 +50,22 @@ public class BankContactServiceImpl implements BankContactService {
         .build();
 
     log.trace("Saving bank contact {} of {} for User({})",
-        bankContact.getName(), bankContact.getBank().getName(), owner.getId());
-    return BankContactResponse.from(bcRepo.save(bankContact));
+        contact.getName(), contact.getBank().getName(), owner.getId());
+    return BankContactResponse.from(bcRepo.save(contact));
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<BankContactResponse> fetchByOwner(User owner, boolean favOnly) {
-    log.trace("Fetching {} bank contacts of User({})",
-        owner.getId(), favOnly ? "favorite" : "all");
+    log.trace("Fetching bank contacts (fav={}) of User({})",
+        favOnly, owner.getId());
 
-    List<BankContact> bankContacts = bcRepo.fetchAllByOwner(owner, false);
+    List<BankContact> contacts = bcRepo.fetchAllByOwner(owner, false);
 
-    log.trace("Fetched {}{} bank contacts of User({})",
-        bankContacts.size(), favOnly ? "favorite " : "", owner.getId());
+    log.trace("Fetched {} bank contacts (fav={}) of User({})",
+        contacts.size(), favOnly, owner.getId());
 
-    return bankContacts.stream()
+    return contacts.stream()
         .map(BankContactResponse::from)
         .toList();
   }

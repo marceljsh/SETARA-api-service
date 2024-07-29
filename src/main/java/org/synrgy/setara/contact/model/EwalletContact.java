@@ -40,6 +40,9 @@ public class EwalletContact extends Auditable {
   )
   private EwalletUser ewalletUser;
 
+  @Column(nullable = false)
+  private String name;
+
   @Column(
     name = "is_favorite",
     columnDefinition = "boolean default false"
