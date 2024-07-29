@@ -1,6 +1,5 @@
 package org.synrgy.setara.vendor.service;
 
-import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 

@@ -3,7 +3,6 @@ package org.synrgy.setara.vendor.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.model.Merchant;

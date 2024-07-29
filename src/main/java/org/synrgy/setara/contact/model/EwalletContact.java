@@ -12,8 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.synrgy.setara.common.model.Auditable;
+import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
-import org.synrgy.setara.vendor.model.Bank;
 
 @Getter
 @Setter
@@ -21,10 +21,10 @@ import org.synrgy.setara.vendor.model.Bank;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tbl_saved_accounts")
-public class SavedAccount extends Auditable {
+@Table(name = "tbl_ewallet_contacts")
+public class EwalletContact extends Auditable {
 
-  @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
     name = "owner_id",
     nullable = false,
@@ -34,20 +34,11 @@ public class SavedAccount extends Auditable {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
-    name = "bank_id",
+    name = "ewallet_user_id",
     nullable = false,
     referencedColumnName = "id"
   )
-  private Bank bank;
-
-  @Column(nullable = false)
-  private String name;
-
-  @Column(nullable = false)
-  private String accountNumber;
-
-  @Column(nullable = false)
-  private String imagePath;
+  private EwalletUser ewalletUser;
 
   @Column(
     name = "is_favorite",

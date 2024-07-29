@@ -1,6 +1,6 @@
 package org.synrgy.setara.contact.dto;
 
-import org.synrgy.setara.contact.model.SavedEwalletUser;
+import org.synrgy.setara.contact.model.EwalletContact;
 
 import lombok.*;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class SavedEwalletUserResponse {
     private String ewalletUserPhoneNumber;
     private String ewalletName;
 
-    public static SavedEwalletUserResponse from(SavedEwalletUser savedUser) {
+    public static SavedEwalletUserResponse from(EwalletContact savedUser) {
         return SavedEwalletUserResponse.builder()
                 .id(savedUser.getId())
                 .ownerId(savedUser.getOwner().getId())

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.service.MerchantService;
-import org.synrgy.setara.common.dto.BaseResponse;
 
 @RestController
 @RequiredArgsConstructor

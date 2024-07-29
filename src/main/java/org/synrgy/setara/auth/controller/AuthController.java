@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.auth.dto.AuthResponse;
 import org.synrgy.setara.auth.dto.LoginRequest;
 import org.synrgy.setara.auth.service.AuthService;
-import org.synrgy.setara.common.dto.BaseResponse;
 
 @Validated
 @RestController

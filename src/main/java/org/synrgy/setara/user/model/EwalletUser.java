@@ -39,8 +39,6 @@ public class EwalletUser extends Auditable {
   @Column(nullable = false)
   private String phoneNumber;
 
-  private BigDecimal balance;
-
   private String imagePath;
 
 }

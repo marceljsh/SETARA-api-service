@@ -5,19 +5,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import lombok.*;
 import org.synrgy.setara.common.model.Auditable;
-import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
+import org.synrgy.setara.vendor.model.Bank;
 
 @Getter
 @Setter
@@ -25,10 +21,10 @@ import org.synrgy.setara.user.model.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tbl_saved_ewallet_users")
-public class SavedEwalletUser extends Auditable {
+@Table(name = "tbl_bank_contacts")
+public class BankContact extends Auditable {
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
   @JoinColumn(
     name = "owner_id",
     nullable = false,
@@ -38,11 +34,20 @@ public class SavedEwalletUser extends Auditable {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
-    name = "ewallet_user_id",
+    name = "bank_id",
     nullable = false,
     referencedColumnName = "id"
   )
-  private EwalletUser ewalletUser;
+  private Bank bank;
+
+  @Column(nullable = false)
+  private String name;
+
+  @Column(nullable = false)
+  private String accountNumber;
+
+  @Column(nullable = false)
+  private String imagePath;
 
   @Column(
     name = "is_favorite",

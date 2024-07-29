@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.contact.exception.SavedEwalletExceptions.*;
 
 @ControllerAdvice(basePackages = "org.synrgy.setara.contact")

@@ -81,7 +81,7 @@ public class User extends Auditable implements UserDetails {
   private BigDecimal balance;
 
   @Column(nullable = false)
-  private String mpin; // mobile pin
+  private String mpin;
 
   @Override
   public String getUsername() {

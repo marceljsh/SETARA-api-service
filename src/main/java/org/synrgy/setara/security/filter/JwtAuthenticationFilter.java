@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.synrgy.setara.common.dto.ErrorResponse;
 import org.synrgy.setara.security.service.JwtService;
 
 import java.io.IOException;

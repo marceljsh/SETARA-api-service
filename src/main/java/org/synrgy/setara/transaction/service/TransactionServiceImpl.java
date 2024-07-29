@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.contact.model.BankContact;
+import org.synrgy.setara.contact.model.EwalletContact;
 import org.synrgy.setara.transaction.utils.TransactionUtils;
-import org.synrgy.setara.contact.model.SavedAccount;
-import org.synrgy.setara.contact.model.SavedEwalletUser;
-import org.synrgy.setara.contact.repository.SavedAccountRepository;
-import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
+import org.synrgy.setara.contact.repository.BankContactRepository;
+import org.synrgy.setara.contact.repository.EwalletContactRepository;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
@@ -37,9 +37,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final EwalletUserRepository ewalletUserRepository;
-    private final SavedEwalletUserRepository savedEwalletUserRepository;
+    private final EwalletContactRepository ewalletContactRepository;
     private final PasswordEncoder passwordEncoder;
-    private final SavedAccountRepository savedAccountRepository;
+    private final BankContactRepository bankContactRepository;
     private final MerchantRepository merchantRepository;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
@@ -139,7 +139,7 @@ public class TransactionServiceImpl implements TransactionService {
         userRepository.save(destinationUser);
 
         if (request.isSavedAccount()) {
-            SavedAccount savedAccount = SavedAccount.builder()
+            BankContact bankContact = BankContact.builder()
                     .owner(sourceUser)
                     .bank(destinationUser.getBank())
                     .name(destinationUser.getName())
@@ -147,7 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .imagePath(sourceUser.getImagePath())
                     .favorite(false)
                     .build();
-            savedAccountRepository.save(savedAccount);
+            bankContactRepository.save(bankContact);
         }
 
         return TransferResponse.builder()
@@ -215,13 +215,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void saveEwalletUser(User owner, EwalletUser ewalletUser) {
-        if (!savedEwalletUserRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
-            SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
+        if (!ewalletContactRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
+            EwalletContact ewalletContact = EwalletContact.builder()
                     .owner(owner)
                     .ewalletUser(ewalletUser)
                     .favorite(false)
                     .build();
-            savedEwalletUserRepository.save(savedEwalletUser);
+            ewalletContactRepository.save(ewalletContact);
         }
     }
 

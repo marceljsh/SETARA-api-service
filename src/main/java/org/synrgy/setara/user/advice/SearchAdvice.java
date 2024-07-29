@@ -6,8 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.exception.SearchExceptions;
 
 @ControllerAdvice(basePackages = "org.synrgy.setara.user")

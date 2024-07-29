@@ -3,7 +3,7 @@ package org.synrgy.setara.app.initializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.synrgy.setara.contact.service.SavedEwalletUserService;
+import org.synrgy.setara.contact.service.EwalletContactService;
 import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
 import org.synrgy.setara.vendor.service.BankService;
@@ -17,7 +17,7 @@ public class DataInitializer implements CommandLineRunner {
   private final UserService userService;
   private final EwalletService ewalletService;
   private final EwalletUserService ewalletUserService;
-  private final SavedEwalletUserService savedEwalletUserService;
+  private final EwalletContactService ewalletContactService;
   private final BankService bankService;
   private final MerchantService merchantService;
 
@@ -27,7 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     userService.seedUser();
     ewalletService.seedEwallet();
     ewalletUserService.seedEwalletUsers();
-    savedEwalletUserService.seedSavedEwalletUsers();
+    ewalletContactService.seedSavedEwalletUsers();
     merchantService.seedMerchant();
   }
 
