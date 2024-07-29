@@ -89,13 +89,6 @@
 			<version>3.5.0</version>
 		</dependency>
 
-		<!--	env	-->
-		<dependency>
-			<groupId>io.github.cdimascio</groupId>
-			<artifactId>java-dotenv</artifactId>
-			<version>5.2.2</version>
-		</dependency>
-
 		<!--	jwt		-->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
