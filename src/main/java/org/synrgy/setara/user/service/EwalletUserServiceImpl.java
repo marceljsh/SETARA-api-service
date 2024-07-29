@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.user.exception.SearchExceptions;
 import org.synrgy.setara.user.model.EwalletUser;
+import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
@@ -12,6 +14,7 @@ import org.synrgy.setara.vendor.repository.EwalletRepository;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -65,5 +68,16 @@ public class EwalletUserServiceImpl implements EwalletUserService {
         } else {
             log.warn("E-wallet 'Ovo' not found in the database.");
         }
+    }
+
+    @Override
+    public EwalletUser searchEwalletUser(String no_ewallet, String ewallet) {
+        Optional<EwalletUser> ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet);
+        if(ewalletUser.isPresent()) {
+            if (Objects.equals(ewalletUser.get().getEwallet().getName().toLowerCase(), ewallet.toLowerCase())) {
+                return ewalletUser.get();
+            }
+        }
+        throw new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet + " in " + ewallet);
     }
 }

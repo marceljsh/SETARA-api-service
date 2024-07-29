@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.exception.SearchExceptions.*;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
@@ -15,6 +16,8 @@ import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -113,7 +116,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserBalanceResponse getBalance(String token) {
+  public UserBalanceResponse getBalance() {
     String signature = SecurityContextHolder.getContext().getAuthentication().getName();
     User user = userRepository.findBySignature(signature)
             .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
@@ -122,5 +125,16 @@ public class UserServiceImpl implements UserService {
             .checkTime(LocalDateTime.now())
             .balance(user.getBalance())
             .build();
+  }
+
+  @Override
+  public User searchUserByNorek(String no, String bank) {
+    Optional<User> user = userRepository.findByAccountNumber(no);
+    if(user.isPresent()) {
+      if (Objects.equals(user.get().getBank().getName().toLowerCase(), bank.toLowerCase())) {
+        return user.get();
+      }
+    }
+    throw new SearchNotFoundException("No rekening " + no + " in bank " + bank + " not found");
   }
 }

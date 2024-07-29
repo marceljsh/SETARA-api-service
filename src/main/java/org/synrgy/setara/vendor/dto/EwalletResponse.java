@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class EwalletResponseDto {
+public class EwalletResponse {
     private String id;
     private String name;
     private String imagePath;

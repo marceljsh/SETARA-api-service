@@ -2,12 +2,13 @@ package org.synrgy.setara.transaction.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 
-@RestControllerAdvice(basePackages = "org.synrgy.setara.transaction")
+@ControllerAdvice(basePackages = "org.synrgy.setara.transaction")
 public class TransactionAdvice {
 
     @ExceptionHandler(TransactionExceptions.UserNotFoundException.class)

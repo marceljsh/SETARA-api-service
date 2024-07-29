@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface SavedAccountService {
 
-  SavedEwalletAndAccountFinalResponse<SavedAccountResponse> getSavedAccounts(String authToken);
+  SavedEwalletAndAccountFinalResponse<SavedAccountResponse> getSavedAccounts();
 
   FavoriteResponse putFavoriteAccount(UUID idTersimpan, boolean isFavorite);
 }

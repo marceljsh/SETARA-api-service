@@ -22,16 +22,9 @@ public class SavedEwalletUserController {
     private final SavedEwalletUserService savedEwalletUserService;
 
     @GetMapping("/saved-ewallet-users")
-    public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(
-            @RequestHeader("Authorization") String token) {
-
-        String authToken = token.substring(7);
-        SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets =
-                savedEwalletUserService.getSavedEwalletUsers(authToken);
-
-        BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>> response =
-                BaseResponse.success(HttpStatus.OK, savedEwallets, "Success Get Saved E-Wallets");
-
+    public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(@RequestParam(required = false) String ewalletName) {
+        SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets = savedEwalletUserService.getSavedEwalletUsers(ewalletName);
+        BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>> response = BaseResponse.success(HttpStatus.OK, savedEwallets, "Success Get Saved E-Wallets");
         return ResponseEntity.ok(response);
     }
 

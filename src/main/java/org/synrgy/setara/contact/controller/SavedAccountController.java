@@ -24,18 +24,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 public class SavedAccountController {
 
-  private final Logger log = LoggerFactory.getLogger(SavedAccountController.class);
   private final SavedAccountService saService;
 
   @GetMapping("/saved-accounts")
-  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts(
-          @RequestHeader("Authorization") String token) {
-
-    String authToken = token.substring(7);
-    SavedEwalletAndAccountFinalResponse<SavedAccountResponse> savedAccounts = saService.getSavedAccounts(authToken);
-
-    BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>> response =
-            BaseResponse.success(HttpStatus.OK, savedAccounts, "Success Get Saved Accounts");
+  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts() {
+    SavedEwalletAndAccountFinalResponse<SavedAccountResponse> savedAccounts = saService.getSavedAccounts();
+    BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>> response = BaseResponse.success(HttpStatus.OK, savedAccounts, "Success Get Saved Accounts");
     return ResponseEntity.ok(response);
   }
 
