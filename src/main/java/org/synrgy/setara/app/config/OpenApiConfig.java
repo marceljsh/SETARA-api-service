@@ -17,17 +17,11 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${openapi.dev-url}")
-    private String devUrl;
-
     @Value("${openapi.prod-url}")
     private String prodUrl;
 
     @Bean
     public OpenAPI myOpenAPI() {
-//        Server devServer = new Server();
-//        devServer.setUrl(devUrl);
-//        devServer.setDescription("Server URL in Development environment");
 
         Server prodServer = new Server();
         prodServer.setUrl(prodUrl);
