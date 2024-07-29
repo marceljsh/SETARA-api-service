@@ -59,7 +59,7 @@ public class OpenApiConfig {
                 .addList("Bearer Authentication");
 
         return new OpenAPI().info(info)
-                .servers(List.of(devServer, prodServer))
+                .servers(List.of(prodServer))
                 .components(new Components().addSecuritySchemes("Bearer Authentication", securityScheme))
                 .addSecurityItem(securityRequirement);
     }
