@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
@@ -32,18 +33,18 @@ public class UserController {
     }
 
     @GetMapping("/search-no-rek/{no}")
-    public ResponseEntity<BaseResponse<User>> searchNoRek(@RequestHeader("Authorization") String token, @PathVariable String no, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoRek(@RequestHeader("Authorization") String token, @PathVariable String no) {
         String authToken = token.substring(7);
-        User userResponse = userService.searchUserByNorek(no, (String) request.get("bank"));
-        BaseResponse<User> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get No Rekening");
+        SearchResponse userResponse = userService.searchUserByNorek(no);
+        BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get No Rekening");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search-no-ewallet/{no}")
-    public ResponseEntity<BaseResponse<EwalletUser>> searchNoEwallet(@RequestHeader("Authorization") String token, @PathVariable String no, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@RequestHeader("Authorization") String token, @PathVariable String no, @RequestBody Map<String, Object> request) {
         String authToken = token.substring(7);
-        EwalletUser userResponse = ewalletUserService.searchEwalletUser(no, (String) request.get("ewallet"));
-        BaseResponse<EwalletUser> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
+        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, (String) request.get("ewallet"));
+        BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
         return ResponseEntity.ok(response);
     }
 

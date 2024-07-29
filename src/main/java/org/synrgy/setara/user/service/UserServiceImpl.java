@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
+import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.user.exception.SearchExceptions.*;
 import org.synrgy.setara.user.model.User;
@@ -128,13 +129,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User searchUserByNorek(String no, String bank) {
+  public SearchResponse searchUserByNorek(String no) {
     Optional<User> user = userRepository.findByAccountNumber(no);
     if(user.isPresent()) {
-      if (Objects.equals(user.get().getBank().getName().toLowerCase(), bank.toLowerCase())) {
-        return user.get();
-      }
+      SearchResponse response = SearchResponse.builder()
+              .no(no)
+              .name(user.get().getUsername())
+              .serviceName(user.get().getBank().getName())
+              .build();
+      return response;
     }
-    throw new SearchNotFoundException("No rekening " + no + " in bank " + bank + " not found");
+    throw new SearchNotFoundException("No rekening " + no + " not found");
   }
 }
