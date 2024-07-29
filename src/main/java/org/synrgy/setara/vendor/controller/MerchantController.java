@@ -16,7 +16,7 @@ import org.synrgy.setara.common.dto.BaseResponse;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/merchants")
+@RequestMapping("/api/v1/merchants")
 public class MerchantController {
     @Autowired
     private MerchantService merchantService;

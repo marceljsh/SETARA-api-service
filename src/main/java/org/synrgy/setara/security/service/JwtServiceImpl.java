@@ -1,11 +1,7 @@
 package org.synrgy.setara.security.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.github.cdimascio.dotenv.Dotenv;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -27,6 +23,15 @@ public class JwtServiceImpl implements JwtService {
   @Value("${security.jwt.token.secret-key}")
   private String secretKey;
 
+  @Value("${security.jwt.token.expiration}")
+  private String jwtExpirationFromProperties;
+
+  private final Dotenv dotenv;
+
+  public JwtServiceImpl() {
+    this.dotenv = Dotenv.load();
+  }
+
   @Override
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -35,7 +40,6 @@ public class JwtServiceImpl implements JwtService {
   @Override
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
-
     return claimsResolver.apply(claims);
   }
 
@@ -52,23 +56,23 @@ public class JwtServiceImpl implements JwtService {
       boolean isUsernameValid = username.equals(userDetails.getUsername());
 
       if (isTokenExpired) {
-        log.error("token is expired");
+        log.error("Token is expired");
         return false;
       }
 
       if (!isUsernameValid) {
-        log.error("user details username (email) is not valid");
+        log.error("User details username (email) is not valid");
         return false;
       }
 
       return true;
 
     } catch (MalformedJwtException e) {
-      log.error("invalid JWT token");
+      log.error("Invalid JWT token");
     } catch (ExpiredJwtException ex) {
-      log.error("expired JWT token");
+      log.error("Expired JWT token");
     } catch (UnsupportedJwtException ex) {
-      log.error("unsupported JWT token");
+      log.error("Unsupported JWT token");
     } catch (IllegalArgumentException ex) {
       log.error("JWT claims string is empty");
     }
@@ -76,28 +80,32 @@ public class JwtServiceImpl implements JwtService {
     return false;
   }
 
-  private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    long expirationTime = Long.parseLong(System.getenv("JWT_EXPIRATION"));
+  private long getJwtExpiration() {
+    String jwtExpiration = jwtExpirationFromProperties != null ? jwtExpirationFromProperties : dotenv.get("JWT_EXPIRATION");
+    return Long.parseLong(jwtExpiration);
+  }
+
+  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    long expirationTime = getJwtExpiration();
     return Jwts.builder()
-      .setClaims(extraClaims)
-      .setSubject(userDetails.getUsername())
-      .setIssuedAt(new Date(System.currentTimeMillis()))
-      .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-      .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-      .compact();
+            .setClaims(extraClaims)
+            .setSubject(userDetails.getUsername())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+            .compact();
   }
 
   private Claims extractAllClaims(String token) {
     return Jwts.parserBuilder()
-      .setSigningKey(getSignInKey())
-      .build()
-      .parseClaimsJws(token)
-      .getBody();
+            .setSigningKey(getSignInKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
   }
 
   private Key getSignInKey() {
     byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-
     return Keys.hmacShaKeyFor(keyBytes);
   }
 
@@ -108,5 +116,4 @@ public class JwtServiceImpl implements JwtService {
   private Date extractExpiration(String token) {
     return extractClaim(token, Claims::getExpiration);
   }
-
 }

@@ -28,7 +28,7 @@ public class SavedAccountServiceImpl implements SavedAccountService {
 
   @Override
   @Transactional
-  public SavedEwalletAndAccountFinalResponse<SavedAccountResponse> getSavedAccounts(String authToken) {
+  public SavedEwalletAndAccountFinalResponse<SavedAccountResponse> getSavedAccounts() {
     String signature = SecurityContextHolder.getContext().getAuthentication().getName();
 
     User user = userRepo.findBySignature(signature)

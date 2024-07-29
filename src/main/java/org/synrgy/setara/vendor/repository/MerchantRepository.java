@@ -23,6 +23,8 @@ public interface MerchantRepository extends JpaRepository<Merchant, UUID> {
 
     Optional<Merchant> findByQrisCode(String qrisCode);
     Optional<Merchant> findById(UUID id);
+
+    Optional<Merchant> findByName(String name);
     Optional<Merchant> findByNmid(String nmid);
     Optional<Merchant> findByTerminalId(String terminalId);
 }

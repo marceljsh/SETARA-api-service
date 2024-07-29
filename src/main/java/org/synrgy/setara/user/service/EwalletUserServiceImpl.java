@@ -13,10 +13,7 @@ import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -72,18 +69,18 @@ public class EwalletUserServiceImpl implements EwalletUserService {
     }
 
     @Override
-    public SearchResponse searchEwalletUser(String no_ewallet, String ewallet) {
+    public SearchResponse searchEwalletUser(String no_ewallet, UUID ewallet) {
         Optional<EwalletUser> ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet);
         if(ewalletUser.isPresent()) {
-            if (Objects.equals(ewalletUser.get().getEwallet().getName().toLowerCase(), ewallet.toLowerCase())) {
+            if (Objects.equals(ewalletUser.get().getEwallet().getId(), ewallet)) {
                 SearchResponse searchResponse = SearchResponse.builder()
                         .no(no_ewallet)
                         .name(ewalletUser.get().getName())
-                        .serviceName(ewallet)
+                        .serviceName(ewalletUser.get().getEwallet().getName())
                         .build();
                 return searchResponse;
             }
         }
-        throw new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet + " in " + ewallet);
+        throw new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet);
     }
 }

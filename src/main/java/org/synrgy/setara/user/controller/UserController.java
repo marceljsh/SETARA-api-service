@@ -1,6 +1,5 @@
 package org.synrgy.setara.user.controller;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +14,7 @@ import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,9 +25,8 @@ public class UserController {
     private final EwalletUserService ewalletUserService;
 
     @GetMapping("/getBalance")
-    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(@RequestHeader("Authorization") String token) {
-        String authToken = token.substring(7);
-        UserBalanceResponse userBalanceResponse = userService.getBalance(authToken);
+    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance() {
+        UserBalanceResponse userBalanceResponse = userService.getBalance();
         BaseResponse<UserBalanceResponse> response = BaseResponse.success(HttpStatus.OK, userBalanceResponse, "Success Get Balance");
         return ResponseEntity.ok(response);
     }
@@ -43,7 +42,8 @@ public class UserController {
     @GetMapping("/search-no-ewallet/{no}")
     public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@RequestHeader("Authorization") String token, @PathVariable String no, @RequestBody Map<String, Object> request) {
         String authToken = token.substring(7);
-        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, (String) request.get("ewallet"));
+        UUID ewalletUUID = UUID.fromString((String) request.get("ewallet"));
+        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, ewalletUUID);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
         return ResponseEntity.ok(response);
     }
