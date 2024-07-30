@@ -26,20 +26,20 @@ public class MerchantServiceImpl implements MerchantService {
     public void seedMerchant() {
         List<Merchant> merchants = Arrays.asList(
                 Merchant.builder()
-                        .merchant_name("Merchant One")
-                        .name("Merchant One Name")
+                        .merchant_name("SIOMAY MBA YU")
+                        .name("Ruko Summarecon Bekasi")
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
-                        .address("123 Merchant Street, City, Country")
-                        .imagePath("/images/merchant1.png")
+                        .address("Ruko Summarecon Bekasi")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
                         .build(),
                 Merchant.builder()
-                        .merchant_name("Merchant Two")
-                        .name("Merchant Two Name")
+                        .merchant_name("Batagor Mba Sri")
+                        .name("Ruko Summarecon Bandung")
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
-                        .address("456 Merchant Avenue, City, Country")
-                        .imagePath("/images/merchant2.png")
+                        .address("Ruko Summarecon Bandung")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
                         .build()
         );
 
