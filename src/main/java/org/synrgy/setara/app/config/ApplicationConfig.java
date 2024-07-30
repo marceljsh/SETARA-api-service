@@ -21,8 +21,8 @@ public class ApplicationConfig {
 
   @Bean
   UserDetailsService userDetailsService() {
-    return signature -> userRepo.findBySignature(signature)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    return username -> userRepo.findBySignature(username)  // Menggunakan 'username' sesuai metode 'loadUserByUsername'
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
   @Bean
