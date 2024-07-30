@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
             "081234567890",
             "Kendrick Lamar",
             "itsjustbigme",
-            "kendrick.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "Compton, CA",
             BigDecimal.valueOf(1000000),
             "170687"
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
             "089876543210",
             "Jane Doe",
             "jane123",
-            "jane.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/nwc0lfqaauew258nreqt.png",
             "Los Angeles, CA",
             BigDecimal.valueOf(50000),
             "987654"
@@ -75,10 +75,26 @@ public class UserServiceImpl implements UserService {
             "081230987654",
             "John Smith",
             "john123",
-            "john.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
+
+    );
+
+    createUserIfNotExists(
+            tahapanBCA,
+            "andhika157@gmail.com",
+            "ADTP604T",
+            "2891376451",
+            "1272051706870004",
+            "081234567890",
+            "Andhika Putra",
+            "andika12345",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
+            "New York, NY",
+            BigDecimal.valueOf(999999999),
+            "12095"
 
     );
   }
