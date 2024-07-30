@@ -23,6 +23,7 @@ public class JwtServiceImpl implements JwtService {
   private String secretKey;
 
   @Value("${security.jwt.token.expiration}")
+
   private Long jwtExpiration;
 
   @Override
