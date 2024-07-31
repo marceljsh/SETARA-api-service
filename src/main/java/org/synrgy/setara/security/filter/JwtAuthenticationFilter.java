@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.synrgy.setara.common.dto.ApiResponse;
 import org.synrgy.setara.security.service.JwtService;
 
 import java.io.IOException;
@@ -64,17 +65,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-      ErrorResponse response = ErrorResponse.from("Token expired", HttpStatus.UNAUTHORIZED);
-      mapper.writeValue(res.getWriter(), response);
-
+      ApiResponse<?> body = ApiResponse.fail("Token expired");
+      mapper.writeValue(res.getWriter(), body);
       return;
+
     } catch (Exception ex) {
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-      ErrorResponse response = ErrorResponse.from("Authentication error", HttpStatus.UNAUTHORIZED);
-      mapper.writeValue(res.getWriter(), response);
-
+      ApiResponse<?> body = ApiResponse.fail("Authentication error");
+      mapper.writeValue(res.getWriter(), body);
       return;
     }
 

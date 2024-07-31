@@ -6,7 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.ApiResponse;
 import org.synrgy.setara.contact.dto.BankContactResponse;
 import org.synrgy.setara.contact.dto.EwalletContactFetchRequest;
@@ -35,9 +41,10 @@ public class ContactController {
     value = "/my-bank-contacts",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<Object> getOwnBankContacts(User owner, @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
-    log.info("Request to get{} bank contacts of User({})",
-        favOnly ? " favorite" : "", owner.getId());
+  public ResponseEntity<Object> getOwnBankContacts(User owner,
+      @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
+
+    log.info("Request to get bank contacts (fav={}) of User({})", owner.getId(), favOnly);
 
     List<BankContactResponse> contacts = bcService.fetchByOwner(owner, favOnly);
 
@@ -48,7 +55,9 @@ public class ContactController {
     value = "/my-bank-contacts/{id}/favorite",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<Object> toggleFavoriteBankContact(User owner, @PathVariable("id") UUID id, @RequestBody FavoriteUpdateRequest request) {
+  public ResponseEntity<Object> toggleFavoriteBankContact(User owner, @PathVariable("id") UUID id,
+      @RequestBody FavoriteUpdateRequest request) {
+
     log.info("Request to update favorite status of BankContact({}) to {}",
         id, request.isFavorite());
 
@@ -61,7 +70,9 @@ public class ContactController {
     value = "/my-ewallet-contacts",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<Object> getOwnEwalletContacts(User owner, @RequestBody EwalletContactFetchRequest request, @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
+  public ResponseEntity<Object> getOwnEwalletContacts(User owner, @RequestBody EwalletContactFetchRequest request,
+      @RequestParam(value = "fav-only", defaultValue = "false") boolean favOnly) {
+
     log.info("Request to fetch ewallet contacts (fav={}) of User({}) for Ewallet({})",
         favOnly, owner.getId(), request.getEwalletId());
 
@@ -74,7 +85,9 @@ public class ContactController {
     value = "/my-ewallet-contacts/{id}/favorite",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<Object> toggleFavoriteEwalletContact(User owner, @PathVariable("id") UUID id, @RequestBody FavoriteUpdateRequest request) {
+  public ResponseEntity<Object> toggleFavoriteEwalletContact(User owner, @PathVariable("id") UUID id,
+      @RequestBody FavoriteUpdateRequest request) {
+
     log.info("Request to update favorite status of EwalletContact({}) to {}",
         id, request.isFavorite());
 

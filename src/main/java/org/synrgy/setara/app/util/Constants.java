@@ -10,4 +10,6 @@ public class Constants {
 
   public static final String EWALLET_USER_NOT_FOUND = "E-Wallet User not found";
 
+  public static final String MERCHANT_NOT_FOUND = "Merchant not found";
+
 }

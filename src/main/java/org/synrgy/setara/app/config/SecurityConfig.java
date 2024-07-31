@@ -5,18 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.synrgy.setara.common.dto.ApiResponse;
 import org.synrgy.setara.security.filter.JwtAuthenticationFilter;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -26,45 +26,43 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String[] SWAGGER_WHITELIST = {
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-resources/**",
-            "/swagger-resources"
-    };
+  private static final String[] SWAGGER_WHITELIST = {
+      "/swagger-ui/**",
+      "/v3/api-docs/**",
+      "/swagger-resources/**",
+      "/swagger-resources",
+  };
 
-    private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/sign-in"
-    };
+  private static final String[] AUTH_WHITELIST = {
+      "/api/v1/auth/sign-in",
+  };
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authProvider;
+  private final JwtAuthenticationFilter jwtAuthFilter;
+  private final AuthenticationProvider authProvider;
+  private final ObjectMapper mapper;
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(withDefaults())
-                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, AUTH_WHITELIST).permitAll()
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        .anyRequest().authenticated()) // Semua request selain whitelist memerlukan autentikasi
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(withDefaults())
+        .authenticationProvider(authProvider)
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .formLogin(withDefaults())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.POST, AUTH_WHITELIST).permitAll()
+            .requestMatchers(SWAGGER_WHITELIST).permitAll()
+            .anyRequest().authenticated())
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint((req, res, e) -> {
+              res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+              res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-                            final Map<String, Object> body = new HashMap<>();
-                            body.put("status", false); // Menyelaraskan dengan format BaseResponse
-                            body.put("message", "Full authentication is required to access this resource");
-                            body.put("code", HttpServletResponse.SC_UNAUTHORIZED);
+              ApiResponse<Void> body = ApiResponse.fail("Full authentication is required to access this resource");
+              mapper.writeValue(res.getWriter(), body);
+            }));
 
-                            final ObjectMapper mapper = new ObjectMapper();
-                            mapper.writeValue(response.getOutputStream(), body);
-                        }));
-
-        return http.build();
-    }
+    return http.build();
+  }
 }

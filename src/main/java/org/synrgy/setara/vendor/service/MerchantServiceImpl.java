@@ -1,93 +1,133 @@
 package org.synrgy.setara.vendor.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.vendor.dto.MerchantRequest;
+import org.springframework.transaction.annotation.Transactional;
+import org.synrgy.setara.app.util.Constants;
+import org.synrgy.setara.transaction.exception.MerchantNotFoundException;
+import org.synrgy.setara.vendor.exception.NmidGenerationException;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
+import org.synrgy.setara.vendor.exception.TerminalIdGenerationException;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 import org.synrgy.setara.vendor.util.CodeGenerator;
 import org.synrgy.setara.vendor.util.QRCodeGenerator;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-    @Autowired
-    private MerchantRepository merchantRepository;
+  private static final int MAX_ATTEMPTS = 10;
 
-    @Override
-    public void seedMerchant() {
-        List<Merchant> merchants = Arrays.asList(
-                Merchant.builder()
-                        .merchant_name("Merchant One")
-                        .name("Merchant One Name")
-                        .nmid(generateUniqueNmid())
-                        .terminalId(generateUniqueTerminalId())
-                        .address("123 Merchant Street, City, Country")
-                        .imagePath("/images/merchant1.png")
-                        .qrisCode(QRCodeGenerator.generateQRCodeBase64(UUID.randomUUID().toString()))
-                        .build(),
-                Merchant.builder()
-                        .merchant_name("Merchant Two")
-                        .name("Merchant Two Name")
-                        .nmid(generateUniqueNmid())
-                        .terminalId(generateUniqueTerminalId())
-                        .address("456 Merchant Avenue, City, Country")
-                        .imagePath("/images/merchant2.png")
-                        .qrisCode(QRCodeGenerator.generateQRCodeBase64(UUID.randomUUID().toString()))
-                        .build()
-        );
+  @Value("${image.path}")
+  private static String IMAGE_PATH;
 
-        for (Merchant merchant : merchants) {
-            Optional<Merchant> existingMerchant = merchantRepository.findByQrisCode(merchant.getQrisCode());
-            if (existingMerchant.isEmpty()) {
-                merchantRepository.save(merchant);
-            } else {
-                System.out.println("Merchant with QRIS code " + merchant.getQrisCode() + " already exists.");
-            }
-        }
+  private static final int QR_CODE_SIZE = 400;
+
+  private final Logger log = LoggerFactory.getLogger(MerchantServiceImpl.class);
+
+  private final MerchantRepository merchantRepo;
+
+  private String generateUniqueNmid() {
+    String nmid;
+    int attempts = 0;
+
+    do {
+      if (attempts == MAX_ATTEMPTS) {
+        log.error("Failed to generate unique nmid");
+        throw new NmidGenerationException("Failed to generate unique nmid");
+      }
+
+      nmid = CodeGenerator.generateUniqueNmid();
+      attempts++;
+
+    } while (!merchantRepo.existsByNmid(nmid));
+
+    return nmid;
+  }
+
+  private String generateUniqueTerminalId() {
+    String terminalId;
+    int attempts = 0;
+
+    do {
+      if (attempts == MAX_ATTEMPTS) {
+        log.error("Failed to generate unique terminal id");
+        throw new TerminalIdGenerationException("Failed to generate unique terminal id");
+      }
+
+      terminalId = CodeGenerator.generateUniqueTerminalId();
+      attempts++;
+
+    } while (!merchantRepo.existsByTerminalId(terminalId));
+
+    return terminalId;
+  }
+
+  private List<Merchant> createInitialMerchants() {
+    return List.of(
+      createMerchant("Los Pollos Hermanos", "12100 Coors Rd SW, Albuquerque", "/images/los_pollos_hermanos.jpg"),
+      createMerchant("Binco Clothing Store", "14200 Ganton Bld, Los Santos", "/images/binco_clothing_store.jpg")
+    );
+  }
+
+  private Merchant createMerchant(String name, String address, String imagePath) {
+    return Merchant.builder()
+        .name(name)
+        .nmid(generateUniqueNmid())
+        .terminalId(generateUniqueTerminalId())
+        .address(address)
+        .imagePath(imagePath)
+        .build();
+  }
+
+  private void processMerchant(Merchant merchant) {
+    if (!merchantRepo.existsByQrisCode(merchant.getQrisCode())) {
+      Merchant savedMerchant = merchantRepo.save(merchant);
+      generateAndSetQRCode(savedMerchant);
+      merchantRepo.save(savedMerchant);
+      log.info("Merchant {} is now operational", savedMerchant.getName());
+    }
+  }
+
+  private void generateAndSetQRCode(Merchant merchant) {
+    String qrData = merchant.getId().toString();
+    String qrCodeImagePath = IMAGE_PATH + "/qrcode_" + merchant.getName() + ".png";
+
+    QRCodeGenerator.generateQRCodeImage(qrData, QR_CODE_SIZE, QR_CODE_SIZE, qrCodeImagePath);
+
+    merchant.setQrisCode(QRCodeGenerator.generateQRCodeBase64(qrData, QR_CODE_SIZE, QR_CODE_SIZE));
+    merchant.setImagePath(qrCodeImagePath);
+  }
+
+  @Override
+  @Transactional
+  public void populate() {
+    List<Merchant> merchants = createInitialMerchants();
+    merchants.forEach(this::processMerchant);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public MerchantResponse fetchById(UUID id) {
+    log.trace("Fetching merchant by id: {}", id);
+
+    Merchant merchant = merchantRepo.findById(id).orElse(null);
+    if (merchant == null) {
+      log.error("Merchant with id {} not found", id);
+      throw new MerchantNotFoundException(Constants.MERCHANT_NOT_FOUND);
     }
 
-    private String generateUniqueNmid() {
-        String nmid;
-        do {
-            nmid = CodeGenerator.generateUniqueNmid();
-        } while (merchantRepository.findByNmid(nmid).isPresent());
-        return nmid;
-    }
+    log.info("Merchant({}) found", id);
 
-    private String generateUniqueTerminalId() {
-        String terminalId;
-        do {
-            terminalId = CodeGenerator.generateUniqueTerminalId();
-        } while (merchantRepository.findByTerminalId(terminalId).isPresent());
-        return terminalId;
-    }
+    return MerchantResponse.from(merchant);
+  }
 
-    @Override
-    public BaseResponse<MerchantResponse> getQrisData(MerchantRequest requestDTO) {
-        Optional<Merchant> optionalMerchant = merchantRepository.findById(UUID.fromString(requestDTO.getId_qris()));
-        if (optionalMerchant.isPresent()) {
-            Merchant merchant = optionalMerchant.get();
-            MerchantResponse merchantResponse = MerchantResponse.builder()
-                    .merchant_name(merchant.getMerchant_name())
-                    .name(merchant.getName())
-                    .nmid(merchant.getNmid())
-                    .terminalId(merchant.getTerminalId())
-                    .address(merchant.getAddress())
-                    .image_path(merchant.getImagePath())
-                    .qris_code(merchant.getQrisCode())
-                    .build();
-
-            return BaseResponse.success(HttpStatus.OK, merchantResponse, "Merchant found.");
-        } else {
-            return BaseResponse.failure(HttpStatus.NOT_FOUND, "Merchant not found.");
-        }
-    }
 }

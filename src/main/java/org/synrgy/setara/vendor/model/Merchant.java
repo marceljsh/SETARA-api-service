@@ -1,10 +1,13 @@
 package org.synrgy.setara.vendor.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.synrgy.setara.common.model.Auditable;
 
 @Getter
@@ -13,11 +16,8 @@ import org.synrgy.setara.common.model.Auditable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "tbl_merchants")
 public class Merchant extends Auditable {
-
-    private String merchant_name;
 
     private String name;
 
@@ -27,11 +27,14 @@ public class Merchant extends Auditable {
     @Column(unique = true)
     private String nmid;
 
-    @Column(name = "image_path")
-    private String imagePath;
+    private String address;
 
-    @Column(name = "qris_code", columnDefinition = "TEXT", length = 512)
+    @Column(
+      unique = true,
+      length = 512
+    )
     private String qrisCode;
 
-    private String address;
+    private String imagePath;
+
 }
