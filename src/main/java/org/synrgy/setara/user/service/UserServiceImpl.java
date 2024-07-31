@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
       SearchResponse response = SearchResponse.builder()
               .no(no)
               .name(user.get().getName())
-              .serviceName(user.get().getBank().getName())
+              .bank(user.get().getBank().getName())
               .build();
       return response;
     }
