@@ -1,12 +1,16 @@
 package org.synrgy.setara.transaction.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.transaction.model.Transaction;
+import org.synrgy.setara.user.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,4 +33,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
   @Query(value = "SELECT * FROM tbl_transactions t WHERE t.destination_account_number = :accountNumber AND EXTRACT(MONTH FROM t.time) = :month AND EXTRACT(YEAR FROM t.time) = :year AND t.type = 'TRANSFER'", nativeQuery = true)
   List<Transaction> findTransfersByAccountNumberAndMonthAndYear(@Param("accountNumber") String accountNumber, @Param("month") int month, @Param("year") int year);
+
+  @Query("SELECT t FROM Transaction t WHERE t.user = :user AND t.time BETWEEN :startDate AND :endDate AND " +
+          "(:transactionCategory = 'ALL_TRANSACTIONS' OR " +
+          "(:transactionCategory = 'OUTGOING' AND t.type IN ('TRANSFER', 'TOP_UP')) OR " +
+          "(:transactionCategory = 'INCOMING' AND t.type = 'DEPOSIT'))")
+  Page<Transaction> findByUserAndTimeBetweenAndTransactionCategory(@Param("user") User user,
+                                                                   @Param("startDate") LocalDateTime startDate,
+                                                                   @Param("endDate") LocalDateTime endDate,
+                                                                   @Param("transactionCategory") String transactionCategory,
+                                                                   Pageable pageable);
 }
