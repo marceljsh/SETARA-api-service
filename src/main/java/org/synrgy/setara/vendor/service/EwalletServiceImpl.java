@@ -32,6 +32,8 @@ public class EwalletServiceImpl implements EwalletService {
             if (!ewalletRepo.existsByName(ewallet.getName())) {
                 ewalletRepo.save(ewallet);
                 log.info("Ewallet {} has been added to the database", ewallet.getName());
+            } else {
+                log.info("Ewallet {} already exists in the database", ewallet.getName());
             }
         }
     }
