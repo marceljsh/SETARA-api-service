@@ -2,12 +2,15 @@ package org.synrgy.setara.transaction.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -39,5 +42,15 @@ public class TransactionController {
     public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(@RequestBody MerchantTransactionRequest request) {
         MerchantTransactionResponse response = transactionService.merchantTransaction(request);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Transaction successful"));
+    }
+
+    @PostMapping("/get-all-mutation")
+    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@RequestBody MutationRequest request,
+                                                                               @RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "10") int size) {
+        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(request, page, size);
+        List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
+        BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
+        return ResponseEntity.ok(response);
     }
 }

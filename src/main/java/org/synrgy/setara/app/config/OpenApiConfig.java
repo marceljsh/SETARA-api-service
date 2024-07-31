@@ -17,11 +17,18 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    @Value("${openapi.dev-url}")
+    private String devUrl;
+
     @Value("${openapi.prod-url}")
     private String prodUrl;
 
     @Bean
     public OpenAPI myOpenAPI() {
+
+        Server devServer = new Server();
+        devServer.setUrl(devUrl);
+        devServer.setDescription("Server URL in Development environment");
 
         Server prodServer = new Server();
         prodServer.setUrl(prodUrl);
@@ -53,7 +60,7 @@ public class OpenApiConfig {
                 .addList("Bearer Authentication");
 
         return new OpenAPI().info(info)
-                .servers(List.of(prodServer))
+                .servers(List.of(devServer, prodServer))
                 .components(new Components().addSecuritySchemes("Bearer Authentication", securityScheme))
                 .addSecurityItem(securityRequirement);
     }
