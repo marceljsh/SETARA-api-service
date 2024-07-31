@@ -32,16 +32,14 @@ public class UserController {
     }
 
     @GetMapping("/search-no-rek/{no}")
-    public ResponseEntity<BaseResponse<SearchResponse>> searchNoRek(@RequestHeader("Authorization") String token, @PathVariable String no) {
-        String authToken = token.substring(7);
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoRek(@PathVariable String no) {
         SearchResponse userResponse = userService.searchUserByNorek(no);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get No Rekening");
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/search-no-ewallet/{no}")
-    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@RequestHeader("Authorization") String token, @PathVariable String no, @RequestBody Map<String, Object> request) {
-        String authToken = token.substring(7);
+    @PostMapping("/search-no-ewallet/{no}")
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@PathVariable String no, @RequestBody Map<String, Object> request) {
         UUID ewalletUUID = UUID.fromString((String) request.get("ewallet"));
         SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, ewalletUUID);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");

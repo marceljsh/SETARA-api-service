@@ -76,7 +76,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
                 SearchResponse searchResponse = SearchResponse.builder()
                         .no(no_ewallet)
                         .name(ewalletUser.get().getName())
-                        .serviceName(ewalletUser.get().getEwallet().getName())
+                        .bank(ewalletUser.get().getEwallet().getName())
                         .build();
                 return searchResponse;
             }
