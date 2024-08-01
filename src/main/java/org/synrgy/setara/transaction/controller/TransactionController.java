@@ -1,8 +1,12 @@
 package org.synrgy.setara.transaction.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
@@ -21,12 +25,46 @@ import java.util.List;
 public class TransactionController {
     private final TransactionService transactionService;
 
+    @Operation(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Kendrick to Farah",
+                                            value = "{\"destinationPhoneNumber\": \"081234567890\", \"amount\": 0, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Andhika to Aurlyn",
+                                            value = "{\"destinationPhoneNumber\": \"081234567891\", \"amount\": 0, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
+                                    )
+                            }
+                    )
+            )
+    )
     @PostMapping("/topup")
     public ResponseEntity<BaseResponse<TopUpResponse>> topUp(@RequestBody TopUpRequest request) {
             TopUpResponse topUpResponse = transactionService.topUp(request);
             return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, topUpResponse, "Top-up successful"));
     }
 
+    @Operation(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Kendrick to Andhika",
+                                            value = "{\"destinationAccountNumber\": \"2891376451\", \"amount\": 0, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
+                                    ),
+                                    @ExampleObject(
+                                            name = "Andhika to Kendrick",
+                                            value = "{\"destinationAccountNumber\": \"1122334455\", \"amount\": 0, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
+                                    )
+                            }
+                    )
+            )
+    )
     @PostMapping("/bca-transfer")
     public ResponseEntity<BaseResponse<TransferResponse>> bcaTransfer(@RequestBody TransferRequest request) {
         TransferResponse response = transactionService.transferWithinBCA(request);
@@ -38,7 +76,7 @@ public class TransactionController {
             @Parameter(
                     name = "month",
                     required = true,
-                    schema = @Schema(type = "integer", example = "7")
+                    schema = @Schema(type = "integer", example = "8")
             ) @RequestParam(name = "month") int month,
             @Parameter(
                     name = "year",

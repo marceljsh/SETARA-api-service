@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
             "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "New York, NY",
             BigDecimal.valueOf(999999999),
-            "12095"
+            "120951"
     );
   }
 

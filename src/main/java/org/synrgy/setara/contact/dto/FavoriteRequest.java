@@ -9,9 +9,9 @@ import java.util.UUID;
 @Data
 @Builder
 public class FavoriteRequest {
-    @Schema(description = "isFavorite", example = "true")
+    @Schema(example = "true")
     private boolean isFavorite;
 
-    @Schema(description = "idTersimpan", example = "028296c2-1cfc-4995-9e89-f5cc61ef451a")
+    @Schema(example = "5cda13a6-8350-473a-8b71-90cddda286af")
     private UUID idTersimpan;
 }
