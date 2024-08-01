@@ -36,19 +36,6 @@ public class SavedAccountController {
     return ResponseEntity.ok(response);
   }
 
-  @Operation(
-          summary = "Update Favorite Account",
-          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                  content = @Content(
-                          mediaType = MediaType.APPLICATION_JSON_VALUE,
-                          schema = @Schema(implementation = FavoriteRequest.class),
-                          examples = @ExampleObject(
-                                  name = "Example Request",
-                                  value = "{\"isFavorite\": true, \"idTersimpan\": \"1234\"}"
-                          )
-                  )
-          )
-  )
   @PutMapping("/favorite-account")
   public ResponseEntity<BaseResponse<FavoriteResponse>> putFavoriteAccount(@RequestBody FavoriteRequest request) {
     FavoriteResponse favoriteResponse = saService.putFavoriteAccount(request.getIdTersimpan(), request.isFavorite());

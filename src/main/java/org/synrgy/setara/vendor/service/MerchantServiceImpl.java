@@ -55,7 +55,7 @@ public class MerchantServiceImpl implements MerchantService {
 //                int qrCodeHeight = 400; // Set the desired height
 //
 //                String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
-//                String qrCodeImagePath = "D:\\QRCode\\" + savedMerchant.getMerchant_name() + "-qrcode.png";
+//                String qrCodeImagePath = "E:\\QRCode\\" + savedMerchant.getMerchant_name() + "-qrcode.png";
 //                QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
 //
 //                // Update the merchant with the generated QR code and image path

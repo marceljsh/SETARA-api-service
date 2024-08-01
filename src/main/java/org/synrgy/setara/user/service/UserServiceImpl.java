@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
             "ADTP604T",
             "2891376451",
             "1272051706870004",
-            "081234567890",
+            "081234567891",
             "Andhika Putra",
             "andika12345",
             "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
