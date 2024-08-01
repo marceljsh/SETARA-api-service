@@ -27,22 +27,22 @@ public class EwalletUserServiceImpl implements EwalletUserService {
         // Daftar pengguna dengan e-wallet "Ovo"
         List<EwalletUser> ewalletUsers = Arrays.asList(
                 EwalletUser.builder()
-                        .name("User1")
+                        .name("FARAH CANTIKA")
                         .phoneNumber("081234567890")
                         .balance(BigDecimal.valueOf(10000))
-                        .imagePath("/images/user1.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/fiabjleyerwpgt5jxjfj.png")
                         .build(),
                 EwalletUser.builder()
-                        .name("User2")
+                        .name("AURLYN PUSPITA")
                         .phoneNumber("081234567891")
                         .balance(BigDecimal.valueOf(20000))
-                        .imagePath("/images/user2.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/nwc0lfqaauew258nreqt.png")
                         .build(),
                 EwalletUser.builder()
-                        .name("User3")
+                        .name("KEVIN ATMAJAYA")
                         .phoneNumber("081234567892")
                         .balance(BigDecimal.valueOf(30000))
-                        .imagePath("/images/user3.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png")
                         .build()
         );
 

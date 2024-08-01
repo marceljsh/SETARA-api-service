@@ -44,7 +44,7 @@ public class MerchantServiceImpl implements MerchantService {
         );
 
         for (Merchant merchant : merchants) {
-            Optional<Merchant> existingMerchant = merchantRepository.findByNmid(merchant.getNmid());
+            Optional<Merchant> existingMerchant = merchantRepository.findByName(merchant.getName());
             if (existingMerchant.isEmpty()) {
                 // Save merchant first to get the id_qris
                 Merchant savedMerchant = merchantRepository.save(merchant);
@@ -63,9 +63,9 @@ public class MerchantServiceImpl implements MerchantService {
                 savedMerchant.setImagePath(qrCodeImagePath);  // Assuming you want to store the image path
                 merchantRepository.save(savedMerchant);
 
-                System.out.println("Merchant with QRIS code " + savedMerchant.getQrisCode() + " has been saved.");
+                System.out.println("Merchant with QRIS code " + savedMerchant.getName() + " has been saved.");
             } else {
-                System.out.println("Merchant with QRIS code " + merchant.getQrisCode() + " already exists.");
+                System.out.println("Merchant with QRIS code " + merchant.getName() + " already exists.");
             }
         }
     }

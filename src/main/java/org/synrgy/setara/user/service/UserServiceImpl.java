@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
             BigDecimal.valueOf(1000000),
             "170687"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "jane.doe@example.com",
@@ -65,7 +64,6 @@ public class UserServiceImpl implements UserService {
             BigDecimal.valueOf(50000),
             "987654"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "john.smith@example.com",
@@ -79,9 +77,7 @@ public class UserServiceImpl implements UserService {
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
-
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "andhika157@gmail.com",
@@ -95,7 +91,6 @@ public class UserServiceImpl implements UserService {
             "New York, NY",
             BigDecimal.valueOf(999999999),
             "12095"
-
     );
   }
 
