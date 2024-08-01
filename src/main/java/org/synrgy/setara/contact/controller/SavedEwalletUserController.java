@@ -1,5 +1,7 @@
 package org.synrgy.setara.contact.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,12 @@ public class SavedEwalletUserController {
     private final SavedEwalletUserService savedEwalletUserService;
 
     @GetMapping("/saved-ewallet-users")
-    public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(@RequestParam(required = false) String ewalletName) {
+    public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(
+            @Parameter(
+                    name = "ewalletName",
+                    required = true,
+                    schema = @Schema(type = "string", example = "Ovo")
+            ) @RequestParam(required = false) String ewalletName) {
         SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets = savedEwalletUserService.getSavedEwalletUsers(ewalletName);
         BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>> response = BaseResponse.success(HttpStatus.OK, savedEwallets, "Success Get Saved E-Wallets");
         return ResponseEntity.ok(response);
