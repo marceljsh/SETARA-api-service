@@ -47,6 +47,10 @@ public class AuthController {
                                   @ExampleObject(
                                           name = "John",
                                           value = "{\"signature\": \"JOHN5678\", \"password\": \"john123\"}"
+                                  ),
+                                  @ExampleObject(
+                                          name = "Andhika",
+                                          value = "{\"signature\": \"ADTP604T\", \"password\": \"andika12345\"}"
                                   )
                           }
                   )
