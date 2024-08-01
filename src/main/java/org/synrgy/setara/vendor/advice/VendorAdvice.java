@@ -11,7 +11,7 @@ import org.synrgy.setara.vendor.exception.BankNotFoundException;
 import org.synrgy.setara.vendor.exception.EwalletNotFoundException;
 import org.synrgy.setara.vendor.exception.NmidGenerationException;
 import org.synrgy.setara.vendor.exception.TerminalIdGenerationException;
-import org.synrgy.setara.vendor.util.QRCodeGenerationException;
+import org.synrgy.setara.vendor.exception.QRCodeGenerationException;
 
 @RestControllerAdvice(basePackages = "org.synrgy.setara.vendor")
 public class VendorAdvice {

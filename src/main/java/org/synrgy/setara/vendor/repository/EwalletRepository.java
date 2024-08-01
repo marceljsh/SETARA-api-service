@@ -14,15 +14,20 @@ import java.util.UUID;
 public interface EwalletRepository extends JpaRepository<Ewallet, UUID> {
 
   @Modifying
-  @Query("UPDATE Ewallet e SET e.deletedAt = CURRENT_TIMESTAMP WHERE e.id = :id")
+  @Query("UPDATE Ewallet e " +
+          "SET e.deletedAt = CURRENT_TIMESTAMP " +
+          "WHERE e.id = :id")
   void deactivateById(UUID id);
 
   @Modifying
-  @Query("UPDATE Ewallet e SET e.deletedAt = null WHERE e.id = :id")
+  @Query("UPDATE Ewallet e " +
+          "SET e.deletedAt = null " +
+          "WHERE e.id = :id")
   void restoreById(@Param("id") UUID id);
 
   boolean existsByName(String name);
 
   Optional<Ewallet> findByName(String name);
+
 }
 

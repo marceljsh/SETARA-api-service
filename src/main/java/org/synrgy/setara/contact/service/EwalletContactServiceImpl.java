@@ -11,9 +11,11 @@ import org.synrgy.setara.contact.dto.EwalletContactAddRequest;
 import org.synrgy.setara.contact.dto.EwalletContactResponse;
 import org.synrgy.setara.contact.model.EwalletContact;
 import org.synrgy.setara.contact.repository.EwalletContactRepository;
+import org.synrgy.setara.user.exception.UserNotFoundException;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
+import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 
@@ -31,6 +33,41 @@ public class EwalletContactServiceImpl implements EwalletContactService {
   private final EwalletUserRepository euRepo;
 
   private final EwalletRepository ewalletRepo;
+
+  private final UserRepository userRepo;
+
+  private void createEwalletContact(User owner, EwalletUser user) {
+    if (!ecRepo.existsByOwnerAndEwalletUser(owner, user)) {
+      EwalletContact contact = EwalletContact.builder()
+        .owner(owner)
+        .ewalletUser(user)
+        .name(user.getName())
+        .favorite(user.getName().equals("Jermaine Cole"))
+        .build();
+
+      ecRepo.save(contact);
+      log.info("Saved EwalletContact for '{}', favorite: {}", user.getName(), contact.isFavorite());
+    } else {
+      log.info("EwalletContact already exists for '{}' and owner '{}'", user.getName(), owner.getName());
+    }
+  }
+
+  @Override
+  @Transactional
+  public void populate() {
+    if (euRepo.count() == 0) {
+      log.trace("No EwalletUser found, skipping EwalletContact seeding");
+      return;
+    }
+
+    User owner = userRepo.findByName("Kendrick Lamar").orElseThrow(() -> {
+      log.error("User not found: Kendrick Lamar");
+      return new UserNotFoundException(Constants.USER_NOT_FOUND);
+    });
+
+    List<EwalletUser> users = euRepo.findAll();
+    users.forEach(user -> createEwalletContact(owner, user));
+  }
 
   @Override
   @Transactional
@@ -51,7 +88,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
         .favorite(request.isFavorite())
         .build();
 
-    log.trace("Saving ewallet contact {} of {} for User({})",
+    log.info("Saving ewallet contact {} of {} for User({})",
         contact.getName(), contact.getEwalletUser().getEwallet().getName(), owner.getId());
 
     return EwalletContactResponse.from(ecRepo.save(contact));
@@ -71,7 +108,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
 
     List<EwalletContact> contacts = ecRepo.fetchAllByOwnerAndEwallet(owner, ewallet, favOnly);
 
-    log.trace("Fetched {} ewallet contacts (fav={}) of User({}) for Ewallet({})",
+    log.info("Fetched {} ewallet contacts (fav={}) of User({}) for Ewallet({})",
         contacts.size(), favOnly, owner.getId(), ewalletId);
 
     return contacts.stream()
@@ -86,7 +123,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
         id, favorite);
 
     if (ecRepo.existsById(id) && ecRepo.belongsToOwner(owner, id)) {
-      log.trace("Proceeding to update favorite of EwalletContact({}) to {}",
+      log.info("Proceeding to update favorite of EwalletContact({}) to {}",
           id, favorite);
       ecRepo.updateFavorite(id, favorite);
     }
@@ -98,7 +135,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
     log.trace("Archiving EwalletContact({})", id);
 
     if (ecRepo.existsById(id)) {
-      log.trace("Proceeding to archive EwalletContact({})", id);
+      log.info("Proceeding to archive EwalletContact({})", id);
       ecRepo.archiveById(id);
     }
   }
@@ -109,7 +146,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
     log.trace("Restoring EwalletContact({})", id);
 
     if (ecRepo.existsById(id)) {
-      log.trace("Proceeding to restore EwalletContact({})", id);
+      log.info("Proceeding to restore EwalletContact({})", id);
       ecRepo.restoreById(id);
     }
   }

@@ -1,4 +1,4 @@
-package org.synrgy.setara.vendor.util;
+package org.synrgy.setara.vendor.exception;
 
 public class QRCodeGenerationException extends RuntimeException {
 

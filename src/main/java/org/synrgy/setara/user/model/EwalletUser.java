@@ -14,8 +14,6 @@ import lombok.Setter;
 import org.synrgy.setara.common.model.Auditable;
 import org.synrgy.setara.vendor.model.Ewallet;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @Builder

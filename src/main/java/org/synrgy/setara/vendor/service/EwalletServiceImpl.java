@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.synrgy.setara.app.util.Constants;
 import org.synrgy.setara.vendor.dto.EwalletResponse;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
@@ -23,19 +24,15 @@ public class EwalletServiceImpl implements EwalletService {
   @Override
   @Transactional
   public void populate() {
-    Map<String, String> ewallets = Map.of(
-        "OVO", "/images/ewallet/ovo.png",
-        "Dana", "/images/ewallet/dana.png",
-        "GoPay", "/images/ewallet/gopay.png",
-        "ShopeePay", "/images/ewallet/shopeepay.png",
-        "LinkAja", "/images/ewallet/linkaja.png"
-    );
+    String imgDir = Constants.IMAGE_PATH + "/ewallets";
+    List<String> names = List.of("OVO", "Dana", "GoPay", "ShopeePay", "LinkAja");
 
-    ewallets.forEach((name, logo) -> {
+    names.forEach(name -> {
       if (!ewalletRepo.existsByName(name)) {
         ewalletRepo.save(Ewallet.builder()
             .name(name)
-            .imagePath(logo)
+            .imagePath(imgDir + "/" +
+                name.replaceAll("\\s+", ""))  // in case of multi-word names
             .build());
         log.info("Ewallet {} is now operational", name);
       }

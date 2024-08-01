@@ -215,7 +215,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void saveEwalletUser(User owner, EwalletUser ewalletUser) {
-        if (!ewalletContactRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
+        if (ewalletContactRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
             EwalletContact ewalletContact = EwalletContact.builder()
                     .owner(owner)
                     .ewalletUser(ewalletUser)

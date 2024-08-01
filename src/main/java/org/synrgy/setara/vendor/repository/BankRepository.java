@@ -14,15 +14,19 @@ import java.util.UUID;
 public interface BankRepository extends JpaRepository<Bank, UUID> {
 
   @Modifying
-  @Query("UPDATE Bank b SET b.deletedAt = CURRENT_TIMESTAMP WHERE b.id = :id")
+  @Query("UPDATE Bank b " +
+          "SET b.deletedAt = CURRENT_TIMESTAMP " +
+          "WHERE b.id = :id")
   void deactivateById(UUID id);
 
   @Modifying
-  @Query("UPDATE Bank b SET b.deletedAt = null WHERE b.id = :id")
+  @Query("UPDATE Bank b " +
+          "SET b.deletedAt = null " +
+          "WHERE b.id = :id")
   void restoreById(@Param("id") UUID id);
 
-  @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Bank b WHERE b.name = :name")
-  boolean existsByName(@Param("name") String name);
+  boolean existsByName(String name);
 
   Optional<Bank> findByName(String name);
+
 }

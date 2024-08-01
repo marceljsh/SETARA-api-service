@@ -3,7 +3,6 @@ package org.synrgy.setara.vendor.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.app.util.Constants;
@@ -16,7 +15,6 @@ import org.synrgy.setara.vendor.repository.MerchantRepository;
 import org.synrgy.setara.vendor.util.CodeGenerator;
 import org.synrgy.setara.vendor.util.QRCodeGenerator;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,8 +24,7 @@ public class MerchantServiceImpl implements MerchantService {
 
   private static final int MAX_ATTEMPTS = 10;
 
-  @Value("${image.path}")
-  private static String IMAGE_PATH;
+  private static final String IMAGE_PATH = System.getProperty("user.dir") + "/images";
 
   private static final int QR_CODE_SIZE = 400;
 
@@ -102,7 +99,6 @@ public class MerchantServiceImpl implements MerchantService {
     String qrCodeImagePath = IMAGE_PATH + "/qrcode_" + merchant.getName() + ".png";
 
     QRCodeGenerator.generateQRCodeImage(qrData, QR_CODE_SIZE, QR_CODE_SIZE, qrCodeImagePath);
-
     merchant.setQrisCode(QRCodeGenerator.generateQRCodeBase64(qrData, QR_CODE_SIZE, QR_CODE_SIZE));
     merchant.setImagePath(qrCodeImagePath);
   }

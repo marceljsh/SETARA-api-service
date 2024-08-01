@@ -1,46 +1,38 @@
 package org.synrgy.setara.user.controller;
 
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.synrgy.setara.common.dto.ApiResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.model.EwalletUser;
+import org.synrgy.setara.user.dto.UserProfileResponse;
 import org.synrgy.setara.user.model.User;
-import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user")
-@Slf4j
+@RequestMapping("/api/v1/users")
 public class UserController {
-    private final UserService userService;
-    private final EwalletUserService ewalletUserService;
 
-    @GetMapping("/getBalance")
-    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance() {
-        UserBalanceResponse userBalanceResponse = userService.getBalance();
-        BaseResponse<UserBalanceResponse> response = BaseResponse.success(HttpStatus.OK, userBalanceResponse, "Success Get Balance");
-        return ResponseEntity.ok(response);
-    }
+  private final Logger log = LoggerFactory.getLogger(UserController.class);
 
-    @GetMapping("/search-no-rek/{no}")
-    public ResponseEntity<BaseResponse<User>> searchNoRek(@PathVariable String no, @RequestBody Map<String, Object> request) {
-        User userResponse = userService.searchUserByNorek(no, (String) request.get("bank"));
-        BaseResponse<User> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get No Rekening");
-        return ResponseEntity.ok(response);
-    }
+  private final UserService userService;
 
-    @GetMapping("/search-no-ewallet/{no}")
-    public ResponseEntity<BaseResponse<EwalletUser>> searchNoEwallet(@PathVariable String no, @RequestBody Map<String, Object> request) {
-        EwalletUser userResponse = ewalletUserService.searchEwalletUser(no, (String) request.get("ewallet"));
-        BaseResponse<EwalletUser> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
-        return ResponseEntity.ok(response);
-    }
+  @GetMapping("/get-own-balance")
+  public ResponseEntity<ApiResponse<Object>> getOwnBalance(User user) {
+    UserBalanceResponse userBalance = userService.fetchUserBalance(user);
+    return ResponseEntity.ok(ApiResponse.success("OK", userBalance));
+  }
+
+  @GetMapping("/by-acc-no/{acc-no}")
+  public ResponseEntity<ApiResponse<UserProfileResponse>> fetchByAccountNumber(@PathVariable("acc-no") String accNo) {
+    UserProfileResponse user = userService.searchByAccNumber(accNo);
+    return ResponseEntity.ok(ApiResponse.success("OK", user));
+  }
 
 }

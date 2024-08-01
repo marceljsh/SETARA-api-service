@@ -24,10 +24,10 @@ public class DataInitializer implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     bankService.populate();
-    userService.seedUser();
+    userService.populate();
     ewalletService.populate();
-    ewalletUserService.seedEwalletUsers();
-    ewalletContactService.seedSavedEwalletUsers();
+    ewalletUserService.populate();
+    ewalletContactService.populate();
     merchantService.populate();
   }
 

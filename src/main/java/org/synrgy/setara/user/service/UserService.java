@@ -1,12 +1,15 @@
 package org.synrgy.setara.user.service;
 
 import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.dto.UserProfileResponse;
 import org.synrgy.setara.user.model.User;
 
 public interface UserService {
 
-  void seedUser();
-  UserBalanceResponse getBalance();
+  void populate();
 
-  User searchUserByNorek(String acount_no, String bank);
+  UserBalanceResponse fetchUserBalance(User user);
+
+  UserProfileResponse searchByAccNumber(String accNumber);
+  
 }

@@ -3,21 +3,22 @@ package org.synrgy.setara.user.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.transaction.exception.TransactionExceptions;
+import org.springframework.transaction.annotation.Transactional;
+import org.synrgy.setara.app.util.Constants;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.exception.SearchExceptions.*;
+import org.synrgy.setara.user.dto.UserProfileResponse;
+import org.synrgy.setara.user.exception.UserNotFoundException;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.vendor.exception.BankNotFoundException;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,116 +26,84 @@ public class UserServiceImpl implements UserService {
 
   private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
+  private static final BigDecimal INITIAL_BALANCE = BigDecimal.valueOf(15_000_000);
+
   private final UserRepository userRepo;
-  private final PasswordEncoder passwordEncoder;
+
   private final BankRepository bankRepo;
-  private final UserRepository userRepository;
 
-  @Override
-  public void seedUser() {
-    Bank tahapanBCA = bankRepo.findByName("Tahapan BCA")
-            .orElseThrow(() -> new RuntimeException("Bank Tahapan BCA not found"));
+  private final PasswordEncoder passwordEncoder;
 
-    createUserIfNotExists(
-            tahapanBCA,
-            "kdot@tde.com",
-            "KDOT604T",
-            "1122334455",
-            "1272051706870001",
-            "081234567890",
-            "Kendrick Lamar",
-            "itsjustbigme",
-            "kendrick.jpg",
-            "Compton, CA",
-            BigDecimal.valueOf(1000000),
-            "170687"
-    );
-
-    createUserIfNotExists(
-            tahapanBCA,
-            "jane.doe@example.com",
-            "JANE1234",
-            "2233445566",
-            "1272051706870002",
-            "089876543210",
-            "Jane Doe",
-            "jane123",
-            "jane.jpg",
-            "Los Angeles, CA",
-            BigDecimal.valueOf(50000),
-            "987654"
-    );
-
-    createUserIfNotExists(
-            tahapanBCA,
-            "john.smith@example.com",
-            "JOHN5678",
-            "3344556677",
-            "1272051706870003",
-            "081230987654",
-            "John Smith",
-            "john123",
-            "john.jpg",
-            "New York, NY",
-            BigDecimal.valueOf(100000),
-            "123456"
-
-    );
+  private String generateImagePath(String name) {
+    return Constants.IMAGE_PATH +
+        "/users/" +
+        name.replaceAll("\\s+", "") +
+        ".jpg";
   }
 
-  private void createUserIfNotExists(Bank bank, String email, String signature, String accountNumber, String nik,
-                                     String phoneNumber, String name, String password, String imagePath,
-                                     String address, BigDecimal balance, String mpin) {
-    boolean userExists = userRepo.existsByEmail(email) ||
-            userRepo.existsBySignature(signature) ||
-            userRepo.existsByAccountNumber(accountNumber) ||
-            userRepo.existsByNik(nik) ||
-            userRepo.existsByPhoneNumber(phoneNumber);
+  private List<User> createInitialUsers() {
+    return List.of(
+        createUser("kdot@tde.com", "KDOT604T", "1122334455", "Kendrick Lamar", "itsjustbigme", "1272051706870001",
+            "081234567890", "Compton, CA", "170687"),
+        createUser("jane.doe@example.com", "JANE1234", "2233445566", "Jane Doe", "jane123", "1272051706870002",
+            "089876543210", "Los Angeles, CA", "987654"),
+        createUser("john.smith@example.com", "JOHN5678", "3344556677", "John Smith", "john123", "1272051706870003",
+            "081230987654", "New York, NY", "123456"));
+  }
 
-    if (userExists) {
-      log.info("{} already exists in the system", email);
-      return;
-    }
+  private User createUser(String email, String signature, String accountNumber, String name, String password,
+      String nik, String phoneNumber, String address, String mpin) {
+    return User.builder()
+        .email(email)
+        .signature(signature)
+        .accountNumber(accountNumber)
+        .name(name)
+        .password(passwordEncoder.encode(password))
+        .nik(nik)
+        .phoneNumber(phoneNumber)
+        .address(address)
+        .mpin(mpin)
+        .build();
+  }
 
-    User user = User.builder()
-            .bank(bank)
-            .email(email)
-            .signature(signature)
-            .accountNumber(accountNumber)
-            .name(name)
-            .password(passwordEncoder.encode(password))
-            .imagePath(imagePath)
-            .nik(nik)
-            .phoneNumber(phoneNumber)
-            .address(address)
-            .balance(balance)
-            .mpin(passwordEncoder.encode(mpin))
-            .build();
-
+  private void populateUserDetails(User user, Bank bank) {
+    user.setBank(bank);
+    user.setImagePath(generateImagePath(user.getName()));
+    user.setBalance(INITIAL_BALANCE);
     userRepo.save(user);
-    log.info("{} has been added to the system", email);
   }
 
   @Override
-  public UserBalanceResponse getBalance() {
-    String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-    User user = userRepository.findBySignature(signature)
-            .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+  @Transactional
+  public void populate() {
+    Bank bca = bankRepo.findByName("Tahapan BCA").orElseThrow(() -> {
+      log.error("Bank with name Tahapan BCA not found");
+      return new BankNotFoundException(Constants.BANK_NOT_FOUND);
+    });
 
-    return UserBalanceResponse.builder()
-            .checkTime(LocalDateTime.now())
-            .balance(user.getBalance())
-            .build();
+    List<User> users = createInitialUsers();
+    users.forEach(user -> populateUserDetails(user, bca));
   }
 
   @Override
-  public User searchUserByNorek(String no, String bank) {
-    Optional<User> user = userRepository.findByAccountNumber(no);
-    if(user.isPresent()) {
-      if (Objects.equals(user.get().getBank().getName().toLowerCase(), bank.toLowerCase())) {
-        return user.get();
-      }
-    }
-    throw new SearchNotFoundException("No rekening " + no + " in bank " + bank + " not found");
+  @Transactional(readOnly = true)
+  public UserBalanceResponse fetchUserBalance(User user) {
+
+    return UserBalanceResponse.of(LocalDateTime.now(), user.getBalance());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public UserProfileResponse searchByAccNumber(String accNumber) {
+    log.trace("Searching user with account number {}", accNumber);
+
+    User user = userRepo.findByAccountNumber(accNumber).orElseThrow(() -> {
+      log.error("User with account number {} not found", accNumber);
+      return new UserNotFoundException(Constants.USER_NOT_FOUND);
+    });
+
+    log.info("User(accNum={}) found", accNumber);
+
+    return UserProfileResponse.from(user);
   }
 }
