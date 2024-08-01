@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.contact.dto.FavoriteResponse;
-import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
-import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
+import org.synrgy.setara.contact.dto.*;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
 
 import java.util.UUID;
@@ -35,11 +33,10 @@ public class SavedEwalletUserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/favorite-ewallets/{id}")
-    public ResponseEntity<FavoriteResponse> putFavoriteEwalletUser(
-            @PathVariable UUID id,
-            @RequestParam boolean isFavorite) {
-        FavoriteResponse response = savedEwalletUserService.putFavoriteEwalletUser(id, isFavorite);
+    @PutMapping("/favorite-ewallet")
+    public ResponseEntity<BaseResponse<FavoriteResponse>> putFavoriteEwalletUser(@RequestBody FavoriteEwalletRequest request) {
+        FavoriteResponse favoriteResponse = savedEwalletUserService.putFavoriteEwalletUser(request.getIdTersimpan(), request.isFavorite());
+        BaseResponse<FavoriteResponse> response = BaseResponse.success(HttpStatus.OK, favoriteResponse, "Success update is favorite E-Wallet");
         return ResponseEntity.ok(response);
     }
 }

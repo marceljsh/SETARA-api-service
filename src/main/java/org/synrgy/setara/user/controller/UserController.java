@@ -1,5 +1,7 @@
 package org.synrgy.setara.user.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,10 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.user.dto.SearchNoEwalletRequest;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.model.EwalletUser;
-import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
 
@@ -35,16 +36,15 @@ public class UserController {
     }
 
     @GetMapping("/search-no-rek/{no}")
-    public ResponseEntity<BaseResponse<SearchResponse>> searchNoRek(@PathVariable String no) {
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoRek(@Parameter(schema = @Schema(type = "string", example = "1122334455")) @PathVariable String no) {
         SearchResponse userResponse = userService.searchUserByNorek(no);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get No Rekening");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/search-no-ewallet/{no}")
-    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@PathVariable String no, @RequestBody Map<String, Object> request) {
-        UUID ewalletUUID = UUID.fromString((String) request.get("ewallet"));
-        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, ewalletUUID);
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@Parameter(schema = @Schema(type = "string", example = "081234567890")) @PathVariable String no, @RequestBody SearchNoEwalletRequest request) {
+        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, request);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
         return ResponseEntity.ok(response);
     }

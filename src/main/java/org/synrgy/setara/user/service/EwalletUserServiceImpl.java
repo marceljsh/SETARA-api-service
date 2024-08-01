@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.user.dto.SearchNoEwalletRequest;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.exception.SearchExceptions;
 import org.synrgy.setara.user.model.EwalletUser;
@@ -69,18 +70,18 @@ public class EwalletUserServiceImpl implements EwalletUserService {
     }
 
     @Override
-    public SearchResponse searchEwalletUser(String no_ewallet, UUID ewallet) {
-        Optional<EwalletUser> ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet);
-        if(ewalletUser.isPresent()) {
-            if (Objects.equals(ewalletUser.get().getEwallet().getId(), ewallet)) {
-                SearchResponse searchResponse = SearchResponse.builder()
-                        .no(no_ewallet)
-                        .name(ewalletUser.get().getName())
-                        .bank(ewalletUser.get().getEwallet().getName())
-                        .build();
-                return searchResponse;
-            }
+    public SearchResponse searchEwalletUser(String no_ewallet, SearchNoEwalletRequest request) {
+        EwalletUser ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet)
+                .orElseThrow(() -> new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet));
+
+        if (!Objects.equals(ewalletUser.getEwallet().getId(), request.getEwalletId())) {
+            throw new SearchExceptions.SearchNotFoundException("Ewallet ID mismatch for number " + no_ewallet);
         }
-        throw new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet);
+
+        return SearchResponse.builder()
+                .no(no_ewallet)
+                .name(ewalletUser.getName())
+                .bank(ewalletUser.getEwallet().getName())
+                .build();
     }
 }
