@@ -25,6 +25,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI myOpenAPI() {
+
         Server devServer = new Server();
         devServer.setUrl(devUrl);
         devServer.setDescription("Server URL in Development environment");
@@ -46,7 +47,7 @@ public class OpenApiConfig {
                 .version("1.0")
                 .contact(contact)
                 .description("This API exposes endpoints to manage binarfud.")
-                .termsOfService("https://www.binarfud.com/terms")
+                .termsOfService("https://www.setara.com/terms")
                 .license(mitLicense);
 
         SecurityScheme securityScheme = new SecurityScheme()

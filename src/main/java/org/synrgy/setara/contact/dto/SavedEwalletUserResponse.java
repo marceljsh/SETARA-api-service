@@ -1,14 +1,17 @@
 package org.synrgy.setara.contact.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.synrgy.setara.contact.model.SavedEwalletUser;
 
+import lombok.*;
 import java.util.UUID;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class SavedEwalletUserResponse {
-
     private UUID id;
     private UUID ownerId;
     private UUID ewalletUserId;
@@ -18,16 +21,16 @@ public class SavedEwalletUserResponse {
     private String ewalletUserPhoneNumber;
     private String ewalletName;
 
-    public SavedEwalletUserResponse(UUID id, UUID ownerId, UUID ewalletUserId, boolean favorite,
-                                    String ewalletUserName, String ewalletUserImagePath,
-                                    String ewalletUserPhoneNumber, String ewalletName) {
-        this.id = id;
-        this.ownerId = ownerId;
-        this.ewalletUserId = ewalletUserId;
-        this.favorite = favorite;
-        this.ewalletUserName = ewalletUserName;
-        this.ewalletUserImagePath = ewalletUserImagePath;
-        this.ewalletUserPhoneNumber = ewalletUserPhoneNumber;
-        this.ewalletName = ewalletName;
+    public static SavedEwalletUserResponse from(SavedEwalletUser savedUser) {
+        return SavedEwalletUserResponse.builder()
+                .id(savedUser.getId())
+                .ownerId(savedUser.getOwner().getId())
+                .ewalletUserId(savedUser.getEwalletUser().getId())
+                .favorite(savedUser.isFavorite())
+                .ewalletUserName(savedUser.getEwalletUser().getName())
+                .ewalletUserImagePath(savedUser.getEwalletUser().getImagePath())
+                .ewalletUserPhoneNumber(savedUser.getEwalletUser().getPhoneNumber())
+                .ewalletName(savedUser.getEwalletUser().getEwallet().getName())
+                .build();
     }
 }

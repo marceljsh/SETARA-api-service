@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.user.dto.SearchResponse;
+import org.synrgy.setara.user.exception.SearchExceptions;
 import org.synrgy.setara.user.model.EwalletUser;
+import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,22 +27,22 @@ public class EwalletUserServiceImpl implements EwalletUserService {
         // Daftar pengguna dengan e-wallet "Ovo"
         List<EwalletUser> ewalletUsers = Arrays.asList(
                 EwalletUser.builder()
-                        .name("User1")
+                        .name("FARAH CANTIKA")
                         .phoneNumber("081234567890")
                         .balance(BigDecimal.valueOf(10000))
-                        .imagePath("/images/user1.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/fiabjleyerwpgt5jxjfj.png")
                         .build(),
                 EwalletUser.builder()
-                        .name("User2")
+                        .name("AURLYN PUSPITA")
                         .phoneNumber("081234567891")
                         .balance(BigDecimal.valueOf(20000))
-                        .imagePath("/images/user2.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/nwc0lfqaauew258nreqt.png")
                         .build(),
                 EwalletUser.builder()
-                        .name("User3")
+                        .name("KEVIN ATMAJAYA")
                         .phoneNumber("081234567892")
                         .balance(BigDecimal.valueOf(30000))
-                        .imagePath("/images/user3.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png")
                         .build()
         );
 
@@ -65,5 +66,21 @@ public class EwalletUserServiceImpl implements EwalletUserService {
         } else {
             log.warn("E-wallet 'Ovo' not found in the database.");
         }
+    }
+
+    @Override
+    public SearchResponse searchEwalletUser(String no_ewallet, UUID ewallet) {
+        Optional<EwalletUser> ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet);
+        if(ewalletUser.isPresent()) {
+            if (Objects.equals(ewalletUser.get().getEwallet().getId(), ewallet)) {
+                SearchResponse searchResponse = SearchResponse.builder()
+                        .no(no_ewallet)
+                        .name(ewalletUser.get().getName())
+                        .bank(ewalletUser.get().getEwallet().getName())
+                        .build();
+                return searchResponse;
+            }
+        }
+        throw new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet);
     }
 }

@@ -2,6 +2,7 @@ package org.synrgy.setara.transaction.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
@@ -11,25 +12,24 @@ import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/transactions")
+@RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/topup")
-    public ResponseEntity<BaseResponse<TransactionResponse>> topUp(@RequestBody TransactionRequest request, @RequestHeader("Authorization") String token) {
-        String authToken = token.substring(7);
-        TransactionResponse transactionResponse = transactionService.topUp(request, authToken);
-        BaseResponse<TransactionResponse> response = BaseResponse.success(HttpStatus.OK, transactionResponse, "Top-up successful");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<BaseResponse<TopUpResponse>> topUp(@RequestBody TopUpRequest request) {
+            TopUpResponse topUpResponse = transactionService.topUp(request);
+            return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, topUpResponse, "Top-up successful"));
     }
 
     @PostMapping("/bca-transfer")
-    public ResponseEntity<BaseResponse<TransferResponseDTO>> bcaTransfer(@RequestBody TransferRequestDTO request, @RequestHeader("Authorization") String token) {
-        String authToken = token.substring(7);
-        TransferResponseDTO response = transactionService.transferWithinBCA(request, authToken);
+    public ResponseEntity<BaseResponse<TransferResponse>> bcaTransfer(@RequestBody TransferRequest request) {
+        TransferResponse response = transactionService.transferWithinBCA(request);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response,"Transfer successful"));
     }
 
@@ -48,6 +48,22 @@ public class TransactionController {
 
         MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(month, year);
         BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/merchant-transaction")
+    public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(@RequestBody MerchantTransactionRequest request) {
+        MerchantTransactionResponse response = transactionService.merchantTransaction(request);
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Transaction successful"));
+    }
+
+    @PostMapping("/get-all-mutation")
+    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@RequestBody MutationRequest request,
+                                                                               @RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "10") int size) {
+        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(request, page, size);
+        List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
+        BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
         return ResponseEntity.ok(response);
     }
 }

@@ -1,14 +1,6 @@
 package org.synrgy.setara.transaction.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +10,11 @@ import org.synrgy.setara.common.model.Auditable;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.model.Ewallet;
+import org.synrgy.setara.vendor.model.Merchant;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -39,7 +33,7 @@ public class Transaction extends Auditable {
   )
   private User user;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
     name = "bank_id",
     referencedColumnName = "id"
@@ -59,6 +53,13 @@ public class Transaction extends Auditable {
   private String destinationAccountNumber;
 
   private String destinationPhoneNumber;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+          name = "merchant_id",
+          referencedColumnName = "id"
+  )
+  private Merchant destinationIdQris;
 
   private BigDecimal amount;
 

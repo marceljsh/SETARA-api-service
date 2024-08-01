@@ -4,7 +4,8 @@ public enum TransactionType {
 
   TRANSFER("Transfer"),
   TOP_UP("Top Up"),
-  DEPOSIT("Deposit");
+  DEPOSIT("Deposit"),
+  QRPAYMENT("QR PAYMENT");
 
   private final String name;
 
@@ -21,6 +22,7 @@ public enum TransactionType {
       case "Transfer" -> TRANSFER;
       case "Top Up" -> TOP_UP;
       case "Deposit" -> DEPOSIT;
+      case "QR PAYMENT" -> QRPAYMENT;
       default -> null;
     };
   }

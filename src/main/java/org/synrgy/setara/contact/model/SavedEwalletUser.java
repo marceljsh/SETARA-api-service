@@ -36,7 +36,7 @@ public class SavedEwalletUser extends Auditable {
   )
   private User owner;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
     name = "ewallet_user_id",
     nullable = false,

@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @Setter
 @Data
 @Builder
-public class TransactionRequest {
-    private String destinationPhoneNumber;
+public class TransferRequest {
+    private String destinationAccountNumber;
     private BigDecimal amount;
     private String mpin;
     private String note;

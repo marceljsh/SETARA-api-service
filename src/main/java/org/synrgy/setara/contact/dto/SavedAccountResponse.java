@@ -4,25 +4,29 @@ import lombok.Builder;
 import lombok.Data;
 import org.synrgy.setara.contact.model.SavedAccount;
 
+import java.util.UUID;
+
 @Data
 @Builder
 public class SavedAccountResponse {
-
-  private String name;
-
-  private String accountNumber;
-
-  private String imagePath;
-
+  private UUID id;
+  private UUID ownerId;
   private boolean favorite;
+  private String accountName;
+  private String userImagePath;
+  private String accountNumber;
+  private String bankName;
 
-  public static SavedAccountResponse from(SavedAccount sa) {
+  public static SavedAccountResponse from(SavedAccount savedAccount) {
     return SavedAccountResponse.builder()
-        .name(sa.getName())
-        .accountNumber(sa.getAccountNumber())
-        .imagePath(sa.getImagePath())
-        .favorite(sa.isFavorite())
-        .build();
+            .id(savedAccount.getId())
+            .ownerId(savedAccount.getOwner().getId())
+            .favorite(savedAccount.isFavorite())
+            .accountName(savedAccount.getName())
+            .userImagePath(savedAccount.getImagePath())
+            .accountNumber(savedAccount.getAccountNumber())
+            .bankName(savedAccount.getBank().getName())
+            .build();
   }
 
 }

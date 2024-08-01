@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionResponse {
+public class TopUpResponse {
     private UserDto user;
     private UserEwalletDto userEwallet;
     private BigDecimal amount;

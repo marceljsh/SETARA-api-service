@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class PutFavoriteRequest {
+public class FavoriteRequest {
     private boolean isFavorite;
     private UUID idTersimpan;
 }

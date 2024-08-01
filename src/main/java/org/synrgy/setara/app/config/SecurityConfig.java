@@ -28,13 +28,13 @@ public class SecurityConfig {
 
     private static final String[] SWAGGER_WHITELIST = {
             "/swagger-ui/**",
-            "/v3/api-docs/**",
+            "/v1/api-docs/**",
             "/swagger-resources/**",
             "/swagger-resources"
     };
 
     private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/sign-in" // Endpoints yang dapat diakses tanpa autentikasi
+            "/api/v1/auth/sign-in"
     };
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -57,8 +57,10 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
                             final Map<String, Object> body = new HashMap<>();
+
                             body.put("status", false); // Menyelaraskan dengan format BaseResponse
-                            body.put("message", "Full authentication is required to access this resource");
+                            body.put("message", "Full authentication is required to access this resource" + exception);
+                          
                             body.put("code", HttpServletResponse.SC_UNAUTHORIZED);
 
                             final ObjectMapper mapper = new ObjectMapper();

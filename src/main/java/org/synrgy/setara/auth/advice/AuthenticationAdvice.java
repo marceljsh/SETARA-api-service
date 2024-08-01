@@ -1,4 +1,4 @@
-package org.synrgy.setara.common.exception;
+package org.synrgy.setara.auth.advice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,11 +8,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.auth.exception.AuthenticationException;
 
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+import javax.naming.AuthenticationException;
+
+@RestControllerAdvice(basePackages = "org.synrgy.setara.auth")
+public class AuthenticationAdvice {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationAdvice.class);
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<BaseResponse<?>> handleAuthenticationException(AuthenticationException ex) {
@@ -26,12 +27,5 @@ public class GlobalExceptionHandler {
         logger.error("Bad credentials: {}", ex.getMessage());
         BaseResponse<?> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, "Bad credentials");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<BaseResponse<?>> handleException(Exception ex) {
-        logger.error("Unexpected error: {}", ex.getMessage());
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -22,7 +22,7 @@ public class ApplicationConfig {
   @Bean
   UserDetailsService userDetailsService() {
     return signature -> userRepo.findBySignature(signature)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
   @Bean

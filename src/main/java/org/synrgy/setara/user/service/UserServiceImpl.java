@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.transaction.exception.TransactionExceptions;
+import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.exception.SearchExceptions.*;
 import org.synrgy.setara.user.exception.UserExceptions;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
@@ -15,6 +18,8 @@ import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +46,11 @@ public class UserServiceImpl implements UserService {
             "081234567890",
             "Kendrick Lamar",
             "itsjustbigme",
-            "kendrick.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "Compton, CA",
             BigDecimal.valueOf(1000000),
             "170687"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "jane.doe@example.com",
@@ -56,12 +60,11 @@ public class UserServiceImpl implements UserService {
             "089876543210",
             "Jane Doe",
             "jane123",
-            "jane.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/nwc0lfqaauew258nreqt.png",
             "Los Angeles, CA",
             BigDecimal.valueOf(50000),
             "987654"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "john.smith@example.com",
@@ -71,11 +74,24 @@ public class UserServiceImpl implements UserService {
             "081230987654",
             "John Smith",
             "john123",
-            "john.jpg",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
-
+    );
+    createUserIfNotExists(
+            tahapanBCA,
+            "andhika157@gmail.com",
+            "ADTP604T",
+            "2891376451",
+            "1272051706870004",
+            "081234567890",
+            "Andhika Putra",
+            "andika12345",
+            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
+            "New York, NY",
+            BigDecimal.valueOf(999999999),
+            "12095"
     );
   }
 
@@ -122,5 +138,19 @@ public class UserServiceImpl implements UserService {
             .checkTime(LocalDateTime.now())
             .balance(user.getBalance())
             .build();
+  }
+
+  @Override
+  public SearchResponse searchUserByNorek(String no) {
+    Optional<User> user = userRepository.findByAccountNumber(no);
+    if(user.isPresent()) {
+      SearchResponse response = SearchResponse.builder()
+              .no(no)
+              .name(user.get().getName())
+              .bank(user.get().getBank().getName())
+              .build();
+      return response;
+    }
+    throw new SearchNotFoundException("No rekening " + no + " not found");
   }
 }
