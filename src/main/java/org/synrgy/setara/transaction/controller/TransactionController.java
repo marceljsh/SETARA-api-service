@@ -73,17 +73,8 @@ public class TransactionController {
 
     @GetMapping("/getMonthlyReport")
     public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
-            @Parameter(
-                    name = "month",
-                    required = true,
-                    schema = @Schema(type = "integer", example = "8")
-            ) @RequestParam(name = "month") int month,
-            @Parameter(
-                    name = "year",
-                    required = true,
-                    schema = @Schema(type = "integer", example = "2024")
-            ) @RequestParam(name = "year") int year) {
-
+            @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,
+            @Parameter(schema = @Schema(type = "integer", example = "2024")) @RequestParam(name = "year") int year) {
         MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(month, year);
         BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
         return ResponseEntity.ok(response);
