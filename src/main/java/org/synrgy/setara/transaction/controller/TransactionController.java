@@ -9,6 +9,8 @@ import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -32,7 +34,18 @@ public class TransactionController {
     }
 
     @GetMapping("/getMonthlyReport")
-    public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(@RequestParam(name = "month") int month, @RequestParam(name = "year") int year) {
+    public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
+            @Parameter(
+                    name = "month",
+                    required = true,
+                    schema = @Schema(type = "integer", example = "7")
+            ) @RequestParam(name = "month") int month,
+            @Parameter(
+                    name = "year",
+                    required = true,
+                    schema = @Schema(type = "integer", example = "2024")
+            ) @RequestParam(name = "year") int year) {
+
         MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(month, year);
         BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
         return ResponseEntity.ok(response);

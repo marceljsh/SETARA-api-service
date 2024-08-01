@@ -256,6 +256,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public MonthlyReportResponse getMonthlyReport(int month, int year) {
+        validateMonth(month);
+        validateYear(year);
+
         String signature = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findBySignature(signature)
                 .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
@@ -290,6 +293,19 @@ public class TransactionServiceImpl implements TransactionService {
                 .expense(expense)
                 .total(income.subtract(expense))
                 .build();
+    }
+
+    private void validateMonth(int month) {
+        if (month < 1 || month > 12) {
+            throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
+        }
+    }
+
+    private void validateYear(int year) {
+        int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+        if (year < 1900 || year > currentYear) {
+            throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
+        }
     }
 
     @Override
