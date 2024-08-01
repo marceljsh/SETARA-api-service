@@ -7,5 +7,5 @@ public interface TransactionService {
 
     TransferResponseDTO transferWithinBCA(TransferRequestDTO request, String authToken);
 
-    GetMonthlyReportResponse getMonthlyReport(String token, int month, int year);
+    MonthlyReportResponse getMonthlyReport(int month, int year);
 }

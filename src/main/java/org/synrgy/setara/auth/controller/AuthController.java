@@ -1,5 +1,8 @@
 package org.synrgy.setara.auth.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,27 @@ public class AuthController {
   private final AuthenticationManager authManager;
   private final AuthService authService;
 
+  @Operation(
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  content = @Content(
+                          mediaType = MediaType.APPLICATION_JSON_VALUE,
+                          examples = {
+                                  @ExampleObject(
+                                          name = "Kendrick",
+                                          value = "{\"signature\": \"KDOT604T\", \"password\": \"itsjustbigme\"}"
+                                  ),
+                                  @ExampleObject(
+                                          name = "Jane",
+                                          value = "{\"signature\": \"JANE1234\", \"password\": \"jane123\"}"
+                                  ),
+                                  @ExampleObject(
+                                          name = "John",
+                                          value = "{\"signature\": \"JOHN5678\", \"password\": \"john123\"}"
+                                  )
+                          }
+                  )
+          )
+  )
   @PostMapping(
           value = "/sign-in",
           consumes = MediaType.APPLICATION_JSON_VALUE,

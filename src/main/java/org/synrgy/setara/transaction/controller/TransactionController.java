@@ -8,6 +8,8 @@ import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -32,23 +34,20 @@ public class TransactionController {
     }
 
     @GetMapping("/getMonthlyReport")
-    public ResponseEntity<BaseResponse<GetMonthlyReportResponse>> getMonthlyReport(@RequestHeader("Authorization") String token, @RequestParam(name = "month") int month, @RequestParam(name = "year") int year) {
-        // Validation
-        if (month < 1 || month > 12) {
-            BaseResponse<GetMonthlyReportResponse> response = BaseResponse.failure(
-                    HttpStatus.BAD_REQUEST, "Invalid month. It must be between 1 and 12.");
-            return ResponseEntity.badRequest().body(response);
-        }
-        int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
-        if (year < 1900 || year > currentYear) {
-            BaseResponse<GetMonthlyReportResponse> response = BaseResponse.failure(
-                    HttpStatus.BAD_REQUEST, "Invalid year. It must be between 1900 and " + currentYear + ".");
-            return ResponseEntity.badRequest().body(response);
-        }
+    public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
+            @Parameter(
+                    name = "month",
+                    required = true,
+                    schema = @Schema(type = "integer", example = "7")
+            ) @RequestParam(name = "month") int month,
+            @Parameter(
+                    name = "year",
+                    required = true,
+                    schema = @Schema(type = "integer", example = "2024")
+            ) @RequestParam(name = "year") int year) {
 
-        String authToken = token.substring(7);
-        GetMonthlyReportResponse getMonthlyReportResponse = transactionService.getMonthlyReport(authToken, month, year);
-        BaseResponse<GetMonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, getMonthlyReportResponse, "Success Get Monthly Report");
+        MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(month, year);
+        BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
         return ResponseEntity.ok(response);
     }
 }

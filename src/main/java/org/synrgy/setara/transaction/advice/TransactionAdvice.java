@@ -28,6 +28,24 @@ public class TransactionAdvice {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TransactionExceptions.UserNotFoundException.class)
+    public ResponseEntity<BaseResponse<?>> handleUserNotFoundException(TransactionExceptions.UserNotFoundException ex) {
+        BaseResponse<?> response = BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TransactionExceptions.InvalidMonthException.class)
+    public ResponseEntity<BaseResponse<?>> handleInvalidMonthException(TransactionExceptions.InvalidMonthException ex) {
+        BaseResponse<?> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TransactionExceptions.InvalidYearException.class)
+    public ResponseEntity<BaseResponse<?>> handleInvalidYearException(TransactionExceptions.InvalidYearException ex) {
+        BaseResponse<?> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<?>> handleGeneralException(Exception ex) {
         BaseResponse<?> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
