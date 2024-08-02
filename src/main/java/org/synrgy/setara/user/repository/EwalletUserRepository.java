@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.user.model.EwalletUser;
+import org.synrgy.setara.vendor.model.Ewallet;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,4 +25,6 @@ public interface EwalletUserRepository extends JpaRepository<EwalletUser, UUID> 
   Optional<EwalletUser> findByPhoneNumber(String phoneNumber);
 
   boolean existsByNameAndPhoneNumber(String name, String phoneNumber);
+
+  boolean existsByNameAndPhoneNumberAndEwallet(String name, String phoneNumber, Ewallet ewallet);
 }

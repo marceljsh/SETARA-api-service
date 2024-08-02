@@ -10,6 +10,7 @@ import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.user.exception.SearchExceptions.*;
+import org.synrgy.setara.user.exception.UserExceptions;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
@@ -50,7 +51,6 @@ public class UserServiceImpl implements UserService {
             BigDecimal.valueOf(1000000),
             "170687"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "jane.doe@example.com",
@@ -65,7 +65,6 @@ public class UserServiceImpl implements UserService {
             BigDecimal.valueOf(50000),
             "987654"
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "john.smith@example.com",
@@ -79,23 +78,20 @@ public class UserServiceImpl implements UserService {
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
-
     );
-
     createUserIfNotExists(
             tahapanBCA,
             "andhika157@gmail.com",
             "ADTP604T",
             "2891376451",
             "1272051706870004",
-            "081234567890",
+            "081234567891",
             "Andhika Putra",
             "andika12345",
             "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
             "New York, NY",
             BigDecimal.valueOf(999999999),
-            "12095"
-
+            "120951"
     );
   }
 
@@ -136,7 +132,7 @@ public class UserServiceImpl implements UserService {
   public UserBalanceResponse getBalance() {
     String signature = SecurityContextHolder.getContext().getAuthentication().getName();
     User user = userRepository.findBySignature(signature)
-            .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+            .orElseThrow(() -> new UserExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 
     return UserBalanceResponse.builder()
             .checkTime(LocalDateTime.now())
@@ -151,7 +147,7 @@ public class UserServiceImpl implements UserService {
       SearchResponse response = SearchResponse.builder()
               .no(no)
               .name(user.get().getName())
-              .serviceName(user.get().getBank().getName())
+              .bank(user.get().getBank().getName())
               .build();
       return response;
     }

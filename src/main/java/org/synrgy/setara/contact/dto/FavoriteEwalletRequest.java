@@ -8,10 +8,10 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class FavoriteRequest {
+public class FavoriteEwalletRequest {
     @Schema(example = "true")
     private boolean isFavorite;
 
-    @Schema(example = "5cda13a6-8350-473a-8b71-90cddda286af")
+    @Schema(example = "fa32d664-6893-456a-89e8-9f05be5aa703")
     private UUID idTersimpan;
 }

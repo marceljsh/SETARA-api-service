@@ -3,6 +3,9 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,10 +25,13 @@ import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.model.Merchant;
+import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +42,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final EwalletRepository ewalletRepository;
     private final EwalletUserRepository ewalletUserRepository;
     private final SavedEwalletUserRepository savedEwalletUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -249,6 +256,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public MonthlyReportResponse getMonthlyReport(int month, int year) {
+        validateMonth(month);
+        validateYear(year);
+
         String signature = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findBySignature(signature)
                 .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
@@ -283,6 +293,19 @@ public class TransactionServiceImpl implements TransactionService {
                 .expense(expense)
                 .total(income.subtract(expense))
                 .build();
+    }
+
+    private void validateMonth(int month) {
+        if (month < 1 || month > 12) {
+            throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
+        }
+    }
+
+    private void validateYear(int year) {
+        int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+        if (year < 1900 || year > currentYear) {
+            throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
+        }
     }
 
     @Override
@@ -361,5 +384,48 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+    @Override
+    public Page<MutationResponse> getAllMutation(MutationRequest request, int page, int size) {
+        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        User sourceUser = userRepository.findBySignature(signature)
+                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+
+        LocalDateTime startDateTime = request.getStartDate().atStartOfDay();
+        LocalDateTime endDateTime = request.getEndDate().atTime(LocalTime.MAX);
+
+        String transactionCategory = request.getTransactionCategory().toString();
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Transaction> transactions = transactionRepository.findByUserAndTimeBetweenAndTransactionCategory(
+                sourceUser, startDateTime, endDateTime, transactionCategory, pageable);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        return transactions.map(transaction -> MutationResponse.builder()
+                .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-", ""))
+                .type(formatTransactionType(transaction))
+                .totalAmount(transaction.getTotalamount())
+                .time(transaction.getTime())
+                .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-", ""))
+                .destinationAccountNumber(transaction.getDestinationAccountNumber())
+                .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
+                .formattedDate(transaction.getTime().format(dateFormatter))
+                .formattedTime(transaction.getTime().format(timeFormatter))
+                .build());
+    }
+
+    private String formatTransactionType(Transaction transaction) {
+        switch (transaction.getType()) {
+            case TRANSFER:
+                return "Transfer M-Banking DB";
+            case TOP_UP:
+                return ewalletRepository.findById(transaction.getEwallet().getId())
+                        .map(ewallet -> "TOP UP " + ewallet.getName())
+                        .orElse("Unknown Wallet");
+            default:
+                return transaction.getType().toString();
+        }
+    }
 }
 

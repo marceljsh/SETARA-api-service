@@ -55,4 +55,16 @@ public class TransactionExceptions {
             super(message);
         }
     }
+
+    public static class InvalidMonthException extends RuntimeException {
+        public InvalidMonthException(String message) {
+            super(message);
+        }
+    }
+
+    public static class InvalidYearException extends RuntimeException {
+        public InvalidYearException(String message) {
+            super(message);
+        }
+    }
 }
