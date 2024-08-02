@@ -43,31 +43,31 @@ public class MerchantServiceImpl implements MerchantService {
                         .build()
         );
 
-        for (Merchant merchant : merchants) {
-            Optional<Merchant> existingMerchant = merchantRepository.findByNmid(merchant.getNmid());
-            if (existingMerchant.isEmpty()) {
-                // Save merchant first to get the id_qris
-                Merchant savedMerchant = merchantRepository.save(merchant);
-
-                // Generate QR code using id_qris
-                String qrisData = savedMerchant.getId().toString();
-                int qrCodeWidth = 400;  // Set the desired width
-                int qrCodeHeight = 400; // Set the desired height
-
-                String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
-                String qrCodeImagePath = "D:\\QRCode\\" + savedMerchant.getMerchant_name() + "-qrcode.png";
-                QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
-
-                // Update the merchant with the generated QR code and image path
-                savedMerchant.setQrisCode(qrCodeBase64);
-                savedMerchant.setImagePath(qrCodeImagePath);  // Assuming you want to store the image path
-                merchantRepository.save(savedMerchant);
-
-                System.out.println("Merchant with QRIS code " + savedMerchant.getQrisCode() + " has been saved.");
-            } else {
-                System.out.println("Merchant with QRIS code " + merchant.getQrisCode() + " already exists.");
-            }
-        }
+//        for (Merchant merchant : merchants) {
+//            Optional<Merchant> existingMerchant = merchantRepository.findByName(merchant.getName());
+//            if (existingMerchant.isEmpty()) {
+//                // Save merchant first to get the id_qris
+//                Merchant savedMerchant = merchantRepository.save(merchant);
+//
+//                // Generate QR code using id_qris
+//                String qrisData = savedMerchant.getId().toString();
+//                int qrCodeWidth = 400;  // Set the desired width
+//                int qrCodeHeight = 400; // Set the desired height
+//
+//                String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
+//                String qrCodeImagePath = "E:\\QRCode\\" + savedMerchant.getMerchant_name() + "-qrcode.png";
+//                QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
+//
+//                // Update the merchant with the generated QR code and image path
+//                savedMerchant.setQrisCode(qrCodeBase64);
+//                savedMerchant.setImagePath(qrCodeImagePath);  // Assuming you want to store the image path
+//                merchantRepository.save(savedMerchant);
+//
+//                System.out.println("Merchant with QRIS code " + savedMerchant.getName() + " has been saved.");
+//            } else {
+//                System.out.println("Merchant with QRIS code " + merchant.getName() + " already exists.");
+//            }
+//        }
     }
 
     private String generateUniqueNmid() {

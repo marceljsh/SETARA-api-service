@@ -8,5 +8,5 @@ import lombok.Data;
 public class SearchResponse {
     private String no;
     private String name;
-    private String serviceName;
+    private String bank;
 }
