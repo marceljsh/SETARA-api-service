@@ -1,14 +1,13 @@
 package org.synrgy.setara.vendor.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.service.MerchantService;
@@ -21,9 +20,9 @@ public class MerchantController {
     @Autowired
     private MerchantService merchantService;
 
-    @GetMapping("/qris")
+    @GetMapping("/qris/{id_qris}")
     public ResponseEntity<BaseResponse<MerchantResponse>> getQrisData(
-            @RequestParam String id_qris,
+            @Parameter(schema = @Schema(example = "e56192b9-d09c-4927-b0e2-ae1e60f1e427")) @PathVariable String id_qris,
             HttpServletRequest request) {
         MerchantRequest requestDTO = new MerchantRequest();
         requestDTO.setId_qris(id_qris);

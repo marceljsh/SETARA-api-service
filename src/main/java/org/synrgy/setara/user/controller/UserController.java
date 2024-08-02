@@ -42,9 +42,9 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/search-no-ewallet/{no}")
-    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@Parameter(schema = @Schema(type = "string", example = "081234567890")) @PathVariable String no, @RequestBody SearchNoEwalletRequest request) {
-        SearchResponse userResponse = ewalletUserService.searchEwalletUser(no, request);
+    @PostMapping("/search-no-ewallet")
+    public ResponseEntity<BaseResponse<SearchResponse>> searchNoEwallet(@RequestBody SearchNoEwalletRequest request) {
+        SearchResponse userResponse = ewalletUserService.searchEwalletUser(request);
         BaseResponse<SearchResponse> response = BaseResponse.success(HttpStatus.OK, userResponse, "Success Get Ewallet");
         return ResponseEntity.ok(response);
     }

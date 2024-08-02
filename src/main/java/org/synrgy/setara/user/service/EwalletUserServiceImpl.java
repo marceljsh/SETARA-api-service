@@ -70,16 +70,18 @@ public class EwalletUserServiceImpl implements EwalletUserService {
     }
 
     @Override
-    public SearchResponse searchEwalletUser(String no_ewallet, SearchNoEwalletRequest request) {
-        EwalletUser ewalletUser = ewalletUserRepo.findByPhoneNumber(no_ewallet)
-                .orElseThrow(() -> new SearchExceptions.SearchNotFoundException("not found number " + no_ewallet));
+    public SearchResponse searchEwalletUser(SearchNoEwalletRequest request) {
+        System.out.println(request.getNoEwallet() + " | " + request.getEwalletId());
+
+        EwalletUser ewalletUser = ewalletUserRepo.findByPhoneNumber(request.getNoEwallet())
+                .orElseThrow(() -> new SearchExceptions.SearchNotFoundException("not found number " + request.getNoEwallet()));
 
         if (!Objects.equals(ewalletUser.getEwallet().getId(), request.getEwalletId())) {
-            throw new SearchExceptions.SearchNotFoundException("Ewallet ID mismatch for number " + no_ewallet);
+            throw new SearchExceptions.SearchNotFoundException("Ewallet ID mismatch for number " + request.getNoEwallet());
         }
 
         return SearchResponse.builder()
-                .no(no_ewallet)
+                .no(request.getNoEwallet())
                 .name(ewalletUser.getName())
                 .bank(ewalletUser.getEwallet().getName())
                 .build();
