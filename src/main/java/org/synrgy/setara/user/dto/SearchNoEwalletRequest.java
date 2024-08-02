@@ -7,8 +7,6 @@ import java.util.UUID;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class SearchNoEwalletRequest {
     @Schema(example = "081234567890")
     private String noEwallet;
