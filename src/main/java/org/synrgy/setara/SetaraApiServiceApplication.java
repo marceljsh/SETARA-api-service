@@ -13,4 +13,5 @@ public class SetaraApiServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SetaraApiServiceApplication.class, args);
 	}
+
 }
