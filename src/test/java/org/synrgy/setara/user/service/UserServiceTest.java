@@ -47,7 +47,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetBalance_UserExists() {
+    void testGetBalance_Success() {
         User user = new User();
         user.setBalance(BigDecimal.valueOf(100000));
         user.setSignature("test_signature");
