@@ -26,7 +26,7 @@ public class SavedEwalletUserController {
             @Parameter(
                     name = "ewalletName",
                     required = true,
-                    schema = @Schema(type = "string", example = "Ovo")
+                    schema = @Schema(type = "string", allowableValues = {"Ovo", "ShopeePay", "GoPay", "DANA", "LinkAja"}, example = "Ovo")
             ) @RequestParam(required = false) String ewalletName) {
         SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets = savedEwalletUserService.getSavedEwalletUsers(ewalletName);
         BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>> response = BaseResponse.success(HttpStatus.OK, savedEwallets, "Success Get Saved E-Wallets");
