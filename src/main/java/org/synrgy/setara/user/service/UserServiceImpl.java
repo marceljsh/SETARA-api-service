@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.exception.SearchExceptions.*;
+import org.synrgy.setara.user.exception.SearchExceptions.SearchNotFoundException;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
@@ -17,7 +17,6 @@ import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
