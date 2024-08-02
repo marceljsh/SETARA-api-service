@@ -58,6 +58,8 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
 
                 savedEwalletUserRepo.save(savedEwalletUser);
                 log.info("SavedEwalletUser with owner {} and ewalletUser {} has been added to the database", owner.getName(), ewalletUser.getName());
+            } else {
+                log.info("SavedEwalletUser with owner {} and ewalletUser {} already exists in the database", owner.getName(), ewalletUser.getName());
             }
         }
     }
