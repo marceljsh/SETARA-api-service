@@ -25,7 +25,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
 
     @Override
     public void seedEwalletUsers() {
-        // Daftar pengguna dengan e-wallet "Ovo"
+        // Daftar pengguna e-wallet
         List<EwalletUser> ewalletUsers = Arrays.asList(
                 EwalletUser.builder()
                         .name("FARAH CANTIKA")
@@ -47,27 +47,40 @@ public class EwalletUserServiceImpl implements EwalletUserService {
                         .build()
         );
 
-        // Ambil e-wallet "Ovo"
-        Optional<Ewallet> ewalletOpt = ewalletRepo.findByName("Ovo");
+        // Daftar nama e-wallet
+        List<String> ewalletNames = Arrays.asList("Ovo", "ShopeePay", "GoPay", "DANA", "LinkAja");
 
-        if (ewalletOpt.isPresent()) {
-            Ewallet ewallet = ewalletOpt.get();
-            ewalletUsers.forEach(ewalletUser -> {
-                // Cek apakah EwalletUser dengan nama dan nomor telepon yang sama sudah ada
-                boolean exists = ewalletUserRepo.existsByNameAndPhoneNumber(ewalletUser.getName(), ewalletUser.getPhoneNumber());
+        for (String ewalletName : ewalletNames) {
+            Optional<Ewallet> ewalletOpt = ewalletRepo.findByName(ewalletName);
 
-                if (exists) {
-                    log.info("EwalletUser with name {} and phone number {} already exists in the database.", ewalletUser.getName(), ewalletUser.getPhoneNumber());
-                } else {
-                    ewalletUser.setEwallet(ewallet);
-                    ewalletUserRepo.save(ewalletUser);
-                    log.info("EwalletUser {} has been added to the database with e-wallet {}", ewalletUser.getName(), ewallet.getName());
-                }
-            });
-        } else {
-            log.warn("E-wallet 'Ovo' not found in the database.");
+            if (ewalletOpt.isPresent()) {
+                Ewallet ewallet = ewalletOpt.get();
+                ewalletUsers.forEach(user -> {
+                    // Buat instance baru dari setiap pengguna e-wallet
+                    EwalletUser ewalletUser = EwalletUser.builder()
+                            .name(user.getName())
+                            .phoneNumber(user.getPhoneNumber())
+                            .balance(user.getBalance())
+                            .imagePath(user.getImagePath())
+                            .ewallet(ewallet)
+                            .build();
+
+                    // Cek apakah EwalletUser dengan nama dan nomor telepon yang sama sudah ada untuk ewallet tertentu
+                    boolean exists = ewalletUserRepo.existsByNameAndPhoneNumberAndEwallet(ewalletUser.getName(), ewalletUser.getPhoneNumber(), ewallet);
+
+                    if (exists) {
+                        log.info("EwalletUser with name {} and phone number {} already exists in the database for ewallet {}.", ewalletUser.getName(), ewalletUser.getPhoneNumber(), ewallet.getName());
+                    } else {
+                        ewalletUserRepo.save(ewalletUser);
+                        log.info("EwalletUser {} has been added to the database with e-wallet {}", ewalletUser.getName(), ewallet.getName());
+                    }
+                });
+            } else {
+                log.warn("E-wallet '{}' not found in the database.", ewalletName);
+            }
         }
     }
+
 
     @Override
     public SearchResponse searchEwalletUser(SearchNoEwalletRequest request) {
