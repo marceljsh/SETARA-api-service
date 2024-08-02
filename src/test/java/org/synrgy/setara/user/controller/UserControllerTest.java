@@ -12,9 +12,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.exception.UserExceptions;
 import org.synrgy.setara.user.service.UserService;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -57,16 +55,4 @@ public class UserControllerTest {
         assertEquals("Success Get Balance", response.getBody().getMessage());
         assertEquals(userBalanceResponse, response.getBody().getData());
     }
-
-//    @Test
-//    void testGetBalance_UserNotFound() {
-//        String signature = "test_signature";
-//        when(userService.getBalance()).thenThrow(new UserExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-//
-//        ResponseEntity<BaseResponse<UserBalanceResponse>> response = userController.getBalance();
-//
-//        assertNotNull(response);
-//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//        assertEquals("User with signature " + signature + " not found", response.getBody().getMessage());
-//    }
 }
