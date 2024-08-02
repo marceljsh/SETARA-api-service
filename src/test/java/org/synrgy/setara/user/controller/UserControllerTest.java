@@ -1,56 +1,72 @@
-//package org.synrgy.setara.user.controller;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.http.MediaType;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-//import org.synrgy.setara.security.service.JwtService;
-//import org.synrgy.setara.user.dto.UserBalanceResponse;
-//import org.synrgy.setara.user.service.UserService;
-//
-//import java.math.BigDecimal;
-//import java.time.LocalDateTime;
-//import java.time.format.DateTimeFormatter;
-//
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-//
-//@WebMvcTest(UserController.class)
-//public class UserControllerTest {
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @MockBean
-//    private UserService userService;
-//
-//    @MockBean
-//    private JwtService jwtService;
-//
+package org.synrgy.setara.user.controller;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.exception.UserExceptions;
+import org.synrgy.setara.user.service.UserService;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class UserControllerTest {
+
+    @Mock
+    private UserService userService;
+
+    @InjectMocks
+    private UserController userController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("test_signature");
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @Test
+    void testGetBalance_Success() {
+        UserBalanceResponse userBalanceResponse = UserBalanceResponse.builder()
+                .checkTime(LocalDateTime.now())
+                .balance(BigDecimal.valueOf(100000))
+                .build();
+
+        when(userService.getBalance()).thenReturn(userBalanceResponse);
+
+        ResponseEntity<BaseResponse<UserBalanceResponse>> response = userController.getBalance();
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Success Get Balance", response.getBody().getMessage());
+        assertEquals(userBalanceResponse, response.getBody().getData());
+    }
+
 //    @Test
-//    void testGetBalance() throws Exception {
-//        LocalDateTime fixedDateTime = LocalDateTime.of(2024, 8, 1, 10, 0);
-//        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+//    void testGetBalance_UserNotFound() {
+//        String signature = "test_signature";
+//        when(userService.getBalance()).thenThrow(new UserExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 //
-//        UserBalanceResponse userBalanceResponse = UserBalanceResponse.builder()
-//                .checkTime(fixedDateTime)
-//                .balance(BigDecimal.valueOf(1000))
-//                .build();
+//        ResponseEntity<BaseResponse<UserBalanceResponse>> response = userController.getBalance();
 //
-//        when(userService.getBalance()).thenReturn(userBalanceResponse);
-//
-//        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/user/getBalance")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.status").value("SUCCESS"))
-//                .andExpect(jsonPath("$.message").value("Success Get Balance"))
-//                .andExpect(jsonPath("$.data.balance").value(1000))
-//                .andExpect(jsonPath("$.data.checkTime").value(fixedDateTime.format(formatter)));
+//        assertNotNull(response);
+//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//        assertEquals("User with signature " + signature + " not found", response.getBody().getMessage());
 //    }
-//}
+}
