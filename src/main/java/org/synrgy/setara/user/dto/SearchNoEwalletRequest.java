@@ -9,9 +9,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class SearchNoEwalletRequest {
-    @Schema(example = "f6e35a16-510c-4b8a-a397-adbd878e7cf2")
+    @Schema(example = "081234567890")
+    private String noEwallet;
+
+    @Schema(example = "f4fce5e1-38f8-42a6-9473-5fe563a52b01")
     private UUID ewalletId;
 }

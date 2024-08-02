@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface EwalletUserService {
     void seedEwalletUsers();
 
-    SearchResponse searchEwalletUser(String no_ewallet, SearchNoEwalletRequest request);
+    SearchResponse searchEwalletUser(SearchNoEwalletRequest request);
 }
