@@ -318,53 +318,53 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request) {
-        try {
-            String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-            User sourceUser = userRepository.findBySignature(signature)
-                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        User sourceUser = userRepository.findBySignature(signature)
+                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 
-            validateMpin(request.getMpin(), sourceUser);
+        validateMpin(request.getMpin(), sourceUser);
 
-            UUID merchantId;
-            try {
-                merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
-            } catch (IllegalArgumentException e) {
-                throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
-            }
-
-            Merchant destinationMerchant = merchantRepository.findById(merchantId)
-                    .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant not found with id " + request.getIdQris()));
-
-            BigDecimal totalAmount = request.getAmount();
-
-            checkSufficientBalance(sourceUser, totalAmount);
-
-            String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
-            String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
-
-            Transaction transaction = Transaction.builder()
-                    .user(sourceUser)
-                    .destinationIdQris(destinationMerchant)
-                    .type(TransactionType.QRPAYMENT)
-                    .amount(request.getAmount())
-                    .adminFee(BigDecimal.ZERO)
-                    .totalamount(totalAmount)
-                    .uniqueCode(uniqueCode)
-                    .referenceNumber(referenceNumber)
-                    .note(request.getNote())
-                    .time(LocalDateTime.now())
-                    .build();
-            transactionRepository.save(transaction);
-
-            sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
-            userRepository.save(sourceUser);
-
-            return createTransactionResponse(transaction, sourceUser, destinationMerchant);
-        } catch (Exception e) {
-            log.error("Error processing merchant transaction", e);
-            throw new RuntimeException("An unexpected error occurred", e);
+        if (request.getAmount().compareTo(BigDecimal.ONE) < 0) {
+            throw new TransactionExceptions.InvalidTransactionAmountException("Transaction amount must be at least 1 rupiah");
         }
+
+        UUID merchantId;
+        try {
+            merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
+        } catch (IllegalArgumentException e) {
+            throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
+        }
+
+        Merchant destinationMerchant = merchantRepository.findById(merchantId)
+                .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant not found with id " + request.getIdQris()));
+
+        BigDecimal totalAmount = request.getAmount();
+
+        checkSufficientBalance(sourceUser, totalAmount);
+
+        String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
+        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
+
+        Transaction transaction = Transaction.builder()
+                .user(sourceUser)
+                .destinationIdQris(destinationMerchant)
+                .type(TransactionType.QRPAYMENT)
+                .amount(request.getAmount())
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(totalAmount)
+                .uniqueCode(uniqueCode)
+                .referenceNumber(referenceNumber)
+                .note(request.getNote())
+                .time(LocalDateTime.now())
+                .build();
+        transactionRepository.save(transaction);
+
+        sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
+        userRepository.save(sourceUser);
+
+        return createTransactionResponse(transaction, sourceUser, destinationMerchant);
     }
+
 
     private MerchantTransactionResponse createTransactionResponse(Transaction transaction, User sourceUser, Merchant destinationMerchant) {
         Bank bank = sourceUser.getBank();

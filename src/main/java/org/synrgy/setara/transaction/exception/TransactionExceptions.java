@@ -50,6 +50,10 @@ public class TransactionExceptions {
         }
     }
 
+    public static class InvalidTransactionAmountException extends RuntimeException {
+        public InvalidTransactionAmountException(String message) {super(message);}
+    }
+
     public static class InvalidTransferDestinationException extends RuntimeException {
         public InvalidTransferDestinationException(String message) {
             super(message);
