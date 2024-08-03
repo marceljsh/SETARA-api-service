@@ -45,4 +45,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
                                                                    @Param("endDate") LocalDateTime endDate,
                                                                    @Param("transactionCategory") String transactionCategory,
                                                                    Pageable pageable);
+
+  Optional<Transaction> findByReferenceNumber(String referenceNumber);
 }

@@ -50,6 +50,10 @@ public class TransactionExceptions {
         }
     }
 
+    public static class InvalidTransactionAmountException extends RuntimeException {
+        public InvalidTransactionAmountException(String message) {super(message);}
+    }
+
     public static class InvalidTransferDestinationException extends RuntimeException {
         public InvalidTransferDestinationException(String message) {
             super(message);
@@ -70,6 +74,18 @@ public class TransactionExceptions {
 
     public static class InvalidYearException extends RuntimeException {
         public InvalidYearException(String message) {
+            super(message);
+        }
+    }
+
+    public static class TransactionNotFoundException extends RuntimeException {
+        public TransactionNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public static class TransactionNotOwnedByUser extends RuntimeException {
+        public TransactionNotOwnedByUser(String message) {
             super(message);
         }
     }

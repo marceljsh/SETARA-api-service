@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -94,5 +95,11 @@ public class TransactionController {
         List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
         BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/get-mutation-detail/{transactionId}")
+    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(@PathVariable UUID transactionId) {
+        MutationDetailResponse response = transactionService.getMutationDetail(transactionId);
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
     }
 }
