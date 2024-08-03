@@ -326,7 +326,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         checkSufficientBalance(sourceUser, totalAmount);
 
-        String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
+        String referenceNumber = TransactionUtils.generateReferenceNumber("MCH");
         String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
 
         Transaction transaction = Transaction.builder()
@@ -395,11 +395,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactions.map(transaction -> MutationResponse.builder()
                 .transactionId(transaction.getId())
-                .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-", ""))
+                .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
                 .type(formatTransactionType(transaction))
                 .totalAmount(transaction.getTotalamount())
                 .time(transaction.getTime())
-                .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-", ""))
+                .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
                 .destinationAccountNumber(transaction.getDestinationAccountNumber())
                 .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
                 .formattedDate(transaction.getTime().format(dateFormatter))
@@ -440,7 +440,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .name(user.getName())
                 .accountNumber(user.getAccountNumber())
                 .imagePath(user.getImagePath())
-                .bankName(transaction.getBank().getName())
+                .bankName("Tahapan BCA")
                 .build();
 
         if (transaction.getType() == TransactionType.TOP_UP) {
