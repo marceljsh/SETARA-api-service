@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.transaction.model.Transaction;
+import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 
 import java.time.LocalDateTime;

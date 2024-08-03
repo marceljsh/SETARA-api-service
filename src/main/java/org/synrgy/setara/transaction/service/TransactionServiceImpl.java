@@ -24,6 +24,7 @@ import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
+import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
@@ -66,8 +67,8 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
         checkSufficientBalance(user, totalAmount);
 
-        EwalletUser destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber())
-                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for phone number " + request.getDestinationPhoneNumber()));
+        EwalletUser destinationEwalletUser = ewalletUserRepository.findByEwalletIdAndPhoneNumber(request.getIdEwallet(), request.getDestinationPhoneNumber())
+                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for id " + request.getIdEwallet() + " and phone number " + request.getDestinationPhoneNumber()));
 
         Transaction transaction = createTransaction(request, user, destinationEwalletUser, totalAmount);
 
@@ -79,6 +80,34 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return createTransactionResponse(transaction, destinationEwalletUser);
+    }
+
+    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
+        Bank bank = transaction.getUser().getBank();
+        String bankName = bank != null ? bank.getName() : "Unknown";
+
+        Ewallet ewallet = ewalletRepository.findById(transaction.getEwallet().getId())
+                .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
+
+        return TopUpResponse.builder()
+                .user(TopUpResponse.UserDto.builder()
+                        .accountNumber(transaction.getUser().getAccountNumber())
+                        .name(transaction.getUser().getName())
+                        .imagePath(transaction.getUser().getImagePath())
+                        .bankName(bankName)
+                        .build())
+                .userEwallet(TopUpResponse.UserEwalletDto.builder()
+                        .name(destinationEwalletUser.getName())
+                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
+                        .imagePath(destinationEwalletUser.getImagePath())
+                        .ewallet(TopUpResponse.EwalletDto.builder()
+                                .name(ewallet.getName())
+                                .build())
+                        .build())
+                .amount(transaction.getAmount())
+                .adminFee(transaction.getAdminFee())
+                .totalAmount(transaction.getTotalamount())
+                .build();
     }
 
     @Override
@@ -233,28 +262,6 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
-        Bank bank = transaction.getUser().getBank();
-        String bankName = bank != null ? bank.getName() : "Unknown";
-
-        return TopUpResponse.builder()
-                .user(TopUpResponse.UserDto.builder()
-                        .accountNumber(transaction.getUser().getAccountNumber())
-                        .name(transaction.getUser().getName())
-                        .imagePath(transaction.getUser().getImagePath())
-                        .bankName(bankName)
-                        .build())
-                .userEwallet(TopUpResponse.UserEwalletDto.builder()
-                        .name(destinationEwalletUser.getName())
-                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
-                        .imagePath(destinationEwalletUser.getImagePath())
-                        .build())
-                .amount(transaction.getAmount())
-                .adminFee(transaction.getAdminFee())
-                .totalAmount(transaction.getTotalamount())
-                .build();
-    }
-
     @Override
     public MonthlyReportResponse getMonthlyReport(int month, int year) {
         if (month < 1 || month > 12) {
@@ -295,53 +302,53 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request) {
-        try {
-            String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-            User sourceUser = userRepository.findBySignature(signature)
-                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        User sourceUser = userRepository.findBySignature(signature)
+                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
 
-            validateMpin(request.getMpin(), sourceUser);
+        validateMpin(request.getMpin(), sourceUser);
 
-            UUID merchantId;
-            try {
-                merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
-            } catch (IllegalArgumentException e) {
-                throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
-            }
-
-            Merchant destinationMerchant = merchantRepository.findById(merchantId)
-                    .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant not found with id " + request.getIdQris()));
-
-            BigDecimal totalAmount = request.getAmount();
-
-            checkSufficientBalance(sourceUser, totalAmount);
-
-            String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
-            String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
-
-            Transaction transaction = Transaction.builder()
-                    .user(sourceUser)
-                    .destinationIdQris(destinationMerchant)
-                    .type(TransactionType.QRPAYMENT)
-                    .amount(request.getAmount())
-                    .adminFee(BigDecimal.ZERO)
-                    .totalamount(totalAmount)
-                    .uniqueCode(uniqueCode)
-                    .referenceNumber(referenceNumber)
-                    .note(request.getNote())
-                    .time(LocalDateTime.now())
-                    .build();
-            transactionRepository.save(transaction);
-
-            sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
-            userRepository.save(sourceUser);
-
-            return createTransactionResponse(transaction, sourceUser, destinationMerchant);
-        } catch (Exception e) {
-            log.error("Error processing merchant transaction", e);
-            throw new RuntimeException("An unexpected error occurred", e);
+        if (request.getAmount().compareTo(BigDecimal.ONE) < 0) {
+            throw new TransactionExceptions.InvalidTransactionAmountException("Transaction amount must be at least 1 rupiah");
         }
+
+        UUID merchantId;
+        try {
+            merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
+        } catch (IllegalArgumentException e) {
+            throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
+        }
+
+        Merchant destinationMerchant = merchantRepository.findById(merchantId)
+                .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant not found with id " + request.getIdQris()));
+
+        BigDecimal totalAmount = request.getAmount();
+
+        checkSufficientBalance(sourceUser, totalAmount);
+
+        String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
+        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
+
+        Transaction transaction = Transaction.builder()
+                .user(sourceUser)
+                .destinationIdQris(destinationMerchant)
+                .type(TransactionType.QRPAYMENT)
+                .amount(request.getAmount())
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(totalAmount)
+                .uniqueCode(uniqueCode)
+                .referenceNumber(referenceNumber)
+                .note(request.getNote())
+                .time(LocalDateTime.now())
+                .build();
+        transactionRepository.save(transaction);
+
+        sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
+        userRepository.save(sourceUser);
+
+        return createTransactionResponse(transaction, sourceUser, destinationMerchant);
     }
+
 
     private MerchantTransactionResponse createTransactionResponse(Transaction transaction, User sourceUser, Merchant destinationMerchant) {
         Bank bank = sourceUser.getBank();

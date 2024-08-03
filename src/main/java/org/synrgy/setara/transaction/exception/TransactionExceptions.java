@@ -8,6 +8,12 @@ public class TransactionExceptions {
         }
     }
 
+    public static class EwalletNotFoundException extends RuntimeException {
+        public EwalletNotFoundException(String message) {
+            super(message);
+        }
+    }
+
     public static class DestinationEwalletUserNotFoundException extends RuntimeException {
         public DestinationEwalletUserNotFoundException(String message) {
             super(message);
@@ -42,6 +48,10 @@ public class TransactionExceptions {
         public InvalidTransferAmountException(String message) {
             super(message);
         }
+    }
+
+    public static class InvalidTransactionAmountException extends RuntimeException {
+        public InvalidTransactionAmountException(String message) {super(message);}
     }
 
     public static class InvalidTransferDestinationException extends RuntimeException {
