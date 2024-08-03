@@ -28,5 +28,7 @@ public interface EwalletUserRepository extends JpaRepository<EwalletUser, UUID> 
 
   boolean existsByNameAndPhoneNumber(String name, String phoneNumber);
 
+  Optional<EwalletUser> findByEwalletIdAndPhoneNumber(UUID ewalletId, String phoneNumber);
+
   boolean existsByNameAndPhoneNumberAndEwallet(String name, String phoneNumber, Ewallet ewallet);
 }
