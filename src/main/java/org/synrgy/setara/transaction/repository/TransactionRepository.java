@@ -12,6 +12,7 @@ import org.synrgy.setara.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -43,4 +44,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
                                                                    @Param("endDate") LocalDateTime endDate,
                                                                    @Param("transactionCategory") String transactionCategory,
                                                                    Pageable pageable);
+
+  Optional<Transaction> findByReferenceNumber(String referenceNumber);
 }

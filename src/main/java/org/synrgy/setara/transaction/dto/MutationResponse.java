@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MutationResponse {
+    private UUID transactionId;
     private String uniqueCode;
     private String type;
     private BigDecimal totalAmount;

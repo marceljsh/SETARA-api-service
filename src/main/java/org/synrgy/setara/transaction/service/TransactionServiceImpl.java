@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -122,8 +123,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
         transactionRepository.save(transaction);
 
-        String depositReferenceNumber = TransactionUtils.generateReferenceNumber("DPT");
-        String depositUniqueCode = TransactionUtils.generateUniqueCode(depositReferenceNumber);
+        String depositReferenceNumber = referenceNumber.replace("TRF", "DPT");
+        String depositUniqueCode = uniqueCode.replace("TRF", "DPT");
 
         Transaction depositTransaction = Transaction.builder()
                 .user(destinationUser)
@@ -256,8 +257,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public MonthlyReportResponse getMonthlyReport(int month, int year) {
-        validateMonth(month);
-        validateYear(year);
+        if (month < 1 || month > 12) {
+            throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
+        }
+
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        if (year < 1900 || year > currentYear) {
+            throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
+        }
 
         String signature = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findBySignature(signature)
@@ -278,34 +285,11 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
 
-        List<Transaction> transfersThroughPhoneNumber = transactionRepository.findTransfersByPhoneNumberAndMonthAndYear(user.getPhoneNumber(), month, year);
-        for (Transaction transfer : transfersThroughPhoneNumber) {
-            income = income.add(transfer.getAmount());
-        }
-
-        List<Transaction> transfersThroughAccountNumber = transactionRepository.findTransfersByAccountNumberAndMonthAndYear(user.getAccountNumber(), month, year);
-        for (Transaction transfer : transfersThroughAccountNumber) {
-            income = income.add(transfer.getAmount());
-        }
-
         return MonthlyReportResponse.builder()
                 .income(income)
                 .expense(expense)
                 .total(income.subtract(expense))
                 .build();
-    }
-
-    private void validateMonth(int month) {
-        if (month < 1 || month > 12) {
-            throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
-        }
-    }
-
-    private void validateYear(int year) {
-        int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
-        if (year < 1900 || year > currentYear) {
-            throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
-        }
     }
 
     @Override
@@ -403,6 +387,7 @@ public class TransactionServiceImpl implements TransactionService {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         return transactions.map(transaction -> MutationResponse.builder()
+                .transactionId(transaction.getId())
                 .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-", ""))
                 .type(formatTransactionType(transaction))
                 .totalAmount(transaction.getTotalamount())
@@ -427,5 +412,78 @@ public class TransactionServiceImpl implements TransactionService {
                 return transaction.getType().toString();
         }
     }
-}
 
+    @Override
+    public MutationDetailResponse getMutationDetail(UUID transactionId) {
+        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findBySignature(signature)
+                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
+
+        if (user != transaction.getUser()) {
+           throw new TransactionExceptions.TransactionNotOwnedByUser("Transaction is not owned by user");
+        }
+
+        MutationDetailResponse.MutationUser sender = null;
+        MutationDetailResponse.MutationUser receiver = null;
+
+        MutationDetailResponse.MutationUser mutationUser = MutationDetailResponse.MutationUser.builder()
+                .name(user.getName())
+                .accountNumber(user.getAccountNumber())
+                .imagePath(user.getImagePath())
+                .bankName(transaction.getBank().getName())
+                .build();
+
+        if (transaction.getType() == TransactionType.TOP_UP) {
+            sender = mutationUser;
+
+            EwalletUser ewalletUser = ewalletUserRepository.findByPhoneNumberAndEwallet(transaction.getDestinationPhoneNumber(), transaction.getEwallet())
+                    .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("not found eWalletUser with number " + transaction.getDestinationPhoneNumber() + " and eWalletId" + transaction.getEwallet().getId()));
+
+            receiver = MutationDetailResponse.MutationUser.builder()
+                    .name(ewalletUser.getName())
+                    .accountNumber(transaction.getDestinationPhoneNumber())
+                    .imagePath(ewalletUser.getImagePath())
+                    .bankName(ewalletUser.getEwallet().getName())
+                    .build();
+        } else if (transaction.getType() == TransactionType.TRANSFER) {
+            sender = mutationUser;
+
+            User destinationUser = userRepository.findByAccountNumber(transaction.getDestinationAccountNumber())
+                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+
+            receiver = MutationDetailResponse.MutationUser.builder()
+                    .name(destinationUser.getName())
+                    .accountNumber(transaction.getDestinationAccountNumber())
+                    .imagePath(destinationUser.getImagePath())
+                    .bankName(transaction.getBank().getName())
+                    .build();
+        } else if (transaction.getType() == TransactionType.DEPOSIT) {
+            String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
+
+            Transaction transfer = transactionRepository.findByReferenceNumber(referenceNumber)
+                    .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + " not found"));
+
+            User sourceUser = transfer.getUser();
+
+            sender = MutationDetailResponse.MutationUser.builder()
+                    .name(sourceUser.getName())
+                    .accountNumber(sourceUser.getAccountNumber())
+                    .imagePath(sourceUser.getImagePath())
+                    .bankName(transaction.getBank().getName())
+                    .build();
+
+            receiver = mutationUser;
+        }
+
+        return MutationDetailResponse.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .amount(transaction.getAmount())
+                .adminFee(transaction.getAdminFee())
+                .totalAmount(transaction.getTotalamount())
+                .build();
+    }
+}

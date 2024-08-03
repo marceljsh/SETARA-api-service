@@ -43,14 +43,22 @@ public class TransactionAdvice {
 
     @ExceptionHandler(TransactionExceptions.InvalidMonthException.class)
     public ResponseEntity<BaseResponse<?>> handleInvalidMonthException(TransactionExceptions.InvalidMonthException ex) {
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TransactionExceptions.InvalidYearException.class)
     public ResponseEntity<BaseResponse<?>> handleInvalidYearException(TransactionExceptions.InvalidYearException ex) {
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TransactionExceptions.TransactionNotFoundException.class)
+    public ResponseEntity<BaseResponse<?>> handleTransactionNotFoundException(TransactionExceptions.TransactionNotFoundException ex) {
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TransactionExceptions.TransactionNotOwnedByUser.class)
+    public ResponseEntity<BaseResponse<?>> handleTransactionNotFoundException(TransactionExceptions.TransactionNotOwnedByUser ex) {
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.UNAUTHORIZED, ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)
