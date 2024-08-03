@@ -77,4 +77,16 @@ public class TransactionExceptions {
             super(message);
         }
     }
+
+    public static class TransactionNotFoundException extends RuntimeException {
+        public TransactionNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public static class TransactionNotOwnedByUser extends RuntimeException {
+        public TransactionNotOwnedByUser(String message) {
+            super(message);
+        }
+    }
 }

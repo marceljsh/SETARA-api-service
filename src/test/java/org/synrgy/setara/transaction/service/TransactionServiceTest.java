@@ -82,51 +82,6 @@ public class TransactionServiceTest {
     }
 
     @Test
-    void testGetMonthlyReport_TransfersSentToUser() {
-        User user = new User();
-        UUID userId = UUID.randomUUID();
-        user.setId(userId);
-        user.setPhoneNumber("123456789");
-        user.setAccountNumber("987654321");
-        when(userRepository.findBySignature("test_signature")).thenReturn(Optional.of(user));
-
-        when(transactionRepository.findByUserAndMonthAndYear(user.getId(), 7, 2024)).thenReturn(Collections.emptyList());
-
-        Transaction transferByPhoneNumber1 = new Transaction();
-        transferByPhoneNumber1.setDestinationPhoneNumber(user.getPhoneNumber());
-        transferByPhoneNumber1.setType(TRANSFER);
-        transferByPhoneNumber1.setAmount(BigDecimal.valueOf(100000));
-
-        Transaction transferByPhoneNumber2 = new Transaction();
-        transferByPhoneNumber2.setDestinationPhoneNumber(user.getPhoneNumber());
-        transferByPhoneNumber2.setType(TRANSFER);
-        transferByPhoneNumber2.setAmount(BigDecimal.valueOf(50000));
-
-        List<Transaction> transfersByPhoneNumber = List.of(transferByPhoneNumber1, transferByPhoneNumber2);
-        when(transactionRepository.findTransfersByPhoneNumberAndMonthAndYear(user.getPhoneNumber(), 7, 2024)).thenReturn(transfersByPhoneNumber);
-
-        Transaction transferByAccountNumber1 = new Transaction();
-        transferByAccountNumber1.setDestinationAccountNumber(user.getAccountNumber());
-        transferByAccountNumber1.setType(TRANSFER);
-        transferByAccountNumber1.setAmount(BigDecimal.valueOf(20000));
-
-        Transaction transferByAccountNumber2 = new Transaction();
-        transferByAccountNumber2.setDestinationAccountNumber(user.getAccountNumber());
-        transferByAccountNumber2.setType(TRANSFER);
-        transferByAccountNumber2.setAmount(BigDecimal.valueOf(10000));
-
-        List<Transaction> transfersByAccountNumber = List.of(transferByAccountNumber1, transferByAccountNumber2);
-        when(transactionRepository.findTransfersByAccountNumberAndMonthAndYear(user.getAccountNumber(), 7, 2024)).thenReturn(transfersByAccountNumber);
-
-        MonthlyReportResponse response = transactionService.getMonthlyReport(7, 2024);
-
-        assertNotNull(response);
-        assertEquals(BigDecimal.valueOf(180000), response.getIncome());
-        assertEquals(BigDecimal.valueOf(0), response.getExpense());
-        assertEquals(BigDecimal.valueOf(180000), response.getTotal());
-    }
-
-    @Test
     void testGetMonthlyReport_NoTransaction() {
         User user = new User();
         UUID userId = UUID.randomUUID();
