@@ -24,6 +24,7 @@ import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
+import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
@@ -65,8 +66,8 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
         checkSufficientBalance(user, totalAmount);
 
-        EwalletUser destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber())
-                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for phone number " + request.getDestinationPhoneNumber()));
+        EwalletUser destinationEwalletUser = ewalletUserRepository.findByEwalletIdAndPhoneNumber(request.getIdEwallet(), request.getDestinationPhoneNumber())
+                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for id " + request.getIdEwallet() + " and phone number " + request.getDestinationPhoneNumber()));
 
         Transaction transaction = createTransaction(request, user, destinationEwalletUser, totalAmount);
 
@@ -78,6 +79,34 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return createTransactionResponse(transaction, destinationEwalletUser);
+    }
+
+    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
+        Bank bank = transaction.getUser().getBank();
+        String bankName = bank != null ? bank.getName() : "Unknown";
+
+        Ewallet ewallet = ewalletRepository.findById(transaction.getEwallet().getId())
+                .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
+
+        return TopUpResponse.builder()
+                .user(TopUpResponse.UserDto.builder()
+                        .accountNumber(transaction.getUser().getAccountNumber())
+                        .name(transaction.getUser().getName())
+                        .imagePath(transaction.getUser().getImagePath())
+                        .bankName(bankName)
+                        .build())
+                .userEwallet(TopUpResponse.UserEwalletDto.builder()
+                        .name(destinationEwalletUser.getName())
+                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
+                        .imagePath(destinationEwalletUser.getImagePath())
+                        .ewallet(TopUpResponse.EwalletDto.builder()
+                                .name(ewallet.getName())
+                                .build())
+                        .build())
+                .amount(transaction.getAmount())
+                .adminFee(transaction.getAdminFee())
+                .totalAmount(transaction.getTotalamount())
+                .build();
     }
 
     @Override
@@ -230,28 +259,6 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
             savedEwalletUserRepository.save(savedEwalletUser);
         }
-    }
-
-    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
-        Bank bank = transaction.getUser().getBank();
-        String bankName = bank != null ? bank.getName() : "Unknown";
-
-        return TopUpResponse.builder()
-                .user(TopUpResponse.UserDto.builder()
-                        .accountNumber(transaction.getUser().getAccountNumber())
-                        .name(transaction.getUser().getName())
-                        .imagePath(transaction.getUser().getImagePath())
-                        .bankName(bankName)
-                        .build())
-                .userEwallet(TopUpResponse.UserEwalletDto.builder()
-                        .name(destinationEwalletUser.getName())
-                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
-                        .imagePath(destinationEwalletUser.getImagePath())
-                        .build())
-                .amount(transaction.getAmount())
-                .adminFee(transaction.getAdminFee())
-                .totalAmount(transaction.getTotalamount())
-                .build();
     }
 
     @Override
