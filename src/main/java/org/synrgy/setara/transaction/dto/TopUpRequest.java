@@ -6,12 +6,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Data
 @Builder
 public class TopUpRequest {
+    private UUID idEwallet;
     private String destinationPhoneNumber;
     private BigDecimal amount;
     private String mpin;

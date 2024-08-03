@@ -32,11 +32,11 @@ public class TransactionController {
                             examples = {
                                     @ExampleObject(
                                             name = "Kendrick to Farah",
-                                            value = "{\"destinationPhoneNumber\": \"081234567890\", \"amount\": 0, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
+                                            value = "{\"idEwallet\": \"0eb30e87-3031-43d8-bd99-845ec3b7a4d9\", \"destinationPhoneNumber\": \"081234567890\", \"amount\": 10000, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
                                     ),
                                     @ExampleObject(
                                             name = "Andhika to Aurlyn",
-                                            value = "{\"destinationPhoneNumber\": \"081234567891\", \"amount\": 0, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
+                                            value = "{\"idEwallet\": \"0eb30e87-3031-43d8-bd99-845ec3b7a4d9\", \"destinationPhoneNumber\": \"081234567891\", \"amount\": 10000, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
                                     )
                             }
                     )
@@ -55,11 +55,11 @@ public class TransactionController {
                             examples = {
                                     @ExampleObject(
                                             name = "Kendrick to Andhika",
-                                            value = "{\"destinationAccountNumber\": \"2891376451\", \"amount\": 0, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
+                                            value = "{\"destinationAccountNumber\": \"2891376451\", \"amount\": 10000, \"mpin\": \"170687\", \"note\": \"string\", \"savedAccount\": true}"
                                     ),
                                     @ExampleObject(
                                             name = "Andhika to Kendrick",
-                                            value = "{\"destinationAccountNumber\": \"1122334455\", \"amount\": 0, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
+                                            value = "{\"destinationAccountNumber\": \"1122334455\", \"amount\": 10000, \"mpin\": \"120951\", \"note\": \"string\", \"savedAccount\": true}"
                                     )
                             }
                     )
