@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MerchantRequest {
-    private String id_qris;
+    private String idQris;
 }
