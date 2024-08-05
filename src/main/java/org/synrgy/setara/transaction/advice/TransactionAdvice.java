@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 
@@ -86,9 +88,30 @@ public class TransactionAdvice {
         return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TransactionExceptions.InvalidTransferAmountException.class)
+    public ResponseEntity<BaseResponse<?>> handleInvalidTransferAmountException(TransactionExceptions.InvalidTransferAmountException ex) {
+        logger.error("Invalid transfer amount: {}", ex.getMessage());
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TransactionExceptions.InvalidTransferDestinationException.class)
+    public ResponseEntity<BaseResponse<?>> handleInvalidTransferDestinationException(TransactionExceptions.InvalidTransferDestinationException ex) {
+        logger.error("Invalid transfer destination: {}", ex.getMessage());
+        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        logger.error("Invalid JSON format");
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<BaseResponse<?>> handleGenericException(Exception ex) {
-        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
+    @ResponseBody
+    public ResponseEntity<BaseResponse<String>> handleGenericException(Exception ex) {
+        logger.error("Unexpected Exception: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

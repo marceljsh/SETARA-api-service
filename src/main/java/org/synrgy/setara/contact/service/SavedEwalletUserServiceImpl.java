@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.synrgy.setara.contact.dto.FavoriteEwalletRequest;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
@@ -97,15 +98,15 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
 
     @Override
     @Transactional
-    public FavoriteResponse putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite) {
-        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepo.findById(idTersimpan);
+    public FavoriteResponse putFavoriteEwalletUser(FavoriteEwalletRequest request) {
+        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepo.findById(request.getIdTersimpan());
         if (optionalSavedEwalletUser.isPresent()) {
             SavedEwalletUser savedEwalletUser = optionalSavedEwalletUser.get();
-            savedEwalletUser.setFavorite(isFavorite);
+            savedEwalletUser.setFavorite(request.isFavorite());
             savedEwalletUserRepo.save(savedEwalletUser);
-            return new FavoriteResponse(idTersimpan, isFavorite);
+            return new FavoriteResponse(request.getIdTersimpan(), request.isFavorite());
         } else {
-            throw new EwalletUserNotFoundException("Saved e-wallet user with id " + idTersimpan + " not found");
+            throw new EwalletUserNotFoundException("Saved e-wallet user with id " + request.getIdTersimpan() + " not found");
         }
     }
 }
