@@ -9,4 +9,5 @@ public class SearchResponse {
     private String no;
     private String name;
     private String bank;
+    private String imagePath;
 }

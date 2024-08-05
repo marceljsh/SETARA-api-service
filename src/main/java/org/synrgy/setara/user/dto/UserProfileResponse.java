@@ -10,7 +10,7 @@ public class UserProfileResponse {
   private String name;
   private String accountNumber;
   private String signature;
-  private String avatarPath;
+  private String imagePath;
   private String bankName;
 
   public static UserProfileResponse from(User user) {
@@ -18,7 +18,7 @@ public class UserProfileResponse {
             .name(user.getName())
             .signature(user.getSignature())
             .accountNumber(user.getAccountNumber())
-            .avatarPath(user.getImagePath())
+            .imagePath(user.getImagePath())
             .bankName(user.getBank().getName())
             .build();
   }
