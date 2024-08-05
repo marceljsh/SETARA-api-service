@@ -95,6 +95,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
                 .no(request.getNoEwallet())
                 .name(ewalletUser.getName())
                 .bank(ewalletUser.getEwallet().getName())
+                .imagePath(ewalletUser.getImagePath())
                 .build();
     }
 }
