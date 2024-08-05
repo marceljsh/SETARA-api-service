@@ -146,6 +146,7 @@ public class UserServiceImpl implements UserService {
               .no(no)
               .name(user.get().getName())
               .bank(user.get().getBank().getName())
+              .imagePath(user.get().getImagePath())
               .build();
       return response;
     }
