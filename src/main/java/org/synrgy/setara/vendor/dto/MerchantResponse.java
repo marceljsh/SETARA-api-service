@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class MerchantResponse {
-    private String merchantName;
     private String name;
     private String nmid;
     private String terminalId;

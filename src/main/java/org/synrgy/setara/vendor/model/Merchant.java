@@ -3,6 +3,7 @@ package org.synrgy.setara.vendor.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.synrgy.setara.common.model.Auditable;
@@ -17,8 +18,6 @@ import org.synrgy.setara.common.model.Auditable;
 @Table(name = "tbl_merchants")
 public class Merchant extends Auditable {
 
-    private String merchant_name;
-
     private String name;
 
     @Column(unique = true)
@@ -30,6 +29,7 @@ public class Merchant extends Auditable {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Lob
     @Column(name = "qris_code", columnDefinition = "TEXT", length = 512)
     private String qrisCode;
 

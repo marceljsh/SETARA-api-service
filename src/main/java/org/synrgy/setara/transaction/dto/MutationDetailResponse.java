@@ -22,7 +22,7 @@ public class MutationDetailResponse {
         private String name;
         private String accountNumber;
         private String imagePath;
-        private String bankName;
+        private String vendorName;
     }
 
 }

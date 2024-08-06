@@ -52,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final MerchantRepository merchantRepository;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
-    private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(10000);
+    private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
 
     @Override
     @Transactional
@@ -440,7 +440,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .name(user.getName())
                 .accountNumber(user.getAccountNumber())
                 .imagePath(user.getImagePath())
-                .bankName("Tahapan BCA")
+                .vendorName("Tahapan BCA")
                 .build();
 
         if (transaction.getType() == TransactionType.TOP_UP) {
@@ -453,7 +453,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .name(ewalletUser.getName())
                     .accountNumber(transaction.getDestinationPhoneNumber())
                     .imagePath(ewalletUser.getImagePath())
-                    .bankName(ewalletUser.getEwallet().getName())
+                    .vendorName(ewalletUser.getEwallet().getName())
                     .build();
         } else if (transaction.getType() == TransactionType.TRANSFER) {
             sender = mutationUser;
@@ -465,7 +465,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .name(destinationUser.getName())
                     .accountNumber(transaction.getDestinationAccountNumber())
                     .imagePath(destinationUser.getImagePath())
-                    .bankName(transaction.getBank().getName())
+                    .vendorName(transaction.getBank().getName())
                     .build();
         } else if (transaction.getType() == TransactionType.DEPOSIT) {
             String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
@@ -479,7 +479,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .name(sourceUser.getName())
                     .accountNumber(sourceUser.getAccountNumber())
                     .imagePath(sourceUser.getImagePath())
-                    .bankName(transaction.getBank().getName())
+                    .vendorName(transaction.getBank().getName())
                     .build();
 
             receiver = mutationUser;

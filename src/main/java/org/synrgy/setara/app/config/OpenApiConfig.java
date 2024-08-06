@@ -20,6 +20,9 @@ public class OpenApiConfig {
     @Value("${openapi.dev-url}")
     private String devUrl;
 
+    @Value("${openapi.staging-url}")
+    private String stagingUrl;
+
     @Value("${openapi.prod-url}")
     private String prodUrl;
 
@@ -29,6 +32,10 @@ public class OpenApiConfig {
         Server devServer = new Server();
         devServer.setUrl(devUrl);
         devServer.setDescription("Server URL in Development environment");
+
+        Server stagingServer = new Server();
+        devServer.setUrl(stagingUrl);
+        devServer.setDescription("Server URL in Staging environment");
 
         Server prodServer = new Server();
         prodServer.setUrl(prodUrl);
@@ -60,7 +67,7 @@ public class OpenApiConfig {
                 .addList("Bearer Authentication");
 
         return new OpenAPI().info(info)
-                .servers(List.of(devServer, prodServer))
+                .servers(List.of(devServer, stagingServer, prodServer))
                 .components(new Components().addSecuritySchemes("Bearer Authentication", securityScheme))
                 .addSecurityItem(securityRequirement);
     }
