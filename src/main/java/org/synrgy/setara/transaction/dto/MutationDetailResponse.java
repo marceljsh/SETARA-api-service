@@ -9,8 +9,6 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class MutationDetailResponse {
     private MutationUser sender;
     private MutationUser receiver;
@@ -20,8 +18,6 @@ public class MutationDetailResponse {
 
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MutationUser {
         private String name;
         private String accountNumber;

@@ -98,7 +98,7 @@ public class TransactionController {
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")
-    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(@Parameter(schema = @Schema(type = "UUID", example = "31fe2207-298d-4856-a055-b4a49769ae82")) @PathVariable UUID transactionId) {
+    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(@Parameter(schema = @Schema(type = "string", format = "uuid", example = "31fe2207-298d-4856-a055-b4a49769ae82")) @PathVariable UUID transactionId) {
         MutationDetailResponse response = transactionService.getMutationDetail(transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
     }
