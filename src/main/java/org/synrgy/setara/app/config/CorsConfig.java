@@ -14,8 +14,7 @@ public class CorsConfig {
     private String allowedOrigin;
 
     @Bean
-    public WebMvcConfigurer getCorsConfiguration()
-    {
+    public WebMvcConfigurer getCorsConfiguration() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
