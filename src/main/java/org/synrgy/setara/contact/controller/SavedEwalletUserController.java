@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.contact.dto.*;
 import org.synrgy.setara.contact.service.SavedEwalletUserService;
+import org.synrgy.setara.user.model.User;
 
 import java.util.UUID;
 
@@ -23,12 +24,13 @@ public class SavedEwalletUserController {
 
     @GetMapping("/saved-ewallet-users")
     public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(
+      User user,
             @Parameter(
                     name = "ewalletName",
                     required = true,
                     schema = @Schema(type = "string", allowableValues = {"Ovo", "ShopeePay", "GoPay", "DANA", "LinkAja"}, example = "Ovo")
             ) @RequestParam(required = false) String ewalletName) {
-        SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets = savedEwalletUserService.getSavedEwalletUsers(ewalletName);
+        SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> savedEwallets = savedEwalletUserService.getSavedEwalletUsers(user, ewalletName);
         BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>> response = BaseResponse.success(HttpStatus.OK, savedEwallets, "Success Get Saved E-Wallets");
         return ResponseEntity.ok(response);
     }

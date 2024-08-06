@@ -14,6 +14,7 @@ import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.dto.SearchNoEwalletRequest;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.service.EwalletUserService;
 import org.synrgy.setara.user.service.UserService;
 
@@ -29,8 +30,8 @@ public class UserController {
     private final EwalletUserService ewalletUserService;
 
     @GetMapping("/getBalance")
-    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance() {
-        UserBalanceResponse userBalanceResponse = userService.getBalance();
+    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(User user) {
+        UserBalanceResponse userBalanceResponse = userService.getBalance(user);
         BaseResponse<UserBalanceResponse> response = BaseResponse.success(HttpStatus.OK, userBalanceResponse, "Success Get Balance");
         return ResponseEntity.ok(response);
     }
