@@ -6,7 +6,7 @@ import org.synrgy.setara.user.dto.UserBalanceResponse;
 public interface UserService {
 
   void seedUser();
-  UserBalanceResponse getBalance();
+  UserBalanceResponse getBalance(User user);
 
   SearchResponse searchUserByNorek(String accountNo);
 }

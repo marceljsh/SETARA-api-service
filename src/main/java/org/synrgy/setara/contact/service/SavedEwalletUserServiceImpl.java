@@ -4,13 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.contact.dto.FavoriteEwalletRequest;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
-import org.synrgy.setara.contact.exception.SavedEwalletExceptions;
 import org.synrgy.setara.contact.exception.SavedEwalletExceptions.*;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
@@ -67,12 +65,7 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
 
     @Override
     @Transactional
-    public SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(String ewalletName) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User user = userRepo.findBySignature(signature)
-                .orElseThrow(() -> new SavedEwalletExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+    public SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(User user, String ewalletName) {
         List<SavedEwalletUser> savedEwalletUsers = savedEwalletUserRepo.findByOwnerIdAndEwalletName(user.getId(), ewalletName);
 
         List<SavedEwalletUserResponse> favoriteEwalletUsers = savedEwalletUsers.stream()

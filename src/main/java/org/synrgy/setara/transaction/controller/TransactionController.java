@@ -15,6 +15,7 @@ import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.synrgy.setara.user.model.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,8 +45,8 @@ public class TransactionController {
             )
     )
     @PostMapping("/topup")
-    public ResponseEntity<BaseResponse<TopUpResponse>> topUp(@RequestBody TopUpRequest request) {
-            TopUpResponse topUpResponse = transactionService.topUp(request);
+    public ResponseEntity<BaseResponse<TopUpResponse>> topUp(User user, @RequestBody TopUpRequest request) {
+            TopUpResponse topUpResponse = transactionService.topUp(user, request);
             return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, topUpResponse, "Top-up successful"));
     }
 
@@ -67,39 +68,41 @@ public class TransactionController {
             )
     )
     @PostMapping("/bca-transfer")
-    public ResponseEntity<BaseResponse<TransferResponse>> bcaTransfer(@RequestBody TransferRequest request) {
-        TransferResponse response = transactionService.transferWithinBCA(request);
+    public ResponseEntity<BaseResponse<TransferResponse>> bcaTransfer(User user, @RequestBody TransferRequest request) {
+        TransferResponse response = transactionService.transferWithinBCA(user, request);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response,"Transfer successful"));
     }
 
     @GetMapping("/get-monthly-report")
     public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
-            @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,
+      User user,
+      @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,
             @Parameter(schema = @Schema(type = "integer", example = "2024")) @RequestParam(name = "year") int year) {
-        MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(month, year);
+        MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(user, month, year);
         BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/merchant-transaction")
-    public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(@RequestBody MerchantTransactionRequest request) {
-        MerchantTransactionResponse response = transactionService.merchantTransaction(request);
+    public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(User user, @RequestBody MerchantTransactionRequest request) {
+        MerchantTransactionResponse response = transactionService.merchantTransaction(user, request);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Transaction successful"));
     }
 
     @PostMapping("/get-all-mutation")
-    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@RequestBody MutationRequest request,
+    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(User user,
+                                                                               @RequestBody MutationRequest request,
                                                                                @RequestParam(defaultValue = "0") int page,
                                                                                @RequestParam(defaultValue = "10") int size) {
-        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(request, page, size);
+        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(user, request, page, size);
         List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
         BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")
-    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(@Parameter(schema = @Schema(type = "string", format = "uuid", example = "31fe2207-298d-4856-a055-b4a49769ae82")) @PathVariable UUID transactionId) {
-        MutationDetailResponse response = transactionService.getMutationDetail(transactionId);
+    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(User user, @PathVariable UUID transactionId) {
+        MutationDetailResponse response = transactionService.getMutationDetail(user, transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
     }
 }

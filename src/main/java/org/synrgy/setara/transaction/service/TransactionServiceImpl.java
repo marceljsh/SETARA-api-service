@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.transaction.utils.TransactionUtils;
@@ -35,6 +34,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -56,11 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public TopUpResponse topUp(TopUpRequest request) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+    public TopUpResponse topUp(User user, TopUpRequest request) {
         validateMpin(request.getMpin(), user);
         validateTopUpAmount(request.getAmount());
 
@@ -112,34 +108,30 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public TransferResponse transferWithinBCA(TransferRequest request) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sourceUser = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+    public TransferResponse transferWithinBCA(User user, TransferRequest request) {
         if (request.getAmount().compareTo(MINIMUM_TRANSFER_AMOUNT) < 0) {
             throw new TransactionExceptions.InvalidTransferAmountException("Transfer amount must be at least " + MINIMUM_TRANSFER_AMOUNT);
         }
 
-        if (request.getDestinationAccountNumber().equals(sourceUser.getAccountNumber())) {
+        if (request.getDestinationAccountNumber().equals(user.getAccountNumber())) {
             throw new TransactionExceptions.InvalidTransferDestinationException("Cannot transfer to your own account");
         }
 
         User destinationUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber())
                 .orElseThrow(() -> new TransactionExceptions.DestinationAccountNotFoundException("Destination account not found " + request.getDestinationAccountNumber()));
 
-        validateMpin(request.getMpin(), sourceUser);
+        validateMpin(request.getMpin(), user);
 
         BigDecimal totalAmount = request.getAmount();
 
-        checkSufficientBalance(sourceUser, totalAmount);
+        checkSufficientBalance(user, totalAmount);
 
         String referenceNumber = TransactionUtils.generateReferenceNumber("TRF");
         String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
 
         Transaction transaction = Transaction.builder()
-                .user(sourceUser)
-                .bank(sourceUser.getBank())
+                .user(user)
+                .bank(user.getBank())
                 .type(TransactionType.TRANSFER)
                 .destinationAccountNumber(request.getDestinationAccountNumber())
                 .amount(request.getAmount())
@@ -157,7 +149,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction depositTransaction = Transaction.builder()
                 .user(destinationUser)
-                .bank(sourceUser.getBank())  // Assuming the bank of the transaction is the bank of the source user
+                .bank(user.getBank())  // Assuming the bank of the transaction is the bank of the source user
                 .type(TransactionType.DEPOSIT)
                 .destinationAccountNumber(null)
                 .amount(request.getAmount())
@@ -170,18 +162,18 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
         transactionRepository.save(depositTransaction);
 
-        sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
+        user.setBalance(user.getBalance().subtract(totalAmount));
         destinationUser.setBalance(destinationUser.getBalance().add(request.getAmount()));
-        userRepository.save(sourceUser);
+        userRepository.save(user);
         userRepository.save(destinationUser);
 
         if (request.isSavedAccount()) {
             SavedAccount savedAccount = SavedAccount.builder()
-                    .owner(sourceUser)
+                    .owner(user)
                     .bank(destinationUser.getBank())
                     .name(destinationUser.getName())
                     .accountNumber(destinationUser.getAccountNumber())
-                    .imagePath(sourceUser.getImagePath())
+                    .imagePath(user.getImagePath())
                     .favorite(false)
                     .build();
             savedAccountRepository.save(savedAccount);
@@ -189,10 +181,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         return TransferResponse.builder()
                 .sourceUser(TransferResponse.UserDTO.builder()
-                        .name(sourceUser.getName())
-                        .bank(sourceUser.getBank().getName())
-                        .accountNumber(sourceUser.getAccountNumber())
-                        .imagePath(sourceUser.getImagePath())
+                        .name(user.getName())
+                        .bank(user.getBank().getName())
+                        .accountNumber(user.getAccountNumber())
+                        .imagePath(user.getImagePath())
                         .build())
                 .destinationUser(TransferResponse.UserDTO.builder()
                         .name(destinationUser.getName())
@@ -263,7 +255,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public MonthlyReportResponse getMonthlyReport(int month, int year) {
+    public MonthlyReportResponse getMonthlyReport(User user, int month, int year) {
         if (month < 1 || month > 12) {
             throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
         }
@@ -273,23 +265,16 @@ public class TransactionServiceImpl implements TransactionService {
             throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
         }
 
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
         BigDecimal income = BigDecimal.valueOf(0);
         BigDecimal expense = BigDecimal.valueOf(0);
 
         List<Transaction> transactions = transactionRepository.findByUserAndMonthAndYear(user.getId(), month, year);
         for (Transaction transaction : transactions) {
-            switch (transaction.getType()) {
-                case TRANSFER, TOP_UP:
-                    expense = expense.add(transaction.getTotalamount());
-                    break;
-                case DEPOSIT:
-                    income = income.add(transaction.getTotalamount());
-                    break;
-            }
+          if (Objects.requireNonNull(transaction.getType()) == TransactionType.TRANSFER || transaction.getType() == TransactionType.TOP_UP) {
+            expense = expense.add(transaction.getTotalamount());
+          } else if (transaction.getType() == TransactionType.DEPOSIT) {
+            income = income.add(transaction.getTotalamount());
+          }
         }
 
         return MonthlyReportResponse.builder()
@@ -301,12 +286,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sourceUser = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
-        validateMpin(request.getMpin(), sourceUser);
+    public MerchantTransactionResponse merchantTransaction(User user, MerchantTransactionRequest request) {
+        validateMpin(request.getMpin(), user);
 
         if (request.getAmount().compareTo(BigDecimal.ONE) < 0) {
             throw new TransactionExceptions.InvalidTransactionAmountException("Transaction amount must be at least 1 rupiah");
@@ -324,13 +305,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         BigDecimal totalAmount = request.getAmount();
 
-        checkSufficientBalance(sourceUser, totalAmount);
+        checkSufficientBalance(user, totalAmount);
 
         String referenceNumber = TransactionUtils.generateReferenceNumber("MCH");
         String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
 
         Transaction transaction = Transaction.builder()
-                .user(sourceUser)
+                .user(user)
                 .destinationIdQris(destinationMerchant)
                 .type(TransactionType.QRPAYMENT)
                 .amount(request.getAmount())
@@ -343,10 +324,10 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
         transactionRepository.save(transaction);
 
-        sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
-        userRepository.save(sourceUser);
+        user.setBalance(user.getBalance().subtract(totalAmount));
+        userRepository.save(user);
 
-        return createTransactionResponse(transaction, sourceUser, destinationMerchant);
+        return createTransactionResponse(transaction, user, destinationMerchant);
     }
 
 
@@ -376,11 +357,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<MutationResponse> getAllMutation(MutationRequest request, int page, int size) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sourceUser = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+    public Page<MutationResponse> getAllMutation(User user, MutationRequest request, int page, int size) {
         LocalDateTime startDateTime = request.getStartDate().atStartOfDay();
         LocalDateTime endDateTime = request.getEndDate().atTime(LocalTime.MAX);
 
@@ -388,7 +365,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Transaction> transactions = transactionRepository.findByUserAndTimeBetweenAndTransactionCategory(
-                sourceUser, startDateTime, endDateTime, transactionCategory, pageable);
+          user, startDateTime, endDateTime, transactionCategory, pageable);
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -408,24 +385,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private String formatTransactionType(Transaction transaction) {
-        switch (transaction.getType()) {
-            case TRANSFER:
-                return "Transfer M-Banking DB";
-            case TOP_UP:
-                return ewalletRepository.findById(transaction.getEwallet().getId())
-                        .map(ewallet -> "TOP UP " + ewallet.getName())
-                        .orElse("Unknown Wallet");
-            default:
-                return transaction.getType().toString();
-        }
+      return switch (transaction.getType()) {
+        case TRANSFER -> "Transfer M-Banking DB";
+        case TOP_UP -> ewalletRepository.findById(transaction.getEwallet().getId())
+          .map(ewallet -> "TOP UP " + ewallet.getName())
+          .orElse("Unknown Wallet");
+        default -> transaction.getType().toString();
+      };
     }
 
     @Override
-    public MutationDetailResponse getMutationDetail(UUID transactionId) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+    public MutationDetailResponse getMutationDetail(User user, UUID transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
 
