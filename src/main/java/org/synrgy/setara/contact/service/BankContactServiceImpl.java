@@ -37,7 +37,7 @@ public class BankContactServiceImpl implements BankContactService {
     Bank bank = bankRepo.findById(request.getBankId()).orElse(null);
     if (bank == null) {
       log.error("Bank({}) not found", request.getBankId());
-      throw new EntityNotFoundException(Constants.BANK_NOT_FOUND);
+      throw new EntityNotFoundException(Constants.ERR_BANK_NOT_FOUND);
     }
 
     BankContact contact = BankContact.builder()

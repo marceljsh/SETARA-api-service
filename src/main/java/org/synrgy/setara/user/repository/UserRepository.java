@@ -41,4 +41,13 @@ public interface UserRepository extends JpaRepository<User, UUID> {
   boolean existsByNik(String nik);
 
   Optional<User> findByAccountNumber(String destinationAccountNumber);
+
+  @Modifying
+  @Query("UPDATE User u SET u.balance = :balance WHERE u.id = :id")
+  void updateBalanceById(@Param("id") UUID id, @Param("balance") BigDecimal balance);
+
+  @Modifying
+  @Query("UPDATE User u SET u.balance = :balance WHERE u.accountNumber = :account_number")
+  void updateBalanceByAccountNumber(@Param("account_number") String accountNumber, @Param("balance") BigDecimal balance);
+
 }

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.app.util.Constants;
-import org.synrgy.setara.transaction.exception.MerchantNotFoundException;
+import org.synrgy.setara.vendor.exception.MerchantNotFoundException;
 import org.synrgy.setara.vendor.exception.NmidGenerationException;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.exception.TerminalIdGenerationException;
@@ -22,8 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-  private static final int MAX_ATTEMPTS = 10;
-
   private static final String IMAGE_PATH = System.getProperty("user.dir") + "/images";
 
   private static final int QR_CODE_SIZE = 400;
@@ -37,7 +35,7 @@ public class MerchantServiceImpl implements MerchantService {
     int attempts = 0;
 
     do {
-      if (attempts == MAX_ATTEMPTS) {
+      if (attempts == Constants.MAX_GENERATION_ATTEMPTS) {
         log.error("Failed to generate unique nmid");
         throw new NmidGenerationException("Failed to generate unique nmid");
       }
@@ -55,7 +53,7 @@ public class MerchantServiceImpl implements MerchantService {
     int attempts = 0;
 
     do {
-      if (attempts == MAX_ATTEMPTS) {
+      if (attempts == Constants.MAX_GENERATION_ATTEMPTS) {
         log.error("Failed to generate unique terminal id");
         throw new TerminalIdGenerationException("Failed to generate unique terminal id");
       }
@@ -63,7 +61,7 @@ public class MerchantServiceImpl implements MerchantService {
       terminalId = CodeGenerator.generateUniqueTerminalId();
       attempts++;
 
-    } while (!merchantRepo.existsByTerminalId(terminalId));
+    } while (merchantRepo.existsByTerminalId(terminalId));
 
     return terminalId;
   }
@@ -118,7 +116,7 @@ public class MerchantServiceImpl implements MerchantService {
     Merchant merchant = merchantRepo.findById(id).orElse(null);
     if (merchant == null) {
       log.error("Merchant with id {} not found", id);
-      throw new MerchantNotFoundException(Constants.MERCHANT_NOT_FOUND);
+      throw new MerchantNotFoundException(Constants.ERR_MERCHANT_NOT_FOUND);
     }
 
     log.info("Merchant({}) found", id);

@@ -1,13 +1,16 @@
 package org.synrgy.setara.transaction.service;
 
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.user.model.User;
 
 public interface TransactionService {
-    TopUpResponse topUp(TopUpRequest request);
 
-    TransferResponse transferWithinBCA(TransferRequest request);
+  TopUpResponse topUp(User user, TopUpRequest request);
 
-    MonthlyReportResponse getMonthlyReport(int month, int year);
+  TransferResponse transfer(User user, TransferRequest request);
 
-    MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request);
+  MonthlyReportResponse getMonthlyReport(User user, int month, int year);
+
+//  MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request);
+
 }

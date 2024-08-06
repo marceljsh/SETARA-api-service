@@ -1,28 +1,28 @@
 package org.synrgy.setara.transaction.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.contact.model.BankContact;
+import org.springframework.transaction.annotation.Transactional;
+import org.synrgy.setara.app.util.Constants;
 import org.synrgy.setara.contact.model.EwalletContact;
-import org.synrgy.setara.transaction.utils.TransactionUtils;
-import org.synrgy.setara.contact.repository.BankContactRepository;
 import org.synrgy.setara.contact.repository.EwalletContactRepository;
 import org.synrgy.setara.transaction.dto.*;
-import org.synrgy.setara.transaction.exception.TransactionExceptions;
+import org.synrgy.setara.transaction.exception.*;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.model.TransactionType;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
+import org.synrgy.setara.transaction.utils.TransactionUtils;
+import org.synrgy.setara.user.exception.EwalletUserNotFoundException;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.vendor.exception.BankNotFoundException;
 import org.synrgy.setara.vendor.model.Bank;
-import org.synrgy.setara.vendor.model.Merchant;
-import org.synrgy.setara.vendor.repository.MerchantRepository;
+import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,335 +31,239 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
-    private final EwalletUserRepository ewalletUserRepository;
-    private final EwalletContactRepository ewalletContactRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final BankContactRepository bankContactRepository;
-    private final MerchantRepository merchantRepository;
-    private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
-    private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
-    private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(10000);
+  private final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
-    @Override
-    @Transactional
-    public TopUpResponse topUp(TopUpRequest request) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+  private static final String DEPOSIT_PREFIX = "DPT";
 
-        validateMpin(request.getMpin(), user);
-        validateTopUpAmount(request.getAmount());
+  private static final String TOP_UP_PREFIX = "TOP";
 
-        BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
-        checkSufficientBalance(user, totalAmount);
+  private static final String TRANSFER_PREFIX = "TRF";
 
-        EwalletUser destinationEwalletUser = ewalletUserRepository.findByPhoneNumber(request.getDestinationPhoneNumber())
-                .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for phone number " + request.getDestinationPhoneNumber()));
+  private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
 
-        Transaction transaction = createTransaction(request, user, destinationEwalletUser, totalAmount);
+  private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
 
-        updateBalances(user, destinationEwalletUser, request.getAmount(), totalAmount);
-        transactionRepository.save(transaction);
+  private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(10000);
 
-        if (request.isSavedAccount()) {
-            saveEwalletUser(user, destinationEwalletUser); // Save the ewallet user data
-        }
+  private final PasswordEncoder passwordEncoder;
 
-        return createTransactionResponse(transaction, destinationEwalletUser);
+  private final TransactionRepository txRepo;
+
+  private final EwalletUserRepository euRepo;
+
+  private final UserRepository userRepo;
+
+  private final EwalletContactRepository ecRepo;
+
+  private final BankRepository bankRepo;
+
+  private void validateMpin(String rawMpin, String encodedMpin) {
+    if (!passwordEncoder.matches(rawMpin, encodedMpin)) {
+      log.error("Invalid MPIN");
+      throw new InvalidMpinException(Constants.ERR_INCORRECT_CREDENTIAL);
+    }
+  }
+
+  private void checkSufficientBalance(BigDecimal balance, BigDecimal totalAmount) {
+    if (balance.compareTo(totalAmount) < 0) {
+      log.error("Balance ({}) is less than total amount ({})", balance, totalAmount);
+      throw new InsufficientBalanceException(Constants.ERR_INSUFFICIENT_BALANCE);
+    }
+  }
+
+  private EwalletUser findEwalletUser(UUID ewalletId, String phoneNumber) {
+    return euRepo.findByPhoneNumberAndEwalletId(phoneNumber, ewalletId).orElseThrow(() -> {
+      log.error("No such E-Wallet User with ewallet_id={} and phone={}", ewalletId, phoneNumber);
+      return new EwalletUserNotFoundException(Constants.ERR_EWALLET_USER_NOT_FOUND);
+    });
+  }
+
+  private Bank findBankById(UUID bankId) {
+    return bankRepo.findById(bankId).orElseThrow(() -> {
+      log.error("No such Bank with id={}", bankId);
+      return new BankNotFoundException(Constants.ERR_BANK_NOT_FOUND);
+    });
+  }
+
+  private String generateReferenceNumber(String prefix) {
+    String referenceNumber;
+    int attempts = 0;
+
+    do {
+      if (attempts == Constants.MAX_GENERATION_ATTEMPTS) {
+        log.error(Constants.ERR_REFERENCE_NUMBER_GENERATION);
+        throw new ReferenceNumberGenerationException(Constants.ERR_REFERENCE_NUMBER_GENERATION);
+      }
+
+      referenceNumber = TransactionUtils.generateReferenceNumber(prefix);
+      attempts++;
+
+    } while (txRepo.existsByReferenceNumber(referenceNumber));
+
+    return referenceNumber;
+  }
+
+  private Transaction createTopUpTx(User user, EwalletUser target, BigDecimal nominal, String note) {
+    String refNo = generateReferenceNumber(TOP_UP_PREFIX);
+    String uniqueCode = TransactionUtils.generateUniqueCode(refNo);
+
+    return Transaction.builder()
+        .user(user)
+        .ewallet(target.getEwallet())
+        .type(TransactionType.TOP_UP)
+        .destPhoneNumber(target.getPhoneNumber())
+        .nominal(nominal)
+        .adminFee(ADMIN_FEE)
+        .uniqueCode(uniqueCode)
+        .referenceNumber(refNo)
+        .note(note)
+        .transactionTime(LocalDateTime.now())
+        .build();
+  }
+
+  private Transaction createTransferTx(User user, Bank bank, String destAccNumber, BigDecimal nominal, String note) {
+     String refNo = generateReferenceNumber(TRANSFER_PREFIX);
+     String uniqueCode = TransactionUtils.generateUniqueCode(refNo);
+
+    return Transaction.builder()
+        .user(user)
+        .bank(bank)
+        .type(TransactionType.TRANSFER)
+        .destAccountNumber(destAccNumber)
+        .nominal(nominal)
+        .adminFee(bank.getName().equals("Tahapan BCA") ? BigDecimal.ZERO : ADMIN_FEE)
+        .uniqueCode(uniqueCode)
+        .referenceNumber(refNo)
+        .note(note)
+        .build();
+  }
+
+  private Transaction createDepositTx(User user, Bank bank, BigDecimal nominal, BigDecimal adminFee, String note) {
+    String refNo = generateReferenceNumber(DEPOSIT_PREFIX);
+    String uniqueCode = TransactionUtils.generateUniqueCode(refNo);
+
+    return Transaction.builder()
+        .user(user)
+        .bank(bank)
+        .type(TransactionType.DEPOSIT)
+        .nominal(nominal)
+        .adminFee(adminFee)
+        .uniqueCode(uniqueCode)
+        .referenceNumber(refNo)
+        .note(note)
+        .transactionTime(LocalDateTime.now())
+        .build();
+  }
+
+  private void validateMonthAndYear(int month, int year) {
+    if (month < 1 || month > 12) {
+      log.error(Constants.ERR_INVALID_TIMESPAN);
+      throw new InvalidTimespanException(Constants.ERR_INVALID_TIMESPAN);
     }
 
-    @Override
-    @Transactional
-    public TransferResponse transferWithinBCA(TransferRequest request) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User sourceUser = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+    int currentYear = LocalDateTime.now().getYear();
+    if (year < 1900 || year > currentYear) {
+      log.error(Constants.ERR_INVALID_TIMESPAN);
+      throw new InvalidTimespanException(Constants.ERR_INVALID_TIMESPAN);
+    }
+  }
 
-        if (request.getAmount().compareTo(MINIMUM_TRANSFER_AMOUNT) < 0) {
-            throw new TransactionExceptions.InvalidTransferAmountException("Transfer amount must be at least " + MINIMUM_TRANSFER_AMOUNT);
-        }
+  @Override
+  @Transactional
+  public TopUpResponse topUp(User user, TopUpRequest request) {
+    validateMpin(request.getMpin(), user.getMpin());
 
-        if (request.getDestinationAccountNumber().equals(sourceUser.getAccountNumber())) {
-            throw new TransactionExceptions.InvalidTransferDestinationException("Cannot transfer to your own account");
-        }
-
-        User destinationUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber())
-                .orElseThrow(() -> new TransactionExceptions.DestinationAccountNotFoundException("Destination account not found " + request.getDestinationAccountNumber()));
-
-        validateMpin(request.getMpin(), sourceUser);
-
-        BigDecimal totalAmount = request.getAmount();
-
-        checkSufficientBalance(sourceUser, totalAmount);
-
-        String referenceNumber = TransactionUtils.generateReferenceNumber("TRF");
-        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
-
-        Transaction transaction = Transaction.builder()
-                .user(sourceUser)
-                .bank(sourceUser.getBank())
-                .type(TransactionType.TRANSFER)
-                .destinationAccountNumber(request.getDestinationAccountNumber())
-                .amount(request.getAmount())
-                .adminFee(BigDecimal.ZERO)
-                .totalamount(totalAmount)
-                .uniqueCode(uniqueCode)
-                .referenceNumber(referenceNumber)
-                .note(request.getNote())
-                .time(LocalDateTime.now())
-                .build();
-        transactionRepository.save(transaction);
-
-        String depositReferenceNumber = TransactionUtils.generateReferenceNumber("DPT");
-        String depositUniqueCode = TransactionUtils.generateUniqueCode(depositReferenceNumber);
-
-        Transaction depositTransaction = Transaction.builder()
-                .user(destinationUser)
-                .bank(sourceUser.getBank())  // Assuming the bank of the transaction is the bank of the source user
-                .type(TransactionType.DEPOSIT)
-                .destinationAccountNumber(null)
-                .amount(request.getAmount())
-                .adminFee(BigDecimal.ZERO)
-                .totalamount(request.getAmount())
-                .uniqueCode(depositUniqueCode)
-                .referenceNumber(depositReferenceNumber)
-                .note(request.getNote())
-                .time(LocalDateTime.now())
-                .build();
-        transactionRepository.save(depositTransaction);
-
-        sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
-        destinationUser.setBalance(destinationUser.getBalance().add(request.getAmount()));
-        userRepository.save(sourceUser);
-        userRepository.save(destinationUser);
-
-        if (request.isSavedAccount()) {
-            BankContact bankContact = BankContact.builder()
-                    .owner(sourceUser)
-                    .bank(destinationUser.getBank())
-                    .name(destinationUser.getName())
-                    .accountNumber(destinationUser.getAccountNumber())
-                    .imagePath(sourceUser.getImagePath())
-                    .favorite(false)
-                    .build();
-            bankContactRepository.save(bankContact);
-        }
-
-        return TransferResponse.builder()
-                .sourceUser(TransferResponse.UserDTO.builder()
-                        .name(sourceUser.getName())
-                        .bank(sourceUser.getBank().getName())
-                        .accountNumber(sourceUser.getAccountNumber())
-                        .imagePath(sourceUser.getImagePath())
-                        .build())
-                .destinationUser(TransferResponse.UserDTO.builder()
-                        .name(destinationUser.getName())
-                        .bank(destinationUser.getBank().getName())
-                        .accountNumber(destinationUser.getAccountNumber())
-                        .imagePath(destinationUser.getImagePath())
-                        .build())
-                .amount(request.getAmount())
-                .adminFee(BigDecimal.ZERO)
-                .totalAmount(totalAmount)
-                .note(request.getNote())
-                .build();
+    if (request.getAmount().compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
+      log.error(Constants.ERR_MINIMUM_TOP_UP);
+      throw new InvalidTransactionAmountException(Constants.ERR_MINIMUM_TOP_UP);
     }
 
-    private void validateMpin(String mpin, User user) {
-        if (!passwordEncoder.matches(mpin, user.getMpin())) {
-            throw new TransactionExceptions.InvalidMpinException("Invalid MPIN");
-        }
+    BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
+    checkSufficientBalance(user.getBalance(), totalAmount);
+
+    EwalletUser target = findEwalletUser(request.getEwalletId(), request.getPhoneNumber());
+    Transaction tx = createTopUpTx(user, target, request.getAmount(), request.getNote());
+
+    BigDecimal newBalance = user.getBalance().subtract(totalAmount);
+    userRepo.updateBalanceById(user.getId(), newBalance);
+
+    txRepo.save(tx);
+
+    if (request.isSaveContact()) {
+      EwalletContact newContact = EwalletContact.builder()
+          .owner(user)
+          .ewalletUser(target)
+          .name(request.getName())
+          .build();
+      ecRepo.save(newContact);
     }
 
-    private void validateTopUpAmount(BigDecimal amount) {
-        if (amount.compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
-            throw new TransactionExceptions.InvalidTopUpAmountException("Top-up amount must be at least " + MINIMUM_TOP_UP_AMOUNT);
-        }
+    return TopUpResponse.of(tx, target.getName());
+  }
+
+  @Override
+  @Transactional
+  public TransferResponse transfer(User user, TransferRequest request) {
+    validateMpin(request.getMpin(), user.getMpin());
+
+    if (request.getAmount().compareTo(MINIMUM_TRANSFER_AMOUNT) < 0) {
+      log.error(Constants.ERR_MINIMUM_TRANSFER);
+      throw new InvalidTransactionAmountException(Constants.ERR_MINIMUM_TRANSFER);
     }
 
-    private void checkSufficientBalance(User user, BigDecimal totalAmount) {
-        if (user.getBalance().compareTo(totalAmount) < 0) {
-            throw new TransactionExceptions.InsufficientBalanceException("Insufficient balance");
-        }
+    if (request.getDestAccountNumber().equals(user.getAccountNumber())) {
+      log.error(Constants.ERR_SAME_ACCOUNT_TRANSFER);
+      throw new InvalidTransactionDestinationException("Cannot transfer to own account");
     }
 
-    private Transaction createTransaction(TopUpRequest request, User user, EwalletUser destinationEwalletUser, BigDecimal totalAmount) {
-        String referenceNumber = TransactionUtils.generateReferenceNumber("TOP");
-        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
+    Bank destBank = findBankById(request.getDestBankId());
 
-        return Transaction.builder()
-                .user(user)
-                .ewallet(destinationEwalletUser.getEwallet())
-                .type(TransactionType.TOP_UP)
-                .destinationPhoneNumber(request.getDestinationPhoneNumber())
-                .amount(request.getAmount())
-                .adminFee(ADMIN_FEE)
-                .totalamount(totalAmount)
-                .uniqueCode(uniqueCode)
-                .referenceNumber(referenceNumber)
-                .note(request.getNote())
-                .time(LocalDateTime.now())
-                .build();
+    BigDecimal totalAmount = request.getAmount();
+    boolean internalTransfer = destBank.getName().equals("Tahapan BCA");
+    if (!internalTransfer) {
+      totalAmount = totalAmount.add(ADMIN_FEE);
     }
 
-    private void updateBalances(User user, EwalletUser destinationEwalletUser, BigDecimal amount, BigDecimal totalAmount) {
-        user.setBalance(user.getBalance().subtract(totalAmount));
-        destinationEwalletUser.setBalance(destinationEwalletUser.getBalance().add(amount));
-        userRepository.save(user);
-        ewalletUserRepository.save(destinationEwalletUser);
+    checkSufficientBalance(user.getBalance(), request.getAmount());
+
+    Transaction transferTx = createTransferTx(user, destBank, request.getDestAccountNumber(), request.getAmount(), request.getNote());
+    Transaction depositTx = createDepositTx(user, destBank, request.getAmount(), internalTransfer ? BigDecimal.ZERO : ADMIN_FEE, request.getNote());
+
+    txRepo.save(transferTx);
+    txRepo.save(depositTx);
+
+    BigDecimal newBalance = user.getBalance().subtract(totalAmount);
+    userRepo.updateBalanceById(user.getId(), newBalance);
+
+    if (internalTransfer) {
+      userRepo.updateBalanceByAccountNumber(request.getDestAccountNumber(), request.getAmount());
     }
 
-    private void saveEwalletUser(User owner, EwalletUser ewalletUser) {
-        if (ewalletContactRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
-            EwalletContact ewalletContact = EwalletContact.builder()
-                    .owner(owner)
-                    .ewalletUser(ewalletUser)
-                    .favorite(false)
-                    .build();
-            ewalletContactRepository.save(ewalletContact);
-        }
-    }
+    return TransferResponse.from(transferTx);
+  }
 
-    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
-        Bank bank = transaction.getUser().getBank();
-        String bankName = bank != null ? bank.getName() : "Unknown";
+  @Override
+  @Transactional(readOnly = true)
+  public MonthlyReportResponse getMonthlyReport(User user, int month, int year) {
+    validateMonthAndYear(month, year);
 
-        return TopUpResponse.builder()
-                .user(TopUpResponse.UserDto.builder()
-                        .accountNumber(transaction.getUser().getAccountNumber())
-                        .name(transaction.getUser().getName())
-                        .imagePath(transaction.getUser().getImagePath())
-                        .bankName(bankName)
-                        .build())
-                .userEwallet(TopUpResponse.UserEwalletDto.builder()
-                        .name(destinationEwalletUser.getName())
-                        .phoneNumber(destinationEwalletUser.getPhoneNumber())
-                        .imagePath(destinationEwalletUser.getImagePath())
-                        .build())
-                .amount(transaction.getAmount())
-                .adminFee(transaction.getAdminFee())
-                .totalAmount(transaction.getTotalamount())
-                .build();
-    }
+    List<Transaction> expenseTxs = txRepo.findMonthlyReportMultipleTypes(user.getId(),
+        List.of(TransactionType.TRANSFER, TransactionType.TOP_UP), month, year);
 
-    @Override
-    public MonthlyReportResponse getMonthlyReport(int month, int year) {
-        String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findBySignature(signature)
-                .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
+    List<Transaction> incomeTxs = txRepo.findMonthlyReportSingleTypes(user.getId(),
+        TransactionType.DEPOSIT, month, year);
 
-        BigDecimal income = BigDecimal.valueOf(0);
-        BigDecimal expense = BigDecimal.valueOf(0);
+    BigDecimal income = incomeTxs.stream()
+        .map(Transaction::getNominal)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<Transaction> transactions = transactionRepository.findByUserAndMonthAndYear(user.getId(), month, year);
-        for (Transaction transaction : transactions) {
-            switch (transaction.getType()) {
-                case TRANSFER, TOP_UP:
-                    expense = expense.add(transaction.getTotalamount());
-                    break;
-                case DEPOSIT:
-                    income = income.add(transaction.getTotalamount());
-                    break;
-            }
-        }
+    BigDecimal expense = expenseTxs.stream()
+        .map(Transaction::getNominal)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<Transaction> transfersThroughPhoneNumber = transactionRepository.findTransfersByPhoneNumberAndMonthAndYear(user.getPhoneNumber(), month, year);
-        for (Transaction transfer : transfersThroughPhoneNumber) {
-            income = income.add(transfer.getAmount());
-        }
-
-        List<Transaction> transfersThroughAccountNumber = transactionRepository.findTransfersByAccountNumberAndMonthAndYear(user.getAccountNumber(), month, year);
-        for (Transaction transfer : transfersThroughAccountNumber) {
-            income = income.add(transfer.getAmount());
-        }
-
-        return MonthlyReportResponse.builder()
-                .income(income)
-                .expense(expense)
-                .total(income.subtract(expense))
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request) {
-        try {
-            String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-            User sourceUser = userRepository.findBySignature(signature)
-                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
-            validateMpin(request.getMpin(), sourceUser);
-
-            UUID merchantId;
-            try {
-                merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
-            } catch (IllegalArgumentException e) {
-                throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
-            }
-
-            Merchant destinationMerchant = merchantRepository.findById(merchantId)
-                    .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant not found with id " + request.getIdQris()));
-
-            BigDecimal totalAmount = request.getAmount();
-
-            checkSufficientBalance(sourceUser, totalAmount);
-
-            String referenceNumber = TransactionUtils.generateReferenceNumber("MERCH");
-            String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
-
-            Transaction transaction = Transaction.builder()
-                    .user(sourceUser)
-                    .destinationIdQris(destinationMerchant)
-                    .type(TransactionType.QRPAYMENT)
-                    .amount(request.getAmount())
-                    .adminFee(BigDecimal.ZERO)
-                    .totalamount(totalAmount)
-                    .uniqueCode(uniqueCode)
-                    .referenceNumber(referenceNumber)
-                    .note(request.getNote())
-                    .time(LocalDateTime.now())
-                    .build();
-            transactionRepository.save(transaction);
-
-            sourceUser.setBalance(sourceUser.getBalance().subtract(totalAmount));
-            userRepository.save(sourceUser);
-
-            return createTransactionResponse(transaction, sourceUser, destinationMerchant);
-        } catch (Exception e) {
-            log.error("Error processing merchant transaction", e);
-            throw new RuntimeException("An unexpected error occurred", e);
-        }
-    }
-
-    private MerchantTransactionResponse createTransactionResponse(Transaction transaction, User sourceUser, Merchant destinationMerchant) {
-        Bank bank = sourceUser.getBank();
-        String bankName = bank != null ? bank.getName() : "Unknown";
-
-        return MerchantTransactionResponse.builder()
-                .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
-                        .name(sourceUser.getName())
-                        .bank(bankName)
-                        .accountNumber(sourceUser.getAccountNumber())
-                        .imagePath(sourceUser.getImagePath())
-                        .build())
-                .destinationUser(MerchantTransactionResponse.DestinationUserDTO.builder()
-                        .name(destinationMerchant.getName())
-                        .nameMerchant(destinationMerchant.getName())
-                        .nmid(destinationMerchant.getNmid())
-                        .terminalId(destinationMerchant.getTerminalId())
-                        .imagePath(destinationMerchant.getImagePath())
-                        .build())
-                .amount(transaction.getAmount())
-                .adminFee(transaction.getAdminFee())
-                .totalAmount(transaction.getTotalamount())
-                .note(transaction.getNote())
-                .build();
-    }
+    return MonthlyReportResponse.of(month, year, income, expense);
+  }
 
 }
-

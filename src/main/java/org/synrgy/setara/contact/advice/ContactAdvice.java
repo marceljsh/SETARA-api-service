@@ -19,25 +19,25 @@ public class ContactAdvice {
 
     @ExceptionHandler(BankContactNotFoundException.class)
     @ResponseBody
-    public ResponseEntity<ApiResponse<String>> handleSavedAccountNotFoundException(BankContactNotFoundException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleSavedAccountNotFoundException(BankContactNotFoundException ex) {
         log.error("BankContactNotFoundException: {}", ex.getMessage());
-        ApiResponse<String> body = ApiResponse.fail(ex.getMessage());
+        ApiResponse<Void> body = ApiResponse.fail(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(EwalletContactNotFoundException.class)
     @ResponseBody
-    public ResponseEntity<ApiResponse<String>> handleEwalletContactNotFoundException(EwalletContactNotFoundException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleEwalletContactNotFoundException(EwalletContactNotFoundException ex) {
         log.error("EwalletContactNotFoundException: {}", ex.getMessage());
-        ApiResponse<String> body = ApiResponse.fail(ex.getMessage());
+        ApiResponse<Void> body = ApiResponse.fail(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(FavoriteUpdateException.class)
     @ResponseBody
-    public ResponseEntity<ApiResponse<String>> handleFavoriteUpdateException(FavoriteUpdateException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleFavoriteUpdateException(FavoriteUpdateException ex) {
         log.error("FavoriteUpdateException: {}", ex.getMessage(), ex);
-        ApiResponse<String> response = ApiResponse.fail(ex.getMessage());
+        ApiResponse<Void> response = ApiResponse.fail(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

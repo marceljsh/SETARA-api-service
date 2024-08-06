@@ -41,7 +41,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
 
     Ewallet ovo = ewalletRepo.findByName("OVO").orElseThrow(() -> {
       log.error("Ewallet with name OVO not found");
-      return new EwalletNotFoundException(Constants.EWALLET_NOT_FOUND);
+      return new EwalletNotFoundException(Constants.ERR_EWALLET_NOT_FOUND);
     });
 
     userData.forEach((name, phoneNumber) -> {

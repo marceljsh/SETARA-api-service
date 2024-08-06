@@ -1,50 +1,40 @@
 package org.synrgy.setara.transaction.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.synrgy.setara.transaction.model.Transaction;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class TopUpResponse {
-    private UserDto user;
-    private UserEwalletDto userEwallet;
-    private BigDecimal amount;
-    private BigDecimal adminFee;
-    private BigDecimal totalAmount;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UserDto {
-        private String accountNumber;
-        private String name;
-        private String imagePath;
-        private String bankName;
-    }
+  private String referenceNumber;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EwalletDto {
-        private String name;
-    }
+  private LocalDateTime transactionTime;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UserEwalletDto {
-        private String name;
-        private String phoneNumber;
-        private String imagePath;
-        private EwalletDto ewallet;
-    }
+  private String ewalletName;
+
+  private String phoneNumber;
+
+  private String name;
+
+  private BigDecimal nominal;
+
+  private BigDecimal adminFee;
+
+  public static TopUpResponse of(Transaction tx, String ewalletUserName) {
+    return TopUpResponse.builder()
+        .referenceNumber(tx.getReferenceNumber())
+        .transactionTime(tx.getTransactionTime())
+        .ewalletName(tx.getEwallet().getName())
+        .phoneNumber(tx.getDestPhoneNumber())
+        .name(ewalletUserName)
+        .nominal(tx.getNominal())
+        .adminFee(tx.getAdminFee())
+        .build();
+  }
+
 }

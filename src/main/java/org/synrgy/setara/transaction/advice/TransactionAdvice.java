@@ -1,46 +1,23 @@
 package org.synrgy.setara.transaction.advice;
 
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.synrgy.setara.transaction.exception.TransactionExceptions;
+import org.synrgy.setara.common.dto.ApiResponse;
+import org.synrgy.setara.transaction.exception.ReferenceNumberGenerationException;
 
 @ControllerAdvice(basePackages = "org.synrgy.setara.transaction")
 public class TransactionAdvice {
 
-    @ExceptionHandler(TransactionExceptions.UserNotFoundException.class)
-    public ResponseEntity<BaseResponse<?>> handleUserNotFoundException(TransactionExceptions.UserNotFoundException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
+  private static final Logger log = LoggerFactory.getLogger(TransactionAdvice.class);
 
-    @ExceptionHandler(TransactionExceptions.DestinationEwalletUserNotFoundException.class)
-    public ResponseEntity<BaseResponse<?>> handleDestinationEwalletUserNotFoundException(TransactionExceptions.DestinationEwalletUserNotFoundException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
+  @ExceptionHandler(ReferenceNumberGenerationException.class)
+  public ResponseEntity<ApiResponse<Void>> handleReferenceNumberGenerationException(ReferenceNumberGenerationException ex) {
+    log.error("ReferenceNumberGenerationException: {}", ex.getMessage());
+    ApiResponse<Void> body = ApiResponse.fail("Failed to generate reference number");
+    return ResponseEntity.internalServerError().body(body);
+  }
 
-    @ExceptionHandler(TransactionExceptions.InvalidMpinException.class)
-    public ResponseEntity<BaseResponse<?>> handleInvalidMpinException(TransactionExceptions.InvalidMpinException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(TransactionExceptions.InvalidTopUpAmountException.class)
-    public ResponseEntity<BaseResponse<?>> handleInvalidTopUpAmountException(TransactionExceptions.InvalidTopUpAmountException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(TransactionExceptions.InsufficientBalanceException.class)
-    public ResponseEntity<BaseResponse<?>> handleInsufficientBalanceException(TransactionExceptions.InsufficientBalanceException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(TransactionExceptions.DestinationAccountNotFoundException.class)
-    public ResponseEntity<BaseResponse<?>> handleDestinationAccountNotFoundException(TransactionExceptions.DestinationAccountNotFoundException ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<BaseResponse<?>> handleGenericException(Exception ex) {
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 }

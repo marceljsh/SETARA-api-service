@@ -1,32 +1,36 @@
 package org.synrgy.setara.transaction.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.synrgy.setara.transaction.model.Transaction;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class TransferResponse {
-    private UserDTO sourceUser;
-    private UserDTO destinationUser;
-    private BigDecimal amount;
-    private BigDecimal adminFee;
-    private BigDecimal totalAmount;
-    private String note;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UserDTO  {
-        private String name;
-        private String bank;
-        private String accountNumber;
-        private String imagePath;
-    }
+  private String referenceNumber;
+
+  private String uniqueCode;
+
+  private LocalDateTime transactionTime;
+
+  private String bankName;
+
+  private String accountNumber;
+
+  private String note;
+
+  public static TransferResponse from(Transaction tx) {
+    return TransferResponse.builder()
+        .referenceNumber(tx.getReferenceNumber())
+        .uniqueCode(tx.getUniqueCode())
+        .transactionTime(tx.getTransactionTime())
+        .bankName(tx.getBank().getName())
+        .accountNumber(tx.getDestAccountNumber())
+        .note(tx.getNote())
+        .build();
+  }
+
 }

@@ -1,4 +1,4 @@
-package org.synrgy.setara.transaction.exception;
+package org.synrgy.setara.vendor.exception;
 
 public class MerchantNotFoundException extends RuntimeException {
 

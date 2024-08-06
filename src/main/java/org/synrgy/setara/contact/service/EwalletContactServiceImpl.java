@@ -62,7 +62,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
 
     User owner = userRepo.findByName("Kendrick Lamar").orElseThrow(() -> {
       log.error("User not found: Kendrick Lamar");
-      return new UserNotFoundException(Constants.USER_NOT_FOUND);
+      return new UserNotFoundException(Constants.ERR_USER_NOT_FOUND);
     });
 
     List<EwalletUser> users = euRepo.findAll();
@@ -78,7 +78,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
     EwalletUser eu = euRepo.findById(request.getEwalletUserId()).orElse(null);
     if (eu == null) {
       log.error("EwalletUser({}) not found", request.getEwalletUserId());
-      throw new EntityNotFoundException(Constants.EWALLET_USER_NOT_FOUND);
+      throw new EntityNotFoundException(Constants.ERR_EWALLET_USER_NOT_FOUND);
     }
 
     EwalletContact contact = EwalletContact.builder()
@@ -103,7 +103,7 @@ public class EwalletContactServiceImpl implements EwalletContactService {
     Ewallet ewallet = ewalletRepo.findById(ewalletId).orElse(null);
     if (ewallet == null) {
       log.error("Ewallet({}) not found", ewalletId);
-      throw new EntityNotFoundException(Constants.EWALLET_NOT_FOUND);
+      throw new EntityNotFoundException(Constants.ERR_EWALLET_NOT_FOUND);
     }
 
     List<EwalletContact> contacts = ecRepo.fetchAllByOwnerAndEwallet(owner, ewallet, favOnly);

@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         .nik(nik)
         .phoneNumber(phoneNumber)
         .address(address)
-        .mpin(mpin)
+        .mpin(passwordEncoder.encode(mpin))
         .build();
   }
 
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
   public void populate() {
     Bank bca = bankRepo.findByName("Tahapan BCA").orElseThrow(() -> {
       log.error("Bank with name Tahapan BCA not found");
-      return new BankNotFoundException(Constants.BANK_NOT_FOUND);
+      return new BankNotFoundException(Constants.ERR_BANK_NOT_FOUND);
     });
 
     List<User> users = createInitialUsers();
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepo.findByAccountNumber(accNumber).orElseThrow(() -> {
       log.error("User with account number {} not found", accNumber);
-      return new UserNotFoundException(Constants.USER_NOT_FOUND);
+      return new UserNotFoundException(Constants.ERR_USER_NOT_FOUND);
     });
 
     log.info("User(accNum={}) found", accNumber);

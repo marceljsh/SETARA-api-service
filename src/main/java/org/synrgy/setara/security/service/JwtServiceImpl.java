@@ -1,7 +1,11 @@
 package org.synrgy.setara.security.service;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -24,13 +28,7 @@ public class JwtServiceImpl implements JwtService {
   private String secretKey;
 
   @Value("${security.jwt.token.expiration}")
-  private String jwtExpirationFromProperties;
-
-  private final Dotenv dotenv;
-
-  public JwtServiceImpl() {
-    this.dotenv = Dotenv.load();
-  }
+  private long jwtExpiration;
 
   @Override
   public String extractUsername(String token) {
@@ -80,28 +78,22 @@ public class JwtServiceImpl implements JwtService {
     return false;
   }
 
-  private long getJwtExpiration() {
-    String jwtExpiration = jwtExpirationFromProperties != null ? jwtExpirationFromProperties : dotenv.get("JWT_EXPIRATION");
-    return Long.parseLong(jwtExpiration);
-  }
-
   public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    long expirationTime = getJwtExpiration();
     return Jwts.builder()
-            .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-            .compact();
+        .setClaims(extraClaims)
+        .setSubject(userDetails.getUsername())
+        .setIssuedAt(new Date(System.currentTimeMillis()))
+        .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+        .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+        .compact();
   }
 
   private Claims extractAllClaims(String token) {
     return Jwts.parserBuilder()
-            .setSigningKey(getSignInKey())
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
+        .setSigningKey(getSignInKey())
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
   }
 
   private Key getSignInKey() {
