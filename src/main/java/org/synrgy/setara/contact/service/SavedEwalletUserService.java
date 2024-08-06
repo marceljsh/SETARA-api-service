@@ -1,5 +1,6 @@
 package org.synrgy.setara.contact.service;
 
+import org.synrgy.setara.contact.dto.FavoriteEwalletRequest;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
@@ -12,5 +13,5 @@ public interface SavedEwalletUserService {
 
     SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(User user, String ewalletName);
 
-    FavoriteResponse putFavoriteEwalletUser(UUID idTersimpan, boolean isFavorite);
+    FavoriteResponse putFavoriteEwalletUser(FavoriteEwalletRequest request);
 }

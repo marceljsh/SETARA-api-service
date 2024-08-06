@@ -10,6 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import javax.imageio.ImageIO;
 
@@ -33,6 +36,13 @@ public class QRCodeGenerator {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, width, height);
             BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+            // Ensure the directory exists
+            Path path = FileSystems.getDefault().getPath(filePath).getParent();
+            if (path != null && !Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+
             ImageIO.write(bufferedImage, "PNG", new File(filePath));
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Error generating QR code image", e);

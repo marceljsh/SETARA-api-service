@@ -37,7 +37,7 @@ public class SavedEwalletUserController {
 
     @PutMapping("/favorite-ewallet")
     public ResponseEntity<BaseResponse<FavoriteResponse>> putFavoriteEwalletUser(@RequestBody FavoriteEwalletRequest request) {
-        FavoriteResponse favoriteResponse = savedEwalletUserService.putFavoriteEwalletUser(request.getIdTersimpan(), request.isFavorite());
+        FavoriteResponse favoriteResponse = savedEwalletUserService.putFavoriteEwalletUser(request);
         BaseResponse<FavoriteResponse> response = BaseResponse.success(HttpStatus.OK, favoriteResponse, "Success update is favorite E-Wallet");
         return ResponseEntity.ok(response);
     }

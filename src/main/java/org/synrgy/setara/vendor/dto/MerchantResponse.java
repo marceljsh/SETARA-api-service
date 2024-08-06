@@ -8,11 +8,10 @@ import lombok.Setter;
 @Setter
 @Builder
 public class MerchantResponse {
-    private String merchant_name;
     private String name;
     private String nmid;
     private String terminalId;
-    private String image_path;
+    private String imagePath;
     private String address;
-    private String qris_code;
+    private String qrisCode;
 }

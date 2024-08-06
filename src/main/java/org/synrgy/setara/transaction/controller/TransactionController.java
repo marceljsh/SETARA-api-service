@@ -73,7 +73,7 @@ public class TransactionController {
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response,"Transfer successful"));
     }
 
-    @GetMapping("/getMonthlyReport")
+    @GetMapping("/get-monthly-report")
     public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
       User user,
       @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,

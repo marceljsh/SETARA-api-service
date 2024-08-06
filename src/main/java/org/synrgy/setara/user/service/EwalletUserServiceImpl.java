@@ -8,13 +8,14 @@ import org.synrgy.setara.user.dto.SearchNoEwalletRequest;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.exception.SearchExceptions;
 import org.synrgy.setara.user.model.EwalletUser;
-import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -80,8 +81,6 @@ public class EwalletUserServiceImpl implements EwalletUserService {
             }
         }
     }
-
-
     @Override
     public SearchResponse searchEwalletUser(SearchNoEwalletRequest request) {
         Ewallet ewallet = ewalletRepo.findById(request.getEwalletId())

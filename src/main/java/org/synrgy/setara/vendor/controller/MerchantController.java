@@ -25,7 +25,7 @@ public class MerchantController {
             @Parameter(schema = @Schema(example = "e56192b9-d09c-4927-b0e2-ae1e60f1e427")) @PathVariable String id_qris,
             HttpServletRequest request) {
         MerchantRequest requestDTO = new MerchantRequest();
-        requestDTO.setId_qris(id_qris);
+        requestDTO.setIdQris(id_qris);
 
         BaseResponse<MerchantResponse> response = merchantService.getQrisData(requestDTO);
         return new ResponseEntity<>(response, response.getCode() == 200 ? HttpStatus.OK : HttpStatus.NOT_FOUND);
