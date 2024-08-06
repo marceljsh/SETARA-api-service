@@ -24,7 +24,7 @@ public class SavedEwalletUserController {
 
     @GetMapping("/saved-ewallet-users")
     public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(
-      User user,
+            @Parameter(description = "Jangan ubah value user!") User user,
             @Parameter(
                     name = "ewalletName",
                     required = true,

@@ -1,5 +1,6 @@
 package org.synrgy.setara.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserController {
     private final EwalletUserService ewalletUserService;
 
     @GetMapping("/getBalance")
-    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(User user) {
+    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(@Parameter(description = "Jangan ubah value user!") User user) {
         UserBalanceResponse userBalanceResponse = userService.getBalance(user);
         BaseResponse<UserBalanceResponse> response = BaseResponse.success(HttpStatus.OK, userBalanceResponse, "Success Get Balance");
         return ResponseEntity.ok(response);
