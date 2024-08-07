@@ -21,11 +21,11 @@ public class EwalletServiceImpl implements EwalletService {
     @Override
     public void seedEwallet() {
         List<Ewallet> ewallets = Arrays.asList(
-                Ewallet.builder().name("Ovo").imagePath("https://media.licdn.com/dms/image/C5612AQEFlpyvi7iEtg/article-cover_image-shrink_600_2000/0/1564509786670?e=2147483647&v=beta&t=hZQb7qxKSWq66flOI2_uWoylvG6UXfGpXbnaYopoezI").build(),
-                Ewallet.builder().name("ShopeePay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/shopee.png").build(),
-                Ewallet.builder().name("GoPay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/gopay.png").build(),
-                Ewallet.builder().name("DANA").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/dana.png").build(),
-                Ewallet.builder().name("LinkAja").imagePath("https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/LinkAja.svg/2048px-LinkAja.svg.png").build()
+                Ewallet.builder().name("Ovo").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860518/SETARA_FC-8/NewOvo.png").build(),
+                Ewallet.builder().name("ShopeePay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860519/SETARA_FC-8/NewShopee.png").build(),
+                Ewallet.builder().name("GoPay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860520/SETARA_FC-8/Newgopay.png").build(),
+                Ewallet.builder().name("DANA").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860518/SETARA_FC-8/NewDana.png").build(),
+                Ewallet.builder().name("LinkAja").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860517/SETARA_FC-8/Newlinkaja.png").build()
         );
 
         for (Ewallet ewallet : ewallets) {

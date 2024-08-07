@@ -29,7 +29,6 @@ public class Merchant extends Auditable {
     @Column(name = "image_path")
     private String imagePath;
 
-    @Lob
     @Column(name = "qris_code", columnDefinition = "TEXT", length = 512)
     private String qrisCode;
 
