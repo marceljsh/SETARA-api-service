@@ -1,5 +1,6 @@
 package org.synrgy.setara.contact.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class SavedAccountController {
   private final SavedAccountService saService;
 
   @GetMapping("/saved-accounts")
-  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts(User user) {
+  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts(@Parameter(description = "Jangan ubah value user!") User user) {
     SavedEwalletAndAccountFinalResponse<SavedAccountResponse> savedAccounts = saService.getSavedAccounts(user);
     BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>> response = BaseResponse.success(HttpStatus.OK, savedAccounts, "Success Get Saved Accounts");
     return ResponseEntity.ok(response);
