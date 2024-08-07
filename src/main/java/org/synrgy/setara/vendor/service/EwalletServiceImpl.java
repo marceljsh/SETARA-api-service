@@ -10,7 +10,6 @@ import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +45,6 @@ public class EwalletServiceImpl implements EwalletService {
                         .name(ewallet.getName())
                         .imagePath(ewallet.getImagePath())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 }

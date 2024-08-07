@@ -9,22 +9,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.vendor.exception.EwalletNotFoundException;
+import org.synrgy.setara.vendor.exception.VendorException;
 
 @RestControllerAdvice(basePackages = "org.synrgy.setara.vendor")
-public class EwalletAdvice {
-    private static final Logger logger = LoggerFactory.getLogger(EwalletAdvice.class);
+public class VendorAdvice {
+    private static final Logger logger = LoggerFactory.getLogger(VendorAdvice.class);
 
-    @ExceptionHandler(EwalletNotFoundException.class)
-    public ResponseEntity<BaseResponse<?>> handleEwalletNotFoundException(EwalletNotFoundException ex) {
-        logger.error("Ewallet not found: {}", ex.getMessage());
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage());
+    @ExceptionHandler(VendorException.class)
+    public ResponseEntity<BaseResponse<String>> handleEwalletNotFoundException(VendorException ex) {
+        logger.error("Ewallet not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.error("Invalid JSON format");
+        logger.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

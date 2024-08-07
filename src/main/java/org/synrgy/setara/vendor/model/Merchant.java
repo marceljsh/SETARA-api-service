@@ -3,7 +3,6 @@ package org.synrgy.setara.vendor.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.synrgy.setara.common.model.Auditable;

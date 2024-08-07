@@ -22,7 +22,7 @@ public class DataInitializer implements CommandLineRunner {
   private final MerchantService merchantService;
 
   @Override
-  public void run(String... args) throws Exception {
+  public void run(String... args) {
     bankService.seedBank();
     userService.seedUser();
     ewalletService.seedEwallet();

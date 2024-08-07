@@ -2,6 +2,10 @@ package org.synrgy.setara.contact.exception;
 
 public class SavedAccountExceptions {
 
+    private SavedAccountExceptions() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
     public static class SavedAccountNotFoundException extends RuntimeException {
         public SavedAccountNotFoundException(String message) {
             super(message);

@@ -1,27 +1,18 @@
 package org.synrgy.setara.contact.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.contact.dto.FavoriteRequest;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
-import org.synrgy.setara.common.dto.BaseResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.synrgy.setara.contact.dto.SavedAccountResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.service.SavedAccountService;
 import org.synrgy.setara.user.model.User;
-
 
 @Validated
 @RestController

@@ -8,6 +8,10 @@ public class TransactionUtils {
 
     private static final int REFERENCE_NUMBER_LENGTH = 5;
 
+    private TransactionUtils() {
+        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
+
     public static String generateReferenceNumber(String typePrefix) {
         String randomDigits = RandomStringUtils.randomNumeric(REFERENCE_NUMBER_LENGTH);
         return String.format("%s-%s", typePrefix, randomDigits);

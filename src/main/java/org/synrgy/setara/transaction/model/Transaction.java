@@ -1,11 +1,7 @@
 package org.synrgy.setara.transaction.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.synrgy.setara.common.model.Auditable;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.vendor.model.Bank;
@@ -14,7 +10,6 @@ import org.synrgy.setara.vendor.model.Merchant;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Getter
 @Setter
