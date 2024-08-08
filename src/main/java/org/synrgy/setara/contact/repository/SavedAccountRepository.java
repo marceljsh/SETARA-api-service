@@ -39,4 +39,6 @@ public interface SavedAccountRepository extends JpaRepository<SavedAccount, UUID
   List<SavedAccount> findByOwnerId(UUID id);
 
   Optional<SavedAccount> findByOwnerAndAccountNumber(User owner, String accountNumber);
+
+  List<SavedAccount> findTop5ByOwnerIdAndFavoriteTrueOrderByTransferCountDesc(UUID ownerId);
 }

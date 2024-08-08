@@ -52,4 +52,6 @@ public interface SavedEwalletUserRepository extends JpaRepository<SavedEwalletUs
   void putFavorite(@Param("id") UUID id, @Param("isFavorite") boolean isFavorite);
 
   Optional<SavedEwalletUser> findByOwnerAndEwalletUser(User owner, EwalletUser ewalletUser);
+
+  List<SavedEwalletUser> findTop5ByOwnerIdAndFavoriteTrueOrderByTransferCountDesc(UUID ownerId);
 }
