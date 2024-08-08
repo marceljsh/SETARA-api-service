@@ -37,4 +37,5 @@ public class SavedEwalletUser extends Auditable {
   )
   private boolean favorite;
 
+  private int transferCount;
 }

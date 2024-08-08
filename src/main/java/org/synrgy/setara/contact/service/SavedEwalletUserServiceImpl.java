@@ -27,41 +27,41 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
     private final UserRepository userRepo;
     private final EwalletUserRepository ewalletUserRepo;
 
-    @Override
-    public void seedSavedEwalletUsers() {
-        List<EwalletUser> ewalletUsers = ewalletUserRepo.findAll();
-
-        if (ewalletUsers.isEmpty()) {
-            log.warn("No e-wallet users found in the database.");
-            return;
-        }
-
-        Optional<User> optionalOwner = userRepo.findByName("Kendrick Lamar");
-
-        if (optionalOwner.isEmpty()) {
-            log.warn("User with name 'Kendrick Lamar' not found.");
-            return;
-        }
-
-        User owner = optionalOwner.get();
-
-        for (EwalletUser ewalletUser : ewalletUsers) {
-            boolean exists = savedEwalletUserRepo.existsByOwnerAndEwalletUser(owner, ewalletUser);
-
-            if (!exists) {
-                SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
-                        .owner(owner)
-                        .ewalletUser(ewalletUser)
-                        .favorite(false)
-                        .build();
-
-                savedEwalletUserRepo.save(savedEwalletUser);
-                log.info("SavedEwalletUser with owner {} and ewalletUser {} has been added to the database", owner.getName(), ewalletUser.getName());
-            } else {
-                log.info("SavedEwalletUser with owner {} and ewalletUser {} already exists in the database", owner.getName(), ewalletUser.getName());
-            }
-        }
-    }
+//    @Override
+//    public void seedSavedEwalletUsers() {
+//        List<EwalletUser> ewalletUsers = ewalletUserRepo.findAll();
+//
+//        if (ewalletUsers.isEmpty()) {
+//            log.warn("No e-wallet users found in the database.");
+//            return;
+//        }
+//
+//        Optional<User> optionalOwner = userRepo.findByName("Kendrick Lamar");
+//
+//        if (optionalOwner.isEmpty()) {
+//            log.warn("User with name 'Kendrick Lamar' not found.");
+//            return;
+//        }
+//
+//        User owner = optionalOwner.get();
+//
+//        for (EwalletUser ewalletUser : ewalletUsers) {
+//            boolean exists = savedEwalletUserRepo.existsByOwnerAndEwalletUser(owner, ewalletUser);
+//
+//            if (!exists) {
+//                SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
+//                        .owner(owner)
+//                        .ewalletUser(ewalletUser)
+//                        .favorite(false)
+//                        .build();
+//
+//                savedEwalletUserRepo.save(savedEwalletUser);
+//                log.info("SavedEwalletUser with owner {} and ewalletUser {} has been added to the database", owner.getName(), ewalletUser.getName());
+//            } else {
+//                log.info("SavedEwalletUser with owner {} and ewalletUser {} already exists in the database", owner.getName(), ewalletUser.getName());
+//            }
+//        }
+//    }
 
     @Override
     @Transactional
