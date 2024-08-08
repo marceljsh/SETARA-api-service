@@ -18,22 +18,22 @@ public class AuthenticationAdvice {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationAdvice.class);
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<BaseResponse<?>> handleAuthenticationException(AuthenticationException ex) {
+    public ResponseEntity<BaseResponse<String>> handleAuthenticationException(AuthenticationException ex) {
         logger.error("Authentication error: {}", ex.getMessage());
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<BaseResponse<?>> handleBadCredentialsException(BadCredentialsException ex) {
+    public ResponseEntity<BaseResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
         logger.error("Bad credentials: {}", ex.getMessage());
-        BaseResponse<?> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, "Bad credentials");
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, "Bad credentials");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.error("Invalid JSON format");
+        logger.error("Invalid JSON format: {}", ex.getMessage());
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

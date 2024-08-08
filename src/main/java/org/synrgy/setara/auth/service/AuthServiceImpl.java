@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     return userRepo.findBySignature(signature)
             .orElseThrow(() -> {
               log.error("User with signature {} not found", signature);
-              throw new AuthenticationException("User not found");
+                return new AuthenticationException("User not found");
             });
   }
 

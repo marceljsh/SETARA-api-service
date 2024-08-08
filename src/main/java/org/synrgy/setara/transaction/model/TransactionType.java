@@ -1,5 +1,8 @@
 package org.synrgy.setara.transaction.model;
 
+import lombok.Getter;
+
+@Getter
 public enum TransactionType {
 
   TRANSFER("Transfer"),
@@ -11,20 +14,6 @@ public enum TransactionType {
 
   TransactionType(String name) {
     this.name = name;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public static TransactionType fromString(String text) {
-    return switch (text) {
-      case "Transfer" -> TRANSFER;
-      case "Top Up" -> TOP_UP;
-      case "Deposit" -> DEPOSIT;
-      case "QR PAYMENT" -> QRPAYMENT;
-      default -> null;
-    };
   }
 
 }

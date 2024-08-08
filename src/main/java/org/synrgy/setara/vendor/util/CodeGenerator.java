@@ -10,6 +10,10 @@ public class CodeGenerator {
     private static final int TERMINAL_ID_LENGTH = 3;
     private static final String ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+    private CodeGenerator() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated.");
+    }
+
     public static String generateUniqueNmid() {
         StringBuilder nmid = new StringBuilder("ID");
         for (int i = 0; i < NMID_LENGTH; i++) {

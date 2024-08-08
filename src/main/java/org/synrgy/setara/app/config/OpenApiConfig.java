@@ -26,6 +26,8 @@ public class OpenApiConfig {
     @Value("${openapi.prod-url}")
     private String prodUrl;
 
+    private static final String BEARER_AUTH_SCHEME = "Bearer Authentication";
+
     @Bean
     public OpenAPI myOpenAPI() {
 
@@ -34,8 +36,8 @@ public class OpenApiConfig {
         devServer.setDescription("Server URL in Development environment");
 
         Server stagingServer = new Server();
-        devServer.setUrl(stagingUrl);
-        devServer.setDescription("Server URL in Staging environment");
+        stagingServer.setUrl(stagingUrl);
+        stagingServer.setDescription("Server URL in Staging environment");
 
         Server prodServer = new Server();
         prodServer.setUrl(prodUrl);
@@ -58,17 +60,17 @@ public class OpenApiConfig {
                 .license(mitLicense);
 
         SecurityScheme securityScheme = new SecurityScheme()
-                .name("Bearer Authentication")
+                .name(BEARER_AUTH_SCHEME)
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT");
 
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("Bearer Authentication");
+                .addList(BEARER_AUTH_SCHEME);
 
         return new OpenAPI().info(info)
                 .servers(List.of(devServer, stagingServer, prodServer))
-                .components(new Components().addSecuritySchemes("Bearer Authentication", securityScheme))
+                .components(new Components().addSecuritySchemes(BEARER_AUTH_SCHEME, securityScheme))
                 .addSecurityItem(securityRequirement);
     }
 }

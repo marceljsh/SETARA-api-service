@@ -34,7 +34,7 @@ public class SavedAccountAdvice {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        log.error("Invalid JSON format");
+        log.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

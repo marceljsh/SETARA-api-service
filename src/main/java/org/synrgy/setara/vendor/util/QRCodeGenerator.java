@@ -15,8 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import javax.imageio.ImageIO;
+import org.synrgy.setara.vendor.exception.VendorException;
 
 public class QRCodeGenerator {
+
+    private QRCodeGenerator() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated.");
+    }
 
     public static String generateQRCodeBase64(String data, int width, int height) {
         try {
@@ -27,7 +32,7 @@ public class QRCodeGenerator {
             byte[] pngData = pngOutputStream.toByteArray();
             return Base64.getEncoder().encodeToString(pngData);
         } catch (WriterException | IOException e) {
-            throw new RuntimeException("Error generating QR code", e);
+            throw VendorException.qrCodeGenerationException("Error generating QR code", e);
         }
     }
 
@@ -37,7 +42,6 @@ public class QRCodeGenerator {
             BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, width, height);
             BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 
-            // Ensure the directory exists
             Path path = FileSystems.getDefault().getPath(filePath).getParent();
             if (path != null && !Files.exists(path)) {
                 Files.createDirectories(path);
@@ -45,7 +49,7 @@ public class QRCodeGenerator {
 
             ImageIO.write(bufferedImage, "PNG", new File(filePath));
         } catch (WriterException | IOException e) {
-            throw new RuntimeException("Error generating QR code image", e);
+            throw VendorException.qrCodeGenerationException("Error generating QR code image", e);
         }
     }
 }
