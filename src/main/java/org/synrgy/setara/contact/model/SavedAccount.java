@@ -55,4 +55,5 @@ public class SavedAccount extends Auditable {
   )
   private boolean favorite;
 
+  private int transferCount;
 }

@@ -27,7 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     userService.seedUser();
     ewalletService.seedEwallet();
     ewalletUserService.seedEwalletUsers();
-    savedEwalletUserService.seedSavedEwalletUsers();
+//    savedEwalletUserService.seedSavedEwalletUsers();
     merchantService.seedMerchant();
   }
 

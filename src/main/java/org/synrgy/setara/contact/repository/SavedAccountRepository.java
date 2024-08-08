@@ -9,6 +9,7 @@ import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -35,7 +36,9 @@ public interface SavedAccountRepository extends JpaRepository<SavedAccount, UUID
   @Query("SELECT COUNT(s) FROM SavedAccount s WHERE s.owner.id = :ownerId AND s.favorite = false AND s.deletedAt IS NULL")
   Long countNotFavoriteByOwner(@Param("ownerId") UUID ownerId);
 
-  boolean existsByOwnerAndAccountNumber(User owner, String accountNumber);
-
   List<SavedAccount> findByOwnerId(UUID id);
+
+  Optional<SavedAccount> findByOwnerAndAccountNumber(User owner, String accountNumber);
+
+  List<SavedAccount> findTop5ByOwnerIdAndFavoriteTrueOrderByTransferCountDesc(UUID ownerId);
 }

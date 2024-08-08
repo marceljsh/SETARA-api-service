@@ -32,10 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -92,13 +89,20 @@ public class TransactionServiceImpl implements TransactionService {
         userRepository.save(user);
         ewalletUserRepository.save(destinationEwalletUser);
 
-        if (request.isSavedAccount() && !savedEwalletUserRepository.existsByOwnerAndEwalletUser(user, destinationEwalletUser)) {
+        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepository.findByOwnerAndEwalletUser(user, destinationEwalletUser);
+        if (request.isSavedAccount() && optionalSavedEwalletUser.isEmpty()) {
             SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
                     .owner(user)
                     .ewalletUser(destinationEwalletUser)
                     .favorite(false)
+                    .transferCount(1)
                     .build();
             savedEwalletUserRepository.save(savedEwalletUser);
+        } else {
+            optionalSavedEwalletUser.ifPresent(ewalletUser -> {
+                ewalletUser.setTransferCount(ewalletUser.getTransferCount() + 1);
+                savedEwalletUserRepository.save(ewalletUser);
+            });
         }
 
         Bank bank = user.getBank();
@@ -189,7 +193,9 @@ public class TransactionServiceImpl implements TransactionService {
         userRepository.save(user);
         userRepository.save(destinationUser);
 
-        if (request.isSavedAccount() && !savedAccountRepository.existsByOwnerAndAccountNumber(user, destinationUser.getAccountNumber())) {
+        Optional<SavedAccount> optionalSavedAccount = savedAccountRepository.findByOwnerAndAccountNumber(user, destinationUser.getAccountNumber());
+
+        if (request.isSavedAccount() && optionalSavedAccount.isEmpty()) {
             SavedAccount savedAccount = SavedAccount.builder()
                     .owner(user)
                     .bank(destinationUser.getBank())
@@ -197,8 +203,14 @@ public class TransactionServiceImpl implements TransactionService {
                     .accountNumber(destinationUser.getAccountNumber())
                     .imagePath(user.getImagePath())
                     .favorite(false)
+                    .transferCount(1)
                     .build();
             savedAccountRepository.save(savedAccount);
+        } else {
+            optionalSavedAccount.ifPresent(account -> {
+                account.setTransferCount(account.getTransferCount() + 1);
+                savedAccountRepository.save(account);
+            });
         }
 
         return TransferResponse.builder()
