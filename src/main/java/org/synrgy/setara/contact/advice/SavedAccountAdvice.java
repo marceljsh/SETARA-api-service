@@ -16,6 +16,14 @@ public class SavedAccountAdvice {
 
     private static final Logger log = LoggerFactory.getLogger(SavedAccountAdvice.class);
 
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<BaseResponse<String>> handleUserNotFoundException(UserNotFoundException ex) {
+        log.error("UserNotFoundException: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(SavedAccountNotFoundException.class)
     @ResponseBody
     public ResponseEntity<BaseResponse<String>> handleSavedAccountNotFoundException(SavedAccountNotFoundException ex) {
@@ -34,7 +42,7 @@ public class SavedAccountAdvice {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        log.error("Invalid JSON format");
+        log.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

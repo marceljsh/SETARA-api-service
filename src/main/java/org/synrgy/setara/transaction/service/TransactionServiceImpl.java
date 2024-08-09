@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.transaction.utils.TransactionUtils;
 import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.repository.SavedAccountRepository;
@@ -18,6 +17,7 @@ import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.model.TransactionType;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
+import org.synrgy.setara.transaction.util.TransactionUtils;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
@@ -32,10 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +55,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public TopUpResponse topUp(User user, TopUpRequest request) {
         validateMpin(request.getMpin(), user);
-        validateTopUpAmount(request.getAmount());
+
+        if (request.getAmount().compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
+            throw new TransactionExceptions.InvalidTopUpAmountException("Top-up amount must be at least " + MINIMUM_TOP_UP_AMOUNT);
+        }
 
         BigDecimal totalAmount = request.getAmount().add(ADMIN_FEE);
         checkSufficientBalance(user, totalAmount);
@@ -66,30 +66,56 @@ public class TransactionServiceImpl implements TransactionService {
         EwalletUser destinationEwalletUser = ewalletUserRepository.findByEwalletIdAndPhoneNumber(request.getIdEwallet(), request.getDestinationPhoneNumber())
                 .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("Destination e-wallet user not found for id " + request.getIdEwallet() + " and phone number " + request.getDestinationPhoneNumber()));
 
-        Transaction transaction = createTransaction(request, user, destinationEwalletUser, totalAmount);
+        String referenceNumber = TransactionUtils.generateReferenceNumber("TOP");
+        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
 
-        updateBalances(user, destinationEwalletUser, request.getAmount(), totalAmount);
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .ewallet(destinationEwalletUser.getEwallet())
+                .type(TransactionType.TOP_UP)
+                .destinationPhoneNumber(destinationEwalletUser.getPhoneNumber())
+                .amount(request.getAmount())
+                .adminFee(ADMIN_FEE)
+                .totalamount(totalAmount)
+                .uniqueCode(uniqueCode)
+                .referenceNumber(referenceNumber)
+                .note(request.getNote())
+                .time(LocalDateTime.now())
+                .build();
         transactionRepository.save(transaction);
 
-        if (request.isSavedAccount()) {
-            saveEwalletUser(user, destinationEwalletUser); // Save the ewallet user data
+        user.setBalance(user.getBalance().subtract(totalAmount));
+        destinationEwalletUser.setBalance(destinationEwalletUser.getBalance().add(request.getAmount()));
+        userRepository.save(user);
+        ewalletUserRepository.save(destinationEwalletUser);
+
+        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepository.findByOwnerAndEwalletUser(user, destinationEwalletUser);
+        if (request.isSavedAccount() && optionalSavedEwalletUser.isEmpty()) {
+            SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
+                    .owner(user)
+                    .ewalletUser(destinationEwalletUser)
+                    .favorite(false)
+                    .transferCount(1)
+                    .build();
+            savedEwalletUserRepository.save(savedEwalletUser);
+        } else {
+            optionalSavedEwalletUser.ifPresent(ewalletUser -> {
+                ewalletUser.setTransferCount(ewalletUser.getTransferCount() + 1);
+                savedEwalletUserRepository.save(ewalletUser);
+            });
         }
 
-        return createTransactionResponse(transaction, destinationEwalletUser);
-    }
-
-    private TopUpResponse createTransactionResponse(Transaction transaction, EwalletUser destinationEwalletUser) {
-        Bank bank = transaction.getUser().getBank();
+        Bank bank = user.getBank();
         String bankName = bank != null ? bank.getName() : "Unknown";
 
-        Ewallet ewallet = ewalletRepository.findById(transaction.getEwallet().getId())
+        Ewallet ewallet = ewalletRepository.findById(destinationEwalletUser.getEwallet().getId())
                 .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
 
         return TopUpResponse.builder()
                 .user(TopUpResponse.UserDto.builder()
-                        .accountNumber(transaction.getUser().getAccountNumber())
-                        .name(transaction.getUser().getName())
-                        .imagePath(transaction.getUser().getImagePath())
+                        .accountNumber(user.getAccountNumber())
+                        .name(user.getName())
+                        .imagePath(user.getImagePath())
                         .bankName(bankName)
                         .build())
                 .userEwallet(TopUpResponse.UserEwalletDto.builder()
@@ -149,7 +175,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction depositTransaction = Transaction.builder()
                 .user(destinationUser)
-                .bank(user.getBank())  // Assuming the bank of the transaction is the bank of the source user
+                .bank(user.getBank())
                 .type(TransactionType.DEPOSIT)
                 .destinationAccountNumber(null)
                 .amount(request.getAmount())
@@ -167,7 +193,9 @@ public class TransactionServiceImpl implements TransactionService {
         userRepository.save(user);
         userRepository.save(destinationUser);
 
-        if (request.isSavedAccount()) {
+        Optional<SavedAccount> optionalSavedAccount = savedAccountRepository.findByOwnerAndAccountNumber(user, destinationUser.getAccountNumber());
+
+        if (request.isSavedAccount() && optionalSavedAccount.isEmpty()) {
             SavedAccount savedAccount = SavedAccount.builder()
                     .owner(user)
                     .bank(destinationUser.getBank())
@@ -175,8 +203,14 @@ public class TransactionServiceImpl implements TransactionService {
                     .accountNumber(destinationUser.getAccountNumber())
                     .imagePath(user.getImagePath())
                     .favorite(false)
+                    .transferCount(1)
                     .build();
             savedAccountRepository.save(savedAccount);
+        } else {
+            optionalSavedAccount.ifPresent(account -> {
+                account.setTransferCount(account.getTransferCount() + 1);
+                savedAccountRepository.save(account);
+            });
         }
 
         return TransferResponse.builder()
@@ -197,61 +231,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .totalAmount(totalAmount)
                 .note(request.getNote())
                 .build();
-    }
-
-    private void validateMpin(String mpin, User user) {
-        if (!passwordEncoder.matches(mpin, user.getMpin())) {
-            throw new TransactionExceptions.InvalidMpinException("Invalid MPIN");
-        }
-    }
-
-    private void validateTopUpAmount(BigDecimal amount) {
-        if (amount.compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
-            throw new TransactionExceptions.InvalidTopUpAmountException("Top-up amount must be at least " + MINIMUM_TOP_UP_AMOUNT);
-        }
-    }
-
-    private void checkSufficientBalance(User user, BigDecimal totalAmount) {
-        if (user.getBalance().compareTo(totalAmount) < 0) {
-            throw new TransactionExceptions.InsufficientBalanceException("Insufficient balance");
-        }
-    }
-
-    private Transaction createTransaction(TopUpRequest request, User user, EwalletUser destinationEwalletUser, BigDecimal totalAmount) {
-        String referenceNumber = TransactionUtils.generateReferenceNumber("TOP");
-        String uniqueCode = TransactionUtils.generateUniqueCode(referenceNumber);
-
-        return Transaction.builder()
-                .user(user)
-                .ewallet(destinationEwalletUser.getEwallet())
-                .type(TransactionType.TOP_UP)
-                .destinationPhoneNumber(request.getDestinationPhoneNumber())
-                .amount(request.getAmount())
-                .adminFee(ADMIN_FEE)
-                .totalamount(totalAmount)
-                .uniqueCode(uniqueCode)
-                .referenceNumber(referenceNumber)
-                .note(request.getNote())
-                .time(LocalDateTime.now())
-                .build();
-    }
-
-    private void updateBalances(User user, EwalletUser destinationEwalletUser, BigDecimal amount, BigDecimal totalAmount) {
-        user.setBalance(user.getBalance().subtract(totalAmount));
-        destinationEwalletUser.setBalance(destinationEwalletUser.getBalance().add(amount));
-        userRepository.save(user);
-        ewalletUserRepository.save(destinationEwalletUser);
-    }
-
-    private void saveEwalletUser(User owner, EwalletUser ewalletUser) {
-        if (!savedEwalletUserRepository.existsByOwnerAndEwalletUser(owner, ewalletUser)) {
-            SavedEwalletUser savedEwalletUser = SavedEwalletUser.builder()
-                    .owner(owner)
-                    .ewalletUser(ewalletUser)
-                    .favorite(false)
-                    .build();
-            savedEwalletUserRepository.save(savedEwalletUser);
-        }
     }
 
     @Override
@@ -327,20 +306,15 @@ public class TransactionServiceImpl implements TransactionService {
         user.setBalance(user.getBalance().subtract(totalAmount));
         userRepository.save(user);
 
-        return createTransactionResponse(transaction, user, destinationMerchant);
-    }
-
-
-    private MerchantTransactionResponse createTransactionResponse(Transaction transaction, User sourceUser, Merchant destinationMerchant) {
-        Bank bank = sourceUser.getBank();
+        Bank bank = user.getBank();
         String bankName = bank != null ? bank.getName() : "Unknown";
 
         return MerchantTransactionResponse.builder()
                 .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
-                        .name(sourceUser.getName())
+                        .name(user.getName())
                         .bank(bankName)
-                        .accountNumber(sourceUser.getAccountNumber())
-                        .imagePath(sourceUser.getImagePath())
+                        .accountNumber(user.getAccountNumber())
+                        .imagePath(user.getImagePath())
                         .build())
                 .destinationUser(MerchantTransactionResponse.DestinationUserDTO.builder()
                         .name(destinationMerchant.getName())
@@ -382,16 +356,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .formattedDate(transaction.getTime().format(dateFormatter))
                 .formattedTime(transaction.getTime().format(timeFormatter))
                 .build());
-    }
-
-    private String formatTransactionType(Transaction transaction) {
-      return switch (transaction.getType()) {
-        case TRANSFER -> "Transfer M-Banking DB";
-        case TOP_UP -> ewalletRepository.findById(transaction.getEwallet().getId())
-          .map(ewallet -> "TOP UP " + ewallet.getName())
-          .orElse("Unknown Wallet");
-        default -> transaction.getType().toString();
-      };
     }
 
     @Override
@@ -462,5 +426,27 @@ public class TransactionServiceImpl implements TransactionService {
                 .adminFee(transaction.getAdminFee())
                 .totalAmount(transaction.getTotalamount())
                 .build();
+    }
+
+    private void validateMpin(String mpin, User user) {
+        if (!passwordEncoder.matches(mpin, user.getMpin())) {
+            throw new TransactionExceptions.InvalidMpinException("Invalid MPIN");
+        }
+    }
+
+    private void checkSufficientBalance(User user, BigDecimal totalAmount) {
+        if (user.getBalance().compareTo(totalAmount) < 0) {
+            throw new TransactionExceptions.InsufficientBalanceException("Insufficient balance");
+        }
+    }
+
+    private String formatTransactionType(Transaction transaction) {
+        return switch (transaction.getType()) {
+            case TRANSFER -> "Transfer M-Banking DB";
+            case TOP_UP -> ewalletRepository.findById(transaction.getEwallet().getId())
+                    .map(ewallet -> "TOP UP " + ewallet.getName())
+                    .orElse("Unknown Wallet");
+            default -> transaction.getType().toString();
+        };
     }
 }

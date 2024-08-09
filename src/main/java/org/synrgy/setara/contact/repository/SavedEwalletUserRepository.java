@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -50,4 +50,8 @@ public interface SavedEwalletUserRepository extends JpaRepository<SavedEwalletUs
   @Modifying
   @Query("UPDATE SavedEwalletUser sa SET sa.favorite = :isFavorite WHERE sa.id = :id")
   void putFavorite(@Param("id") UUID id, @Param("isFavorite") boolean isFavorite);
+
+  Optional<SavedEwalletUser> findByOwnerAndEwalletUser(User owner, EwalletUser ewalletUser);
+
+  List<SavedEwalletUser> findTop5ByOwnerIdAndFavoriteTrueOrderByTransferCountDesc(UUID ownerId);
 }

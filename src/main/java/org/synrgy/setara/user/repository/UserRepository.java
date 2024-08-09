@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.synrgy.setara.user.model.User;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 

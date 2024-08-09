@@ -1,11 +1,14 @@
 package org.synrgy.setara.vendor.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
+import org.synrgy.setara.vendor.exception.VendorException;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 import org.synrgy.setara.vendor.util.CodeGenerator;
@@ -21,10 +24,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-    @Autowired
-    private MerchantRepository merchantRepository;
+    private static final Logger log = LoggerFactory.getLogger(MerchantServiceImpl.class);
+    private final MerchantRepository merchantRepository;
 
     private static final String QR_CODE_DIR = "src/main/resources/static/qrcodes/";
 
@@ -50,35 +54,36 @@ public class MerchantServiceImpl implements MerchantService {
         for (Merchant merchant : merchants) {
             Optional<Merchant> existingMerchant = merchantRepository.findByName(merchant.getName());
             if (existingMerchant.isEmpty()) {
-                Merchant savedMerchant = merchantRepository.save(merchant);
+                try {
+                    Merchant savedMerchant = merchantRepository.save(merchant);
 
-                String qrisData = savedMerchant.getId().toString();
-                int qrCodeWidth = 400;
-                int qrCodeHeight = 400;
+                    String qrisData = savedMerchant.getId().toString();
+                    int qrCodeWidth = 400;
+                    int qrCodeHeight = 400;
 
-                String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
+                    String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
 
-                Path path = Paths.get(QR_CODE_DIR);
-                if (!Files.exists(path)) {
-                    try {
+                    Path path = Paths.get(QR_CODE_DIR);
+                    if (!Files.exists(path)) {
                         Files.createDirectories(path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
                     }
+
+                    String qrCodeImagePath = QR_CODE_DIR + savedMerchant.getName() + "-qrcode.png";
+                    QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
+
+                    savedMerchant.setQrisCode(qrCodeBase64);
+                    merchantRepository.save(savedMerchant);
+
+                    log.info("Merchant with name {} has been saved with QR code.", savedMerchant.getName());
+                } catch (IOException e) {
+                    throw VendorException.qrCodeGenerationException("Failed to save QR code for merchant " + merchant.getName(), e);
                 }
-
-                String qrCodeImagePath = QR_CODE_DIR + savedMerchant.getName() + "-qrcode.png";
-                QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
-
-                savedMerchant.setQrisCode(qrCodeBase64);
-                merchantRepository.save(savedMerchant);
-
-                System.out.println("Merchant with QRIS code " + savedMerchant.getName() + " has been saved.");
             } else {
-                System.out.println("Merchant with QRIS code " + merchant.getName() + " already exists.");
+                log.info("Merchant with name {} already exists.", merchant.getName());
             }
         }
     }
+
 
     private String generateUniqueNmid() {
         String nmid;

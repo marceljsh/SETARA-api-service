@@ -6,10 +6,8 @@ import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
 import org.synrgy.setara.user.model.User;
 
-import java.util.UUID;
-
 public interface SavedEwalletUserService {
-    void seedSavedEwalletUsers();
+//    void seedSavedEwalletUsers();
 
     SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(User user, String ewalletName);
 

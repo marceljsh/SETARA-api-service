@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.repository.BankRepository;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -19,10 +19,10 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public void seedBank() {
-        List<Bank> banks = Arrays.asList(
+        List<Bank> banks = Collections.singletonList(
                 Bank.builder()
-                    .name("Tahapan BCA")
-                    .build()
+                        .name("Tahapan BCA")
+                        .build()
         );
 
         for (Bank bank : banks) {

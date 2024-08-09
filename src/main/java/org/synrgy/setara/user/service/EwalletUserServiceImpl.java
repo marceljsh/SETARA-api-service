@@ -26,7 +26,6 @@ public class EwalletUserServiceImpl implements EwalletUserService {
 
     @Override
     public void seedEwalletUsers() {
-        // Daftar pengguna e-wallet
         List<EwalletUser> ewalletUsers = Arrays.asList(
                 EwalletUser.builder()
                         .name("FARAH CANTIKA")
@@ -48,7 +47,6 @@ public class EwalletUserServiceImpl implements EwalletUserService {
                         .build()
         );
 
-        // Daftar nama e-wallet
         List<String> ewalletNames = Arrays.asList("Ovo", "ShopeePay", "GoPay", "DANA", "LinkAja");
 
         for (String ewalletName : ewalletNames) {
@@ -57,7 +55,6 @@ public class EwalletUserServiceImpl implements EwalletUserService {
             if (ewalletOpt.isPresent()) {
                 Ewallet ewallet = ewalletOpt.get();
                 ewalletUsers.forEach(user -> {
-                    // Buat instance baru dari setiap pengguna e-wallet
                     EwalletUser ewalletUser = EwalletUser.builder()
                             .name(user.getName())
                             .phoneNumber(user.getPhoneNumber())
@@ -66,7 +63,6 @@ public class EwalletUserServiceImpl implements EwalletUserService {
                             .ewallet(ewallet)
                             .build();
 
-                    // Cek apakah EwalletUser dengan nama dan nomor telepon yang sama sudah ada untuk ewallet tertentu
                     boolean exists = ewalletUserRepo.existsByNameAndPhoneNumberAndEwallet(ewalletUser.getName(), ewalletUser.getPhoneNumber(), ewallet);
 
                     if (exists) {
