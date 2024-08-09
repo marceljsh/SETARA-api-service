@@ -17,7 +17,7 @@ import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.model.TransactionType;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
-import org.synrgy.setara.transaction.utils.TransactionUtils;
+import org.synrgy.setara.transaction.util.TransactionUtils;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
