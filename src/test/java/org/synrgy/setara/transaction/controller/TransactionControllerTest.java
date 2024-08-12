@@ -18,7 +18,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TransactionControllerTest {
+class TransactionControllerTest {
 
     @Mock
     private TransactionService transactionService;
@@ -29,6 +29,11 @@ public class TransactionControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testTopUp_Success() {
+
     }
 
     @Test
@@ -49,5 +54,10 @@ public class TransactionControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Success Get Monthly Report", Objects.requireNonNull(response.getBody()).getMessage());
         assertEquals(monthlyReportResponse, response.getBody().getData());
+    }
+
+    @Test
+    void testMerchantTrasaction_Success() {
+
     }
 }

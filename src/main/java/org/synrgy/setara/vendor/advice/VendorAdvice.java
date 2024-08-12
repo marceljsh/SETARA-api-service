@@ -9,31 +9,38 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.vendor.exception.VendorException;
+import org.synrgy.setara.user.exception.UserExceptions;
+import org.synrgy.setara.vendor.exception.VendorExceptions;
 
 @RestControllerAdvice(basePackages = "org.synrgy.setara.vendor")
 public class VendorAdvice {
-    private static final Logger logger = LoggerFactory.getLogger(VendorAdvice.class);
+    private static final Logger log = LoggerFactory.getLogger(VendorAdvice.class);
 
-    @ExceptionHandler(VendorException.class)
-    public ResponseEntity<BaseResponse<String>> handleEwalletNotFoundException(VendorException ex) {
-        logger.error("Ewallet not found: {}", ex.getMessage(), ex);
-        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, ex.getMessage());
+    @ExceptionHandler(VendorExceptions.MerchantNotFoundException.class)
+    public ResponseEntity<BaseResponse<String>> handleMerchantNotFoundException(VendorExceptions.MerchantNotFoundException ex) {
+        log.error("Merchant not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Merchant not found");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(VendorExceptions.QrCodeGenerationException.class)
+    public ResponseEntity<BaseResponse<String>> handleQrCodeGenerationException(VendorExceptions.QrCodeGenerationException ex) {
+        log.error("Qr Code Generation error: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "Qr Code Generation error");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.error("Invalid JSON format: {}", ex.getMessage(), ex);
+        log.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseBody
     public ResponseEntity<BaseResponse<String>> handleGenericException(Exception ex) {
-        logger.error("Unexpected Exception: {}", ex.getMessage(), ex);
+        log.error("Unexpected Exception: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

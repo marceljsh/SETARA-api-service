@@ -5,9 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
@@ -25,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.synrgy.setara.transaction.model.TransactionType.*;
 
-public class TransactionServiceTest {
+class TransactionServiceTest {
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -42,7 +39,34 @@ public class TransactionServiceTest {
     }
 
     @Test
-    void testGetMonthlyReport_UsersOwnTransactions() {
+    void testTopUp_Success() {
+        User user = new User();
+        UUID userId = UUID.randomUUID();
+        user.setId(userId);
+    }
+
+    @Test
+    void testTopUp_InvalidMpin() {
+
+    }
+
+    @Test
+    void testTopUp_InvalidTopUpAmount() {
+
+    }
+
+    @Test
+    void testTopUp_InsufficientBalance() {
+
+    }
+
+    @Test
+    void testTopUp_DestinationEwalletUserNotFound() {
+
+    }
+
+    @Test
+    void testGetMonthlyReport_Success() {
         User user = new User();
         UUID userId = UUID.randomUUID();
         user.setId(userId);
@@ -113,5 +137,30 @@ public class TransactionServiceTest {
     @Test
     void testGetMonthlyReport_InvalidYear2() {
         assertThrows(TransactionExceptions.InvalidYearException.class, () -> transactionService.getMonthlyReport(new User(), 7, 2100));
+    }
+
+    @Test
+    void testMerchantTransaction_Success() {
+
+    }
+
+    @Test
+    void testMerchantTransaction_InvalidMpin() {
+
+    }
+
+    @Test
+    void testMerchantTransaction_InvalidTopUpAmount() {
+
+    }
+
+    @Test
+    void testMerchantTransaction_InsufficientBalance() {
+
+    }
+
+    @Test
+    void testMerchantTransaction_MerchantNotFound() {
+
     }
 }
