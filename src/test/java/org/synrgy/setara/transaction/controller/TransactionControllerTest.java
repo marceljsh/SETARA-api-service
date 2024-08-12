@@ -1,5 +1,6 @@
 package org.synrgy.setara.transaction.controller;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.MonthlyReportResponse;
+import org.synrgy.setara.transaction.dto.TopUpRequest;
+import org.synrgy.setara.transaction.dto.TopUpResponse;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.synrgy.setara.user.model.User;
 
@@ -33,6 +36,26 @@ class TransactionControllerTest {
 
     @Test
     void testTopUp_Success() {
+        User user = new User();
+
+        TopUpRequest topUpRequest = TopUpRequest.builder().build();
+
+        TopUpResponse topUpResponse = TopUpResponse.builder()
+                .user(new TopUpResponse.UserDto())
+                .userEwallet(new TopUpResponse.UserEwalletDto())
+                .amount(BigDecimal.valueOf(20000))
+                .adminFee(BigDecimal.valueOf(1000))
+                .totalAmount(BigDecimal.valueOf(21000))
+                .build();
+
+        when(transactionService.topUp(user, topUpRequest)).thenReturn(topUpResponse);
+
+        ResponseEntity<BaseResponse<TopUpResponse>> response = transactionController.topUp(user, topUpRequest);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Top-up successful", Objects.requireNonNull(response.getBody()).getMessage());
+        assertEquals(topUpResponse, response.getBody().getData());
 
     }
 
