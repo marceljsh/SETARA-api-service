@@ -6,23 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.synrgy.setara.contact.repository.SavedAccountRepository;
 import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
-import org.synrgy.setara.transaction.dto.TopUpRequest;
-import org.synrgy.setara.transaction.dto.TopUpResponse;
+import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
-import org.synrgy.setara.transaction.dto.MonthlyReportResponse;
 import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.model.Ewallet;
+import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
+import org.synrgy.setara.vendor.repository.MerchantRepository;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +51,12 @@ class TransactionServiceTest {
 
     @Mock
     private SavedEwalletUserRepository savedEwalletUserRepository;
+
+    @Mock
+    private SavedAccountRepository savedAccountRepository;
+
+    @Mock
+    private MerchantRepository merchantRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -269,26 +276,379 @@ class TransactionServiceTest {
 
     @Test
     void testMerchantTransaction_Success() {
+        Bank bank = Bank.builder()
+                .name("BCA")
+                .build();
+        bank.setId(UUID.randomUUID());
 
+        User user = User.builder()
+                .accountNumber("987654321")
+                .name("John Doe")
+                .imagePath("/images/johndoe.png")
+                .balance(BigDecimal.valueOf(100000))
+                .mpin(passwordEncoder.encode("123456"))
+                .bank(bank)
+                .build();
+        user.setId(UUID.randomUUID());
+
+        Merchant merchant = Merchant.builder()
+                .name("Jane Smith")
+                .nmid("ID5958987675019")
+                .terminalId("JYW")
+                .imagePath("/images/janesmith.png")
+                .address("Fernvale Rd.")
+                .build();
+
+        MerchantTransactionRequest request = MerchantTransactionRequest.builder()
+                .idQris(UUID.randomUUID())
+                .amount(BigDecimal.valueOf(40000))
+                .note("Testing...")
+                .mpin("123456")
+                .build();
+
+        when(passwordEncoder.matches(request.getMpin(), user.getMpin())).thenReturn(true);
+        when(merchantRepository.findById(request.getIdQris())).thenReturn(Optional.of(merchant));
+
+        MerchantTransactionResponse expectedResponse = MerchantTransactionResponse.builder()
+                .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
+                        .name("John Doe")
+                        .bank("BCA")
+                        .accountNumber("987654321")
+                        .imagePath("/images/johndoe.png")
+                        .build())
+                .destinationUser(MerchantTransactionResponse.DestinationUserDTO.builder()
+                        .name("Jane Smith")
+                        .nameMerchant("Jane Smith")
+                        .nmid("ID5958987675019")
+                        .terminalId("JYW")
+                        .imagePath("/images/janesmith.png")
+                        .build())
+                .amount(BigDecimal.valueOf(40000))
+                .adminFee(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.valueOf(40000))
+                .note("Testing...")
+                .build();
+
+        MerchantTransactionResponse response = transactionService.merchantTransaction(user, request);
+
+        assertNotNull(response);
+        assertEquals(expectedResponse, response);
+        assertEquals(BigDecimal.valueOf(60000), user.getBalance());
     }
 
     @Test
     void testMerchantTransaction_InvalidMpin() {
+        User user = User.builder()
+                .balance(BigDecimal.valueOf(30000))
+                .mpin(passwordEncoder.encode("123456"))
+                .build();
 
+        MerchantTransactionRequest request = MerchantTransactionRequest.builder()
+                .amount(BigDecimal.valueOf(20000))
+                .mpin("654321")
+                .build();
+
+        assertThrows(TransactionExceptions.InvalidMpinException.class, () -> transactionService.merchantTransaction(user, request));
     }
 
     @Test
     void testMerchantTransaction_InvalidTopUpAmount() {
+        User user = User.builder()
+                .balance(BigDecimal.valueOf(30000))
+                .mpin(passwordEncoder.encode("123456"))
+                .build();
 
+        MerchantTransactionRequest request = MerchantTransactionRequest.builder()
+                .amount(BigDecimal.valueOf(0))
+                .mpin("123456")
+                .build();
+
+        when(passwordEncoder.matches(request.getMpin(), user.getMpin())).thenReturn(true);
+
+        assertThrows(TransactionExceptions.InvalidTransactionAmountException.class, () -> transactionService.merchantTransaction(user, request));
     }
 
     @Test
     void testMerchantTransaction_InsufficientBalance() {
+        User user = User.builder()
+                .balance(BigDecimal.valueOf(20000))
+                .mpin(passwordEncoder.encode("123456"))
+                .build();
 
+        MerchantTransactionRequest request = MerchantTransactionRequest.builder()
+                .idQris(UUID.randomUUID())
+                .amount(BigDecimal.valueOf(30000))
+                .mpin("123456")
+                .build();
+
+        when(passwordEncoder.matches(request.getMpin(), user.getMpin())).thenReturn(true);
+        when(merchantRepository.findById(request.getIdQris())).thenReturn(Optional.of(new Merchant()));
+
+        assertThrows(TransactionExceptions.InsufficientBalanceException.class, () -> transactionService.merchantTransaction(user, request));
     }
 
     @Test
     void testMerchantTransaction_MerchantNotFound() {
+        User user = User.builder()
+                .balance(BigDecimal.valueOf(30000))
+                .mpin(passwordEncoder.encode("123456"))
+                .build();
 
+        MerchantTransactionRequest request = MerchantTransactionRequest.builder()
+                .idQris(UUID.randomUUID())
+                .amount(BigDecimal.valueOf(20000))
+                .mpin("123456")
+                .build();
+
+        when(passwordEncoder.matches(request.getMpin(), user.getMpin())).thenReturn(true);
+        when(merchantRepository.findById(request.getIdQris())).thenReturn(Optional.empty());
+
+        assertThrows(TransactionExceptions.MerchantNotFoundException.class, () -> transactionService.merchantTransaction(user, request));
+    }
+
+    @Test
+    void testGetMutationDetail_SuccessTopUp() {
+        User user = User.builder()
+                .name("John Doe")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("123456789")
+                .imagePath("/images/johndoe.png")
+                .build();
+
+        Ewallet ewallet = Ewallet.builder()
+                .name("ovo")
+                .build();
+        ewallet.setId(UUID.randomUUID());
+
+        EwalletUser ewalletUser = EwalletUser.builder()
+                .name("Jane Smith")
+                .ewallet(ewallet)
+                .phoneNumber("987654321")
+                .imagePath("/images/janesmith.png")
+                .build();
+
+        UUID mutationDetailId = UUID.randomUUID();
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .ewallet(ewalletUser.getEwallet())
+                .type(TOP_UP)
+                .destinationPhoneNumber("987654321")
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.valueOf(1000))
+                .totalamount(BigDecimal.valueOf(101000))
+                .note("Testing...")
+                .time(LocalDateTime.now())
+                .build();
+        transaction.setId(mutationDetailId);
+
+        when(transactionRepository.findById(mutationDetailId)).thenReturn(Optional.of(transaction));
+        when(ewalletUserRepository.findByPhoneNumberAndEwallet(transaction.getDestinationPhoneNumber(), transaction.getEwallet())).thenReturn(Optional.of(ewalletUser));
+
+        MutationDetailResponse.MutationUser sender = MutationDetailResponse.MutationUser.builder()
+                .name(user.getName())
+                .accountNumber(user.getAccountNumber())
+                .imagePath(user.getImagePath())
+                .vendorName("Tahapan BCA")
+                .build();
+
+        MutationDetailResponse.MutationUser receiver = MutationDetailResponse.MutationUser.builder()
+                .name(ewalletUser.getName())
+                .accountNumber(ewalletUser.getPhoneNumber())
+                .imagePath(ewalletUser.getImagePath())
+                .vendorName(transaction.getEwallet().getName())
+                .build();
+
+        MutationDetailResponse expectedResponse = MutationDetailResponse.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.valueOf(1000))
+                .totalAmount(BigDecimal.valueOf(101000))
+                .build();
+
+        MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
+
+        assertNotNull(response);
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testGetMutationDetail_SuccessTransaction() {
+        User user = User.builder()
+                .name("John Doe")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("123456789")
+                .imagePath("/images/johndoe.png")
+                .build();
+
+        User destinationUser = User.builder()
+                .name("Jane Smith")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("987654321")
+                .imagePath("/images/janesmith.png")
+                .build();
+
+        UUID mutationDetailId = UUID.randomUUID();
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .bank(user.getBank())
+                .type(TRANSFER)
+                .destinationAccountNumber("987654321")
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(BigDecimal.valueOf(100000))
+                .note("Testing...")
+                .time(LocalDateTime.now())
+                .build();
+        transaction.setId(mutationDetailId);
+
+        when(transactionRepository.findById(mutationDetailId)).thenReturn(Optional.of(transaction));
+        when(userRepository.findByAccountNumber(transaction.getDestinationAccountNumber())).thenReturn(Optional.of(destinationUser));
+
+        MutationDetailResponse.MutationUser sender = MutationDetailResponse.MutationUser.builder()
+                .name(user.getName())
+                .accountNumber(user.getAccountNumber())
+                .imagePath(user.getImagePath())
+                .vendorName("Tahapan BCA")
+                .build();
+
+        MutationDetailResponse.MutationUser receiver = MutationDetailResponse.MutationUser.builder()
+                .name(destinationUser.getName())
+                .accountNumber(destinationUser.getAccountNumber())
+                .imagePath(destinationUser.getImagePath())
+                .vendorName(transaction.getBank().getName())
+                .build();
+
+        MutationDetailResponse expectedResponse = MutationDetailResponse.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.valueOf(100000))
+                .build();
+
+        MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
+
+        assertNotNull(response);
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testGetMutationDetail_SuccessDeposit() {
+        User user = User.builder()
+                .name("John Doe")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("123456789")
+                .imagePath("/images/johndoe.png")
+                .build();
+
+        User sourceUser = User.builder()
+                .name("Jane Smith")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("987654321")
+                .imagePath("/images/janesmith.png")
+                .build();
+
+        UUID mutationDetailId = UUID.randomUUID();
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .bank(user.getBank())
+                .type(DEPOSIT)
+                .destinationAccountNumber("123456789")
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(BigDecimal.valueOf(100000))
+                .referenceNumber("DPT-12345")
+                .note("Testing...")
+                .time(LocalDateTime.now())
+                .build();
+        transaction.setId(mutationDetailId);
+
+        Transaction transfer = Transaction.builder()
+                .user(sourceUser)
+                .bank(sourceUser.getBank())
+                .type(TRANSFER)
+                .destinationAccountNumber("123456789")
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(BigDecimal.valueOf(100000))
+                .referenceNumber("TRF-12345")
+                .note("Testing...")
+                .time(LocalDateTime.now())
+                .build();
+
+        when(transactionRepository.findById(mutationDetailId)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.findByReferenceNumber(transaction.getReferenceNumber().replace("DPT-", "TRF-"))).thenReturn(Optional.of(transfer));
+
+        MutationDetailResponse.MutationUser sender = MutationDetailResponse.MutationUser.builder()
+                .name(sourceUser.getName())
+                .accountNumber(sourceUser.getAccountNumber())
+                .imagePath(sourceUser.getImagePath())
+                .vendorName(transaction.getBank().getName())
+                .build();
+
+        MutationDetailResponse.MutationUser receiver = MutationDetailResponse.MutationUser.builder()
+                .name(user.getName())
+                .accountNumber(user.getAccountNumber())
+                .imagePath(user.getImagePath())
+                .vendorName("Tahapan BCA")
+                .build();
+
+        MutationDetailResponse expectedResponse = MutationDetailResponse.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.valueOf(100000))
+                .build();
+
+        MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
+
+        assertNotNull(response);
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testGetMutationDetail_NotFound() {
+        UUID mutationDetailId = UUID.randomUUID();
+
+        when(transactionRepository.findById(mutationDetailId)).thenReturn(Optional.empty());
+
+        assertThrows(TransactionExceptions.TransactionNotFoundException.class, () -> transactionService.getMutationDetail(new User(), mutationDetailId));
+    }
+
+    @Test
+    void testGetMutationDetail_TransactionNotOwnedByUser() {
+        User user = User.builder()
+                .name("John Doe")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("123456789")
+                .imagePath("/images/johndoe.png")
+                .build();
+
+        User user2 = User.builder()
+                .name("Jane Smith")
+                .bank(Bank.builder().name("Tahapan BCA").build())
+                .accountNumber("987654321")
+                .imagePath("/images/janesmith.png")
+                .build();
+
+        UUID mutationDetailId = UUID.randomUUID();
+        Transaction transaction = Transaction.builder()
+                .user(user2)
+                .bank(user2.getBank())
+                .type(TRANSFER)
+                .destinationAccountNumber("987654321")
+                .amount(BigDecimal.valueOf(100000))
+                .adminFee(BigDecimal.ZERO)
+                .totalamount(BigDecimal.valueOf(100000))
+                .note("Testing...")
+                .time(LocalDateTime.now())
+                .build();
+        transaction.setId(mutationDetailId);
+
+        when(transactionRepository.findById(mutationDetailId)).thenReturn(Optional.of(transaction));
+
+        assertThrows(TransactionExceptions.TransactionNotOwnedByUser.class, () -> transactionService.getMutationDetail(user, mutationDetailId));
     }
 }
