@@ -44,9 +44,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final EwalletRepository ewalletRepository;
     private final EwalletUserRepository ewalletUserRepository;
     private final SavedEwalletUserRepository savedEwalletUserRepository;
-    private final PasswordEncoder passwordEncoder;
     private final SavedAccountRepository savedAccountRepository;
     private final MerchantRepository merchantRepository;
+    private final PasswordEncoder passwordEncoder;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);

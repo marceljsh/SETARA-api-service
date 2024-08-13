@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.exception.SearchExceptions;
 
@@ -16,23 +15,23 @@ public class SearchAdvice {
     private static final Logger log = LoggerFactory.getLogger(SearchAdvice.class);
 
     @ExceptionHandler(SearchExceptions.SearchNotFoundException.class)
-    public ResponseEntity<BaseResponse<String>> handleSearchNotFoundException() {
-        log.error("Search not found");
-        return new ResponseEntity<>(BaseResponse.failure(HttpStatus.NOT_FOUND, "Search not found"), HttpStatus.NOT_FOUND);
+    public ResponseEntity<BaseResponse<String>> handleSearchNotFoundException(SearchExceptions.SearchNotFoundException ex) {
+        log.error("Search not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Search not found");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException() {
-        log.error("Invalid JSON format");
+    public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseBody
-    public ResponseEntity<BaseResponse<String>> handleGenericException() {
-        log.error("Unexpected Exception");
+    public ResponseEntity<BaseResponse<String>> handleGenericException(Exception ex) {
+        log.error("Unexpected Exception: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

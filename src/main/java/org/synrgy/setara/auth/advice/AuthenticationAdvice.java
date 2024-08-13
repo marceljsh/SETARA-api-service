@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
 
@@ -15,34 +14,33 @@ import javax.naming.AuthenticationException;
 
 @RestControllerAdvice(basePackages = "org.synrgy.setara.auth")
 public class AuthenticationAdvice {
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationAdvice.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationAdvice.class);
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<BaseResponse<String>> handleAuthenticationException(AuthenticationException ex) {
-        logger.error("Authentication error: {}", ex.getMessage());
-        BaseResponse<String> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        log.error("Authentication error: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, "Authentication error");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<BaseResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
-        logger.error("Bad credentials: {}", ex.getMessage());
+        log.error("Bad credentials: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.UNAUTHORIZED, "Bad credentials");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.error("Invalid JSON format: {}", ex.getMessage());
+        log.error("Invalid JSON format: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Invalid JSON format");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseBody
     public ResponseEntity<BaseResponse<String>> handleGenericException(Exception ex) {
-        logger.error("Unexpected Exception: {}", ex.getMessage(), ex);
+        log.error("Unexpected Exception: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
