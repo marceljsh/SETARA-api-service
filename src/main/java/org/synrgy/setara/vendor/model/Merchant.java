@@ -19,22 +19,29 @@ import org.synrgy.setara.common.model.Auditable;
 @Table(name = "tbl_merchants")
 public class Merchant extends Auditable {
 
-    private String name;
+  private String name;
 
-    @Column(unique = true)
-    private String terminalId;
+  @Column(
+    unique = true,
+    length = 3
+  )
+  private String terminalId;
 
-    @Column(unique = true)
-    private String nmid;
+  @Column(
+    unique = true,
+    length = 15
+  )
+  private String nmid;
 
-    private String address;
+  private String address;
 
-    @Column(
-      unique = true,
-      length = 512
-    )
-    private String qrisCode;
+  @Column(
+    unique = true,
+    columnDefinition = "TEXT",
+    length = 512
+  )
+  private String qrisCode;
 
-    private String imagePath;
+  private String imagePath;
 
 }

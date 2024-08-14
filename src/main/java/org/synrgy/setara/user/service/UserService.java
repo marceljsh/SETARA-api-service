@@ -9,7 +9,5 @@ public interface UserService {
   void populate();
 
   UserBalanceResponse fetchUserBalance(User user);
-
-  UserProfileResponse searchByAccNumber(String accNumber);
   
 }

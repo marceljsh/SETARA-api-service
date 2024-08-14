@@ -32,7 +32,7 @@ public class TopUpResponse {
         .ewalletName(tx.getEwallet().getName())
         .phoneNumber(tx.getDestPhoneNumber())
         .name(ewalletUserName)
-        .nominal(tx.getNominal())
+        .nominal(tx.getAmount())
         .adminFee(tx.getAdminFee())
         .build();
   }

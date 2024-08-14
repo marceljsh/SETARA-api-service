@@ -6,4 +6,8 @@ public class FavoriteUpdateException extends RuntimeException {
     super(message);
   }
 
+  public FavoriteUpdateException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

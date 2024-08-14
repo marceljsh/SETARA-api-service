@@ -1,13 +1,13 @@
-package org.synrgy.setara.transaction.utils;
+package org.synrgy.setara.transaction.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class TransactionUtils {
+public class TxUtils {
 
-  private TransactionUtils() {
+  private TxUtils() {
   }
 
   private static final int REFERENCE_NUMBER_LENGTH = 5;

@@ -3,7 +3,6 @@ package org.synrgy.setara.auth.controller;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.auth.dto.AuthResponse;
 import org.synrgy.setara.auth.dto.LoginRequest;
 import org.synrgy.setara.auth.service.AuthService;
+import org.synrgy.setara.common.dto.BaseResponse;
 
 @Validated
 @RestController
@@ -24,23 +24,24 @@ import org.synrgy.setara.auth.service.AuthService;
 public class AuthController {
 
   private final Logger log = LoggerFactory.getLogger(AuthController.class);
+
   private final AuthenticationManager authManager;
   private final AuthService authService;
 
   @PostMapping(
-          value = "/sign-in",
-          consumes = MediaType.APPLICATION_JSON_VALUE,
-          produces = MediaType.APPLICATION_JSON_VALUE
+    value = "/sign-in",
+    consumes = MediaType.APPLICATION_JSON_VALUE,
+    produces = MediaType.APPLICATION_JSON_VALUE
   )
   public ResponseEntity<BaseResponse<AuthResponse>> signIn(@RequestBody LoginRequest request) {
-    authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                    request.getSignature(), request.getPassword()));
+    log.info("Request to sign in for {}", request.getSignature());
+
+    UsernamePasswordAuthenticationToken token =
+        new UsernamePasswordAuthenticationToken(request.getSignature(), request.getPassword());
+    authManager.authenticate(token);
 
     AuthResponse body = authService.authenticate(request);
-
-    BaseResponse<AuthResponse> response = BaseResponse.success(
-            HttpStatus.OK, body, "Authentication successful");
+    BaseResponse<AuthResponse> response = BaseResponse.success("OK", body);
 
     return ResponseEntity.ok(response);
   }

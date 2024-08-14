@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.synrgy.setara.common.dto.ApiResponse;
+import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.security.service.JwtService;
 
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-      ApiResponse<?> body = ApiResponse.fail("Token expired");
+      BaseResponse<?> body = BaseResponse.fail("Token expired");
       mapper.writeValue(res.getWriter(), body);
       return;
 
@@ -73,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-      ApiResponse<?> body = ApiResponse.fail("Authentication error");
+      BaseResponse<?> body = BaseResponse.fail("Authentication error");
       mapper.writeValue(res.getWriter(), body);
       return;
     }

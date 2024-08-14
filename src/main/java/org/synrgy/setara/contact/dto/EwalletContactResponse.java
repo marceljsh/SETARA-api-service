@@ -13,11 +13,8 @@ import java.util.UUID;
 public class EwalletContactResponse {
 
   private UUID id;
-
   private UserProfileResponse owner;
-
   private EwalletUserResponse ewalletUser;
-
   private boolean favorite;
 
   public static EwalletContactResponse from(EwalletContact contact) {

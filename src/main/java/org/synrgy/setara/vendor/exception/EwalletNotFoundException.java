@@ -6,4 +6,8 @@ public class EwalletNotFoundException extends RuntimeException {
     super(message);
   }
 
+  public EwalletNotFoundException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

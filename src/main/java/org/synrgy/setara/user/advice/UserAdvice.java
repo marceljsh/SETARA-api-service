@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.synrgy.setara.common.dto.ApiResponse;
+import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.exception.EwalletUserNotFoundException;
 import org.synrgy.setara.user.exception.UserNotFoundException;
 
@@ -16,16 +16,16 @@ public class UserAdvice {
   private static final Logger log = LoggerFactory.getLogger(UserAdvice.class);
 
   @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(UserNotFoundException ex) {
+  public ResponseEntity<BaseResponse<Void>> handleUserNotFoundException(UserNotFoundException ex) {
     log.error("UserNotFoundException: {}", ex.getMessage());
-    ApiResponse<Void> body = ApiResponse.fail(ex.getMessage());
+    BaseResponse<Void> body = BaseResponse.fail(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
   }
 
   @ExceptionHandler(EwalletUserNotFoundException.class)
-  public ResponseEntity<ApiResponse<Void>> handleEwalletUserNotFoundException(EwalletUserNotFoundException ex) {
+  public ResponseEntity<BaseResponse<Void>> handleEwalletUserNotFoundException(EwalletUserNotFoundException ex) {
     log.error("EwalletUserNotFoundException: {}", ex.getMessage());
-    ApiResponse<Void> body = ApiResponse.fail(ex.getMessage());
+    BaseResponse<Void> body = BaseResponse.fail(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
   }
 

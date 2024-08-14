@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.app.util.Constants;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
-import org.synrgy.setara.user.dto.UserProfileResponse;
-import org.synrgy.setara.user.exception.UserNotFoundException;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.exception.BankNotFoundException;
@@ -29,10 +27,29 @@ public class UserServiceImpl implements UserService {
   private static final BigDecimal INITIAL_BALANCE = BigDecimal.valueOf(15_000_000);
 
   private final UserRepository userRepo;
-
   private final BankRepository bankRepo;
-
   private final PasswordEncoder passwordEncoder;
+
+  @Override
+  @Transactional
+  public void populate() {
+    log.debug("Populating user data");
+
+    Bank bca = bankRepo.findByName("Tahapan BCA").orElseThrow(() -> {
+      log.error("Tahapan BCA not found, failed to populate user data");
+      return new BankNotFoundException(Constants.ERR_BANK_NOT_FOUND);
+    });
+
+    createInitialUsers().forEach(user -> populateUserDetails(user, bca));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public UserBalanceResponse fetchUserBalance(User user) {
+    log.debug("Fetching balance from User(id={})", user.getEmail());
+
+    return UserBalanceResponse.of(LocalDateTime.now(), user.getBalance());
+  }
 
   private String generateImagePath(String name) {
     return Constants.IMAGE_PATH +
@@ -73,37 +90,4 @@ public class UserServiceImpl implements UserService {
     userRepo.save(user);
   }
 
-  @Override
-  @Transactional
-  public void populate() {
-    Bank bca = bankRepo.findByName("Tahapan BCA").orElseThrow(() -> {
-      log.error("Bank with name Tahapan BCA not found");
-      return new BankNotFoundException(Constants.ERR_BANK_NOT_FOUND);
-    });
-
-    List<User> users = createInitialUsers();
-    users.forEach(user -> populateUserDetails(user, bca));
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public UserBalanceResponse fetchUserBalance(User user) {
-
-    return UserBalanceResponse.of(LocalDateTime.now(), user.getBalance());
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public UserProfileResponse searchByAccNumber(String accNumber) {
-    log.trace("Searching user with account number {}", accNumber);
-
-    User user = userRepo.findByAccountNumber(accNumber).orElseThrow(() -> {
-      log.error("User with account number {} not found", accNumber);
-      return new UserNotFoundException(Constants.ERR_USER_NOT_FOUND);
-    });
-
-    log.info("User(accNum={}) found", accNumber);
-
-    return UserProfileResponse.from(user);
-  }
 }

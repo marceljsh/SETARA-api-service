@@ -12,13 +12,9 @@ import java.util.UUID;
 public class EwalletUserResponse {
 
   private UUID id;
-
   private EwalletResponse ewallet;
-
   private String name;
-
   private String phoneNumber;
-
   private String imagePath;
 
   public static EwalletUserResponse from(EwalletUser user) {

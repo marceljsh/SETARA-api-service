@@ -32,17 +32,21 @@ public interface EwalletContactRepository extends JpaRepository<EwalletContact, 
           "WHERE ec.owner = :owner " +
           "AND ec.ewalletUser.ewallet = :ewallet " +
           "AND (:fav_only = false OR ec.favorite = true)")
-  List<EwalletContact> fetchAllByOwnerAndEwallet(@Param("owner") User owner, @Param("ewallet") Ewallet ewallet, @Param("fav_only") boolean favOnly);
+  List<EwalletContact> fetchAllByOwnerAndEwallet(@Param("owner") User owner,
+                                                 @Param("ewallet") Ewallet ewallet,
+                                                 @Param("fav_only") boolean favOnly);
 
   @Modifying
   @Query("UPDATE EwalletContact ec " +
       "SET ec.favorite = :favorite " +
       "WHERE ec.id = :id")
-  void updateFavorite(@Param("id") UUID id, @Param("favorite") boolean favorite);
+  void updateFavorite(@Param("id") UUID id,
+                      @Param("favorite") boolean favorite);
 
   @Query("SELECT COUNT(ec) > 0 FROM EwalletContact ec " +
           "WHERE ec.id = :id AND ec.owner = :owner")
-  boolean belongsToOwner(@Param("ownerId") User owner, @Param("id") UUID id);
+  boolean belongsToOwner(@Param("owner") User owner,
+                         @Param("id") UUID id);
 
   boolean existsByOwnerAndEwalletUser(User owner, EwalletUser user);
 

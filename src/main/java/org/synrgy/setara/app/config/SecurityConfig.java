@@ -15,7 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.synrgy.setara.common.dto.ApiResponse;
+import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.security.filter.JwtAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -23,7 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
   private static final String[] SWAGGER_WHITELIST = {
@@ -45,7 +45,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(withDefaults())
+        .cors(AbstractHttpConfigurer::disable)
         .authenticationProvider(authProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .formLogin(withDefaults())
@@ -59,7 +59,7 @@ public class SecurityConfig {
               res.setContentType(MediaType.APPLICATION_JSON_VALUE);
               res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-              ApiResponse<Void> body = ApiResponse.fail("Full authentication is required to access this resource");
+              BaseResponse<Void> body = BaseResponse.fail("Full authentication is required to access this resource");
               mapper.writeValue(res.getWriter(), body);
             }));
 

@@ -24,13 +24,13 @@ public class Constants {
 
   public static final String ERR_MERCHANT_NOT_FOUND = "Merchant not found";
 
-  public static final String ERR_MINIMUM_TOP_UP = "Top-up amount has not reached the minimum required amount";
+  public static final String ERR_MINIMUM_AMOUNT = "Amount has not reached the minimum required amount";
 
-  public static final String ERR_MINIMUM_TRANSFER = "Transfer amount has not reached the minimum required amount";
+  public static final String ERR_REFERENCE_NUMBER_GENERATION = "Failed to generate reference number";
 
   public static final String ERR_SAME_ACCOUNT_TRANSFER = "Cannot transfer to the same account";
 
-  public static final String ERR_REFERENCE_NUMBER_GENERATION = "Failed to generate reference number";
+  public static final String ERR_TRANSACTION_NOT_FOUND = "Transaction not found";
 
   public static final String ERR_USER_NOT_FOUND = "User not found";
 

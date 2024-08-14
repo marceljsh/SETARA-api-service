@@ -26,4 +26,6 @@ public class Regexp {
 
   public static final String BANK_ACCOUNT_NUMBER = "^[0-9]+$";
 
+  public static final String SIGNATURE = "^[a-zA-Z0-9]+$";
+
 }

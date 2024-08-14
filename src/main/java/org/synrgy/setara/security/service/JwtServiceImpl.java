@@ -51,14 +51,14 @@ public class JwtServiceImpl implements JwtService {
     try {
       final String username = extractUsername(token);
       boolean isTokenExpired = isTokenExpired(token);
-      boolean isUsernameValid = username.equals(userDetails.getUsername());
+      boolean sameUsername = username.equals(userDetails.getUsername());
 
       if (isTokenExpired) {
         log.error("Token is expired");
         return false;
       }
 
-      if (!isUsernameValid) {
+      if (!sameUsername) {
         log.error("User details username (email) is not valid");
         return false;
       }

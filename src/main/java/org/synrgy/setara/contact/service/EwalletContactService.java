@@ -11,7 +11,7 @@ public interface EwalletContactService {
 
   void populate();
 
-  EwalletContactResponse save(User owner, EwalletContactAddRequest request);
+  EwalletContactResponse addEwalletContact(User owner, EwalletContactAddRequest request);
 
   List<EwalletContactResponse> fetchByOwnerAndEwalletId(User owner, UUID ewalletId, boolean favOnly);
 

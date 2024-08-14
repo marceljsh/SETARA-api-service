@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import org.synrgy.setara.app.util.Regexp;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ public class LoginRequest {
     message = "User ID must be {min}-{max} characters long"
   )
   @Pattern(
-    regexp = "^[a-zA-Z0-9]+$",
+    regexp = Regexp.SIGNATURE,
     message = "User ID can only have letters and numbers"
   )
   private String signature;
@@ -26,7 +27,7 @@ public class LoginRequest {
     message = "Password must be {min}-{max} characters long"
   )
   @Pattern(
-    regexp = "^[a-zA-Z0-9!@#$%^&*()_\\-+=\\[\\]{}|;:'\",.<>/?\\\\]*$",
+    regexp = Regexp.PASSWORD,
     message = "Password can only have letters, numbers, and special characters"
   )
   private String password;

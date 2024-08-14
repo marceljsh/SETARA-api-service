@@ -13,17 +13,11 @@ import java.util.UUID;
 public class BankContactResponse {
 
   private UUID id;
-
   private UserProfileResponse owner;
-
   private BankResponse bank;
-
   private String name;
-
   private String accountNumber;
-
   private String imagePath;
-
   private boolean favorite;
 
   public static BankContactResponse from(BankContact bankContact) {

@@ -46,7 +46,8 @@ public class User extends Auditable implements UserDetails {
   @Column(
     unique = true,
     nullable = false,
-    updatable = false
+    updatable = false,
+    length = 20
   )
   private String accountNumber;
 

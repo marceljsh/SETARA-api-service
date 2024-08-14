@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class UserBalanceResponse {
 
   private LocalDateTime checkTime;
-
   private BigDecimal balance;
 
   public static UserBalanceResponse of(LocalDateTime checkTime, BigDecimal balance) {

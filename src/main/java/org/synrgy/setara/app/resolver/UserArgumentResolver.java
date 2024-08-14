@@ -21,7 +21,6 @@ import org.synrgy.setara.user.repository.UserRepository;
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
   private final JwtService jwtService;
-
   private final UserRepository userRepo;
 
   @Override

@@ -11,9 +11,7 @@ import java.util.UUID;
 public class EwalletResponse {
 
   private UUID id;
-
   private String name;
-
   private String imagePath;
 
   public static EwalletResponse from(Ewallet ewallet) {

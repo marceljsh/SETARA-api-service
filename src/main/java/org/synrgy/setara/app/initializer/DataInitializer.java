@@ -15,15 +15,10 @@ import org.synrgy.setara.vendor.service.MerchantService;
 public class DataInitializer implements CommandLineRunner {
 
   private final UserService userService;
-
   private final EwalletService ewalletService;
-
   private final EwalletUserService ewalletUserService;
-
   private final EwalletContactService ewalletContactService;
-
   private final BankService bankService;
-
   private final MerchantService merchantService;
 
   @Override

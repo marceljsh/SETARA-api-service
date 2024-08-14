@@ -11,11 +11,8 @@ import java.math.BigDecimal;
 public class UserProfileResponse {
 
   private String name;
-
   private String accountNumber;
-
   private BigDecimal balance;
-
   private String imagePath;
 
   public static UserProfileResponse from(User user) {

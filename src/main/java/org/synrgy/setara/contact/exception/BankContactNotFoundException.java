@@ -6,4 +6,8 @@ public class BankContactNotFoundException extends RuntimeException {
     super(message);
   }
 
+  public BankContactNotFoundException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

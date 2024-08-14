@@ -11,17 +11,11 @@ import java.util.UUID;
 public class MerchantResponse {
 
   private UUID id;
-
   private String name;
-
   private String terminalId;
-
   private String nmid;
-
   private String address;
-
   private String qrisCode;
-
   private String imagePath;
 
   public static MerchantResponse from(Merchant merchant) {

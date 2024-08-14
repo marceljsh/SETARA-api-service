@@ -22,6 +22,8 @@ public class BankServiceImpl implements BankService {
   @Override
   @Transactional
   public void populate() {
+    log.debug("Populating bank data");
+
     List<String> bankNames = List.of("Tahapan BCA", "Bank BNI", "Bank BRI",
         "Bank Mandiri", "Bank BTN", "Seabank","Bank Jago", "CIMB Niaga");
 
@@ -36,6 +38,8 @@ public class BankServiceImpl implements BankService {
   @Override
   @Transactional(readOnly = true)
   public List<BankResponse> fetchAll() {
+    log.debug("Fetching all banks");
+
     return bankRepo.findAll()
         .stream()
         .map(BankResponse::from)

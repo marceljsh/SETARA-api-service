@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface BankContactService {
 
-  BankContactResponse save(User owner, BankContactAddRequest request);
+  BankContactResponse addBankContact(User owner, BankContactAddRequest request);
 
   List<BankContactResponse> fetchByOwner(User owner, boolean favOnly);
 

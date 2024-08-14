@@ -29,16 +29,19 @@ public interface BankContactRepository extends JpaRepository<BankContact, UUID> 
   @Query("SELECT ba FROM BankContact ba " +
           "WHERE ba.owner = :owner AND " +
           "(:fav_only = false OR ba.favorite = true)")
-  List<BankContact> fetchAllByOwner(@Param("owner") User owner, @Param("fav_only") boolean favOnly);
+  List<BankContact> fetchAllByOwner(@Param("owner") User owner,
+                                    @Param("fav_only") boolean favOnly);
 
   @Modifying
   @Query("UPDATE BankContact ba " +
           "SET ba.favorite = :favorite " +
           "WHERE ba.id = :id")
-  void updateFavorite(@Param("id") UUID id, @Param("favorite") boolean favorite);
+  void updateFavorite(@Param("id") UUID id,
+                      @Param("favorite") boolean favorite);
 
   @Query("SELECT COUNT(ba) > 0 FROM BankContact ba " +
           "WHERE ba.id = :id AND ba.owner = :owner")
-  boolean belongsToOwner(@Param("owner") User owner, @Param("id") UUID id);
+  boolean belongsToOwner(@Param("owner") User owner,
+                         @Param("id") UUID id);
 
 }

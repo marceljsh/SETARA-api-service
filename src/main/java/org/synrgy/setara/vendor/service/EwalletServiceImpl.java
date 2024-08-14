@@ -11,7 +11,6 @@ import org.synrgy.setara.vendor.model.Ewallet;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +23,8 @@ public class EwalletServiceImpl implements EwalletService {
   @Override
   @Transactional
   public void populate() {
+    log.debug("Populating e-wallet data");
+
     String imgDir = Constants.IMAGE_PATH + "/ewallets";
     List<String> names = List.of("OVO", "Dana", "GoPay", "ShopeePay", "LinkAja");
 
@@ -32,7 +33,9 @@ public class EwalletServiceImpl implements EwalletService {
         ewalletRepo.save(Ewallet.builder()
             .name(name)
             .imagePath(imgDir + "/" +
-                name.replaceAll("\\s+", ""))  // in case of multi-word names
+                // in case of multi-word names
+                name.replaceAll("\\s+", "") +
+                ".png")
             .build());
         log.info("Ewallet {} is now operational", name);
       }
@@ -42,6 +45,8 @@ public class EwalletServiceImpl implements EwalletService {
   @Override
   @Transactional(readOnly = true)
   public List<EwalletResponse> fetchAll() {
+    log.debug("Fetching all e-wallets");
+
     return ewalletRepo.findAll()
         .stream()
         .map(EwalletResponse::from)

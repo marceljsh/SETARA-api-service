@@ -9,29 +9,26 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class TransferResponse {
+public class QRPaymentResponse {
+
+  private String merchantName;
+
+  private LocalDateTime transactionTime;
 
   private String referenceNumber;
 
   private String uniqueCode;
 
-  private LocalDateTime transactionTime;
-
-  private String bankName;
-
-  private String accountNumber;
-
   private BigDecimal amount;
 
   private String note;
 
-  public static TransferResponse from(Transaction tx) {
-    return TransferResponse.builder()
+  public static QRPaymentResponse from(Transaction tx) {
+    return QRPaymentResponse.builder()
+        .merchantName(tx.getMerchant().getName())
+        .transactionTime(tx.getTransactionTime())
         .referenceNumber(tx.getReferenceNumber())
         .uniqueCode(tx.getUniqueCode())
-        .transactionTime(tx.getTransactionTime())
-        .bankName(tx.getBank().getName())
-        .accountNumber(tx.getDestAccountNumber())
         .amount(tx.getAmount())
         .note(tx.getNote())
         .build();

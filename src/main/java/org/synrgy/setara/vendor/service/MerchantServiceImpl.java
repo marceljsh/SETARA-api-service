@@ -22,13 +22,35 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-  private static final String IMAGE_PATH = System.getProperty("user.dir") + "/images";
-
-  private static final int QR_CODE_SIZE = 400;
-
   private final Logger log = LoggerFactory.getLogger(MerchantServiceImpl.class);
 
+  private static final String IMAGE_PATH = System.getProperty("user.dir") + "/images";
+  private static final int QR_CODE_SIZE = 400;
+
   private final MerchantRepository merchantRepo;
+
+  @Override
+  @Transactional
+  public void populate() {
+    log.debug("Populating merchant data");
+
+    createInitialMerchants().forEach(this::processMerchant);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public MerchantResponse fetchById(UUID id) {
+    log.debug("Fetching merchant by id: {}", id);
+
+    Merchant merchant = merchantRepo.findById(id).orElseThrow(() -> {
+      log.error("Merchant with id {} not found", id);
+      return new MerchantNotFoundException(Constants.ERR_MERCHANT_NOT_FOUND);
+    });
+
+    log.info("Merchant(id={}) found", id);
+
+    return MerchantResponse.from(merchant);
+  }
 
   private String generateUniqueNmid() {
     String nmid;
@@ -43,7 +65,7 @@ public class MerchantServiceImpl implements MerchantService {
       nmid = CodeGenerator.generateUniqueNmid();
       attempts++;
 
-    } while (!merchantRepo.existsByNmid(nmid));
+    } while (merchantRepo.existsByNmid(nmid));
 
     return nmid;
   }
@@ -94,34 +116,13 @@ public class MerchantServiceImpl implements MerchantService {
 
   private void generateAndSetQRCode(Merchant merchant) {
     String qrData = merchant.getId().toString();
-    String qrCodeImagePath = IMAGE_PATH + "/qrcode_" + merchant.getName() + ".png";
+    String merchantName = merchant.getName().replace(" ", "-");
+    String qrCodeImagePath = IMAGE_PATH + "/qrcode_" + merchantName + ".png";
 
     QRCodeGenerator.generateQRCodeImage(qrData, QR_CODE_SIZE, QR_CODE_SIZE, qrCodeImagePath);
-    merchant.setQrisCode(QRCodeGenerator.generateQRCodeBase64(qrData, QR_CODE_SIZE, QR_CODE_SIZE));
+    String qrisCode = QRCodeGenerator.generateQRCodeBase64(qrData, QR_CODE_SIZE, QR_CODE_SIZE);
+    merchant.setQrisCode(qrisCode);
     merchant.setImagePath(qrCodeImagePath);
-  }
-
-  @Override
-  @Transactional
-  public void populate() {
-    List<Merchant> merchants = createInitialMerchants();
-    merchants.forEach(this::processMerchant);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public MerchantResponse fetchById(UUID id) {
-    log.trace("Fetching merchant by id: {}", id);
-
-    Merchant merchant = merchantRepo.findById(id).orElse(null);
-    if (merchant == null) {
-      log.error("Merchant with id {} not found", id);
-      throw new MerchantNotFoundException(Constants.ERR_MERCHANT_NOT_FOUND);
-    }
-
-    log.info("Merchant({}) found", id);
-
-    return MerchantResponse.from(merchant);
   }
 
 }

@@ -67,18 +67,18 @@ public class Transaction extends Auditable {
   )
   private Merchant merchant;
 
-  private BigDecimal nominal;
+  private BigDecimal amount;
 
   private BigDecimal adminFee;
-
-  @Column(unique = true)
-  private String uniqueCode;
 
   @Column(
     name = "reference_no",
     unique = true
   )
   private String referenceNumber;
+
+  @Column(unique = true)
+  private String uniqueCode;
 
   private String note;
 

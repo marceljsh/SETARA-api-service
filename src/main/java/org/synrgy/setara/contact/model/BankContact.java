@@ -43,10 +43,13 @@ public class BankContact extends Auditable {
   @Column(nullable = false)
   private String name;
 
-  @Column(nullable = false)
+  @Column(
+    nullable = false,
+    unique = true,
+    length = 20
+  )
   private String accountNumber;
 
-  @Column(nullable = false)
   private String imagePath;
 
   @Column(
