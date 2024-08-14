@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.dto.SearchNoEwalletRequest;
@@ -24,7 +25,8 @@ public class UserController {
     private final EwalletUserService ewalletUserService;
 
     @GetMapping("/getBalance")
-    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(@Parameter(description = "Jangan ubah value user!") User user) {
+    public ResponseEntity<BaseResponse<UserBalanceResponse>> getBalance(
+            @AuthenticationPrincipal User user) {
         UserBalanceResponse userBalanceResponse = userService.getBalance(user);
         BaseResponse<UserBalanceResponse> response = BaseResponse.success(HttpStatus.OK, userBalanceResponse, "Success Get Balance");
         return ResponseEntity.ok(response);

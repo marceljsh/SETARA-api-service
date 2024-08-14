@@ -1,9 +1,9 @@
 package org.synrgy.setara.contact.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
@@ -23,7 +23,8 @@ public class SavedAccountController {
   private final SavedAccountService saService;
 
   @GetMapping("/saved-accounts")
-  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts(@Parameter(description = "Jangan ubah value user!") User user) {
+  public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>>> getSavedAccounts(
+          @AuthenticationPrincipal User user) {
     SavedEwalletAndAccountFinalResponse<SavedAccountResponse> savedAccounts = saService.getSavedAccounts(user);
     BaseResponse<SavedEwalletAndAccountFinalResponse<SavedAccountResponse>> response = BaseResponse.success(HttpStatus.OK, savedAccounts, "Success Get Saved Accounts");
     return ResponseEntity.ok(response);
