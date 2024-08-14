@@ -3,12 +3,9 @@ package org.synrgy.setara.vendor.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
-import org.synrgy.setara.vendor.exception.VendorException;
+import org.synrgy.setara.vendor.exception.VendorExceptions;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 import org.synrgy.setara.vendor.util.CodeGenerator;
@@ -76,14 +73,13 @@ public class MerchantServiceImpl implements MerchantService {
 
                     log.info("Merchant with name {} has been saved with QR code.", savedMerchant.getName());
                 } catch (IOException e) {
-                    throw VendorException.qrCodeGenerationException("Failed to save QR code for merchant " + merchant.getName(), e);
+                    throw new VendorExceptions.QrCodeGenerationException("Failed to save QR code for merchant " + merchant.getName());
                 }
             } else {
                 log.info("Merchant with name {} already exists.", merchant.getName());
             }
         }
     }
-
 
     private String generateUniqueNmid() {
         String nmid;
@@ -102,22 +98,17 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public BaseResponse<MerchantResponse> getQrisData(MerchantRequest requestDTO) {
-        Optional<Merchant> optionalMerchant = merchantRepository.findById(UUID.fromString(requestDTO.getIdQris()));
-        if (optionalMerchant.isPresent()) {
-            Merchant merchant = optionalMerchant.get();
-            MerchantResponse merchantResponse = MerchantResponse.builder()
-                    .name(merchant.getName())
-                    .nmid(merchant.getNmid())
-                    .terminalId(merchant.getTerminalId())
-                    .address(merchant.getAddress())
-                    .imagePath(merchant.getImagePath())
-                    .qrisCode(merchant.getQrisCode())
-                    .build();
+    public MerchantResponse getQrisData(UUID idQris) {
+        Merchant merchant = merchantRepository.findById(idQris)
+                .orElseThrow(() -> new VendorExceptions.MerchantNotFoundException("Merchant with idQris: " + idQris + " not found"));
 
-            return BaseResponse.success(HttpStatus.OK, merchantResponse, "Merchant found.");
-        } else {
-            return BaseResponse.failure(HttpStatus.NOT_FOUND, "Merchant not found.");
-        }
+        return MerchantResponse.builder()
+                .name(merchant.getName())
+                .nmid(merchant.getNmid())
+                .terminalId(merchant.getTerminalId())
+                .address(merchant.getAddress())
+                .imagePath(merchant.getImagePath())
+                .qrisCode(merchant.getQrisCode())
+                .build();
     }
 }

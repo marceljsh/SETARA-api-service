@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import javax.imageio.ImageIO;
-import org.synrgy.setara.vendor.exception.VendorException;
+import org.synrgy.setara.vendor.exception.VendorExceptions;
 
 public class QRCodeGenerator {
 
@@ -32,7 +32,7 @@ public class QRCodeGenerator {
             byte[] pngData = pngOutputStream.toByteArray();
             return Base64.getEncoder().encodeToString(pngData);
         } catch (WriterException | IOException e) {
-            throw VendorException.qrCodeGenerationException("Error generating QR code", e);
+            throw new VendorExceptions.QrCodeGenerationException("Error generating QR code: " + e);
         }
     }
 
@@ -49,7 +49,7 @@ public class QRCodeGenerator {
 
             ImageIO.write(bufferedImage, "PNG", new File(filePath));
         } catch (WriterException | IOException e) {
-            throw VendorException.qrCodeGenerationException("Error generating QR code image", e);
+            throw new VendorExceptions.QrCodeGenerationException("Error generating QR code: " + e);
         }
     }
 }
