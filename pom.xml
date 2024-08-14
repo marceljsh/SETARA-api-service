@@ -107,6 +107,20 @@
 			<version>2.6.0</version>
 		</dependency>
 
+		<!-- Jasper Reports -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.20.5</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
 		<!-- Testing Libraries -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
