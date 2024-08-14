@@ -3,6 +3,7 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,9 @@ import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -47,6 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final SavedAccountRepository savedAccountRepository;
     private final MerchantRepository merchantRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ReceiptService receiptService;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
@@ -213,7 +218,7 @@ public class TransactionServiceImpl implements TransactionService {
             });
         }
 
-        return TransferResponse.builder()
+        TransferResponse response = TransferResponse.builder()
                 .sourceUser(TransferResponse.UserDTO.builder()
                         .name(user.getName())
                         .bank(user.getBank().getName())
@@ -231,6 +236,28 @@ public class TransactionServiceImpl implements TransactionService {
                 .totalAmount(totalAmount)
                 .note(request.getNote())
                 .build();
+
+        try {
+            byte[] receiptPdf = receiptService.generateReceipt(transaction, response);
+
+            // Specify the path to save the PDF
+            String pdfFileName = "transfer_receipt_" + transaction.getReferenceNumber() + ".pdf";
+            Path pdfPath = Paths.get("src/main/resources/receipts/", pdfFileName);
+
+            // Create directories if they do not exist
+            Files.createDirectories(pdfPath.getParent());
+
+            // Save the PDF file to the specified path
+            Files.write(pdfPath, receiptPdf);
+
+            // Optionally, you can log the location of the saved file
+            log.info("PDF saved to: " + pdfPath.toAbsolutePath().toString());
+
+        } catch (Exception e) {
+            log.error("Error generating or saving receipt PDF", e);
+        }
+
+        return response;
     }
 
     @Override
