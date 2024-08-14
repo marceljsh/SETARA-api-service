@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.contact.dto.FavoriteEwalletRequest;
@@ -23,7 +24,7 @@ public class SavedEwalletUserController {
 
     @GetMapping("/saved-ewallet-users")
     public ResponseEntity<BaseResponse<SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse>>> getSavedEwallets(
-            @Parameter(description = "Jangan ubah value user!") User user,
+            @AuthenticationPrincipal User user,
             @Parameter(
                     name = "ewalletName",
                     required = true,
