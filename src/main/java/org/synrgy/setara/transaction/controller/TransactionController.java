@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
@@ -75,8 +76,8 @@ public class TransactionController {
 
     @GetMapping("/get-monthly-report")
     public ResponseEntity<BaseResponse<MonthlyReportResponse>> getMonthlyReport(
-      @Parameter(description = "Jangan ubah value user!") User user,
-      @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,
+            @AuthenticationPrincipal User user,
+            @Parameter(schema = @Schema(type = "integer", example = "8")) @RequestParam(name = "month") int month,
             @Parameter(schema = @Schema(type = "integer", example = "2024")) @RequestParam(name = "year") int year) {
         MonthlyReportResponse monthlyReportResponse = transactionService.getMonthlyReport(user, month, year);
         BaseResponse<MonthlyReportResponse> response = BaseResponse.success(HttpStatus.OK, monthlyReportResponse, "Success Get Monthly Report");
@@ -84,13 +85,15 @@ public class TransactionController {
     }
 
     @PostMapping("/merchant-transaction")
-    public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(@Parameter(description = "Jangan ubah value user!") User user, @RequestBody MerchantTransactionRequest request) {
+    public ResponseEntity<BaseResponse<MerchantTransactionResponse>> merchantTransaction(
+            @AuthenticationPrincipal User user,
+            @RequestBody MerchantTransactionRequest request) {
         MerchantTransactionResponse response = transactionService.merchantTransaction(user, request);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Transaction successful"));
     }
 
     @PostMapping("/get-all-mutation")
-    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@Parameter(description = "Jangan ubah value user!") User user,
+    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@AuthenticationPrincipal User user,
                                                                                @RequestBody MutationRequest request,
                                                                                @RequestParam(defaultValue = "0") int page,
                                                                                @RequestParam(defaultValue = "10") int size) {
@@ -101,7 +104,9 @@ public class TransactionController {
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")
-    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(@Parameter(description = "Jangan ubah value user!") User user, @PathVariable UUID transactionId) {
+    public ResponseEntity<BaseResponse<MutationDetailResponse>> getMutationDetail(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID transactionId) {
         MutationDetailResponse response = transactionService.getMutationDetail(user, transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
     }

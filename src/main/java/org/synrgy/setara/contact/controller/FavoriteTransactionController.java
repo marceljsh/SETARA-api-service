@@ -1,9 +1,9 @@
 package org.synrgy.setara.contact.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +24,7 @@ public class FavoriteTransactionController {
     private final FavoriteTransactionService favoriteTransactionService;
 
     @GetMapping("/favorite-transactions")
-    public ResponseEntity<BaseResponse<List<FavoriteTransactionsResponse>>> getFavoriteTransactions(@Parameter(description = "Jangan ubah value user!") User user) {
+    public ResponseEntity<BaseResponse<List<FavoriteTransactionsResponse>>> getFavoriteTransactions(@AuthenticationPrincipal User user) {
         List<FavoriteTransactionsResponse> favoriteTransactions = favoriteTransactionService.getFavoriteTransactions(user);
         BaseResponse<List<FavoriteTransactionsResponse>> response = BaseResponse.success(HttpStatus.OK, favoriteTransactions, "Success Get Favorite Transactions");
         return ResponseEntity.ok(response);

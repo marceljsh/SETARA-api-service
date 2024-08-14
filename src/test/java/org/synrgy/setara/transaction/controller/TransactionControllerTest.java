@@ -1,6 +1,5 @@
 package org.synrgy.setara.transaction.controller;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -10,20 +9,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
-import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.vendor.model.Bank;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.synrgy.setara.transaction.model.TransactionType.TRANSFER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 class TransactionControllerTest {
 

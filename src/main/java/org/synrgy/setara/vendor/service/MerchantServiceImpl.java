@@ -3,9 +3,7 @@ package org.synrgy.setara.vendor.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.exception.VendorExceptions;
 import org.synrgy.setara.vendor.model.Merchant;
@@ -82,7 +80,6 @@ public class MerchantServiceImpl implements MerchantService {
             }
         }
     }
-
 
     private String generateUniqueNmid() {
         String nmid;

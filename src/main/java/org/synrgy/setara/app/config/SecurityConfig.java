@@ -59,9 +59,8 @@ public class SecurityConfig {
 
                             final Map<String, Object> body = new HashMap<>();
 
-                            body.put("status", false); // Menyelaraskan dengan format BaseResponse
+                            body.put("status", false);
                             body.put("message", "Full authentication is required to access this resource" + exception);
-                          
                             body.put("code", HttpServletResponse.SC_UNAUTHORIZED);
 
                             final ObjectMapper mapper = new ObjectMapper();
