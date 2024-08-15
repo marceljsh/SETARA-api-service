@@ -138,10 +138,9 @@ public class EwalletContactServiceImpl implements EwalletContactService {
           .build();
 
       ecRepo.save(contact);
-      log.info("Saved EwalletContact for '{}', favorite: {}", user.getName(), contact.isFavorite());
-    } else {
-      log.info("EwalletContact already exists for '{}' and owner '{}'", user.getName(), owner.getName());
     }
+    log.info("EwalletContact(name={}, owner={}, fav={}) is now operational",
+        user.getName(), user.getName(), user.getName().equals("Jermaine Cole"));
   }
 
 }

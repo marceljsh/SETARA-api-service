@@ -26,7 +26,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
 
   private String generateImagePath(String name) {
     return Constants.IMAGE_PATH +
-        "/ewallet-users/" +
+        "/ewallet-user/" +
         name.replaceAll("\\s+", "") +
         ".jpg";
   }
@@ -53,6 +53,7 @@ public class EwalletUserServiceImpl implements EwalletUserService {
             .imagePath(generateImagePath(name))
             .build());
       }
+      log.info("EwalletUser(ew={}, no={}) is now operational", ovo.getName(), phoneNumber);
     });
   }
 

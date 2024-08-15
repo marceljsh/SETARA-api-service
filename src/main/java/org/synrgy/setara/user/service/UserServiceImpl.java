@@ -65,7 +65,9 @@ public class UserServiceImpl implements UserService {
         createUser("jane.doe@example.com", "JANE1234", "2233445566", "Jane Doe", "jane123", "1272051706870002",
             "089876543210", "Los Angeles, CA", "987654"),
         createUser("john.smith@example.com", "JOHN5678", "3344556677", "John Smith", "john123", "1272051706870003",
-            "081230987654", "New York, NY", "123456"));
+            "081230987654", "New York, NY", "123456"),
+        createUser("andhika157@gmail.com", "ADTP604T", "2891376451", "Andhika Putra", "andika12345", "1272051706870004",
+            "081234567891", "New York, NY", "120951"));
   }
 
   private User createUser(String email, String signature, String accountNumber, String name, String password,
@@ -84,10 +86,13 @@ public class UserServiceImpl implements UserService {
   }
 
   private void populateUserDetails(User user, Bank bank) {
-    user.setBank(bank);
-    user.setImagePath(generateImagePath(user.getName()));
-    user.setBalance(INITIAL_BALANCE);
-    userRepo.save(user);
+    if (!userRepo.existsByEmail(user.getEmail())) {
+      user.setBank(bank);
+      user.setImagePath(generateImagePath(user.getName()));
+      user.setBalance(INITIAL_BALANCE);
+      userRepo.save(user);
+    }
+    log.info("User {} is now operational", user.getEmail());
   }
 
 }

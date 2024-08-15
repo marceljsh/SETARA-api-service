@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.synrgy.setara.contact.model.EwalletContact;
 import org.synrgy.setara.user.dto.EwalletUserResponse;
-import org.synrgy.setara.user.dto.UserProfileResponse;
+import org.synrgy.setara.vendor.dto.EwalletResponse;
 
 import java.util.UUID;
 
@@ -13,15 +13,19 @@ import java.util.UUID;
 public class EwalletContactResponse {
 
   private UUID id;
-  private UserProfileResponse owner;
-  private EwalletUserResponse ewalletUser;
+  private EwalletResponse ewallet;
+  private String name;
+  private String phoneNumber;
+  private String imagePath;
   private boolean favorite;
 
   public static EwalletContactResponse from(EwalletContact contact) {
     return EwalletContactResponse.builder()
         .id(contact.getId())
-        .owner(UserProfileResponse.from(contact.getOwner()))
-        .ewalletUser(EwalletUserResponse.from(contact.getEwalletUser()))
+        .ewallet(EwalletResponse.from(contact.getEwalletUser().getEwallet()))
+        .name(contact.getEwalletUser().getName())
+        .phoneNumber(contact.getEwalletUser().getPhoneNumber())
+        .imagePath(contact.getEwalletUser().getImagePath())
         .favorite(contact.isFavorite())
         .build();
   }

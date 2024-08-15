@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.contact.controller.media.FetchEwalletContacts;
+import org.synrgy.setara.contact.controller.media.ToggleFavorite;
 import org.synrgy.setara.contact.dto.EwalletContactResponse;
 import org.synrgy.setara.contact.dto.FavoriteUpdateRequest;
 import org.synrgy.setara.contact.service.EwalletContactService;
@@ -32,6 +34,7 @@ public class EwalletContactController {
 
   private final EwalletContactService ecService;
 
+  @FetchEwalletContacts
   @GetMapping(
     value = "/ewallet-contacts/by-ewallet/{ewallet-id}",
     produces = MediaType.APPLICATION_JSON_VALUE
@@ -48,6 +51,7 @@ public class EwalletContactController {
     return ResponseEntity.ok(BaseResponse.success("OK", contacts));
   }
 
+  @ToggleFavorite
   @PatchMapping(
     value = "/ewallet-contacts/{id}/favorite",
     consumes = MediaType.APPLICATION_JSON_VALUE,

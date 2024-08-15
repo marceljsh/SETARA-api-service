@@ -30,7 +30,7 @@ public class TopUpRequest {
   )
   @Pattern(
     regexp = Regexp.PHONE_NUMBER,
-    message = "Phone number must contain only digits with prefix \"+\""
+    message = "Phone number must contain only digits"
   )
   private String phoneNumber;
 

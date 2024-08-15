@@ -110,14 +110,14 @@ public class MerchantServiceImpl implements MerchantService {
       Merchant savedMerchant = merchantRepo.save(merchant);
       generateAndSetQRCode(savedMerchant);
       merchantRepo.save(savedMerchant);
-      log.info("Merchant {} is now operational", savedMerchant.getName());
     }
+    log.info("Merchant {} is now operational", merchant.getName());
   }
 
   private void generateAndSetQRCode(Merchant merchant) {
     String qrData = merchant.getId().toString();
     String merchantName = merchant.getName().replace(" ", "-");
-    String qrCodeImagePath = IMAGE_PATH + "/qrcode_" + merchantName + ".png";
+    String qrCodeImagePath = IMAGE_PATH + "/merchant/qrcode_" + merchantName + ".png";
 
     QRCodeGenerator.generateQRCodeImage(qrData, QR_CODE_SIZE, QR_CODE_SIZE, qrCodeImagePath);
     String qrisCode = QRCodeGenerator.generateQRCodeBase64(qrData, QR_CODE_SIZE, QR_CODE_SIZE);

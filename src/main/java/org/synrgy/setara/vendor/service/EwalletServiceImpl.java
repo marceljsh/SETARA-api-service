@@ -25,7 +25,7 @@ public class EwalletServiceImpl implements EwalletService {
   public void populate() {
     log.debug("Populating e-wallet data");
 
-    String imgDir = Constants.IMAGE_PATH + "/ewallets";
+    String imgDir = Constants.IMAGE_PATH + "/ewallet";
     List<String> names = List.of("OVO", "Dana", "GoPay", "ShopeePay", "LinkAja");
 
     names.forEach(name -> {
@@ -37,8 +37,8 @@ public class EwalletServiceImpl implements EwalletService {
                 name.replaceAll("\\s+", "") +
                 ".png")
             .build());
-        log.info("Ewallet {} is now operational", name);
       }
+      log.info("Ewallet {} is now operational", name);
     });
   }
 

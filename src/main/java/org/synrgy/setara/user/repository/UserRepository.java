@@ -44,4 +44,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
   void updateBalanceByAccountNumber(@Param("account_number") String accountNumber,
                                     @Param("balance") BigDecimal balance);
 
+  boolean existsByEmail(String email);
+
 }

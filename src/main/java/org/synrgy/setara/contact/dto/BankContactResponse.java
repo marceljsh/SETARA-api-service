@@ -13,7 +13,6 @@ import java.util.UUID;
 public class BankContactResponse {
 
   private UUID id;
-  private UserProfileResponse owner;
   private BankResponse bank;
   private String name;
   private String accountNumber;
@@ -23,7 +22,6 @@ public class BankContactResponse {
   public static BankContactResponse from(BankContact bankContact) {
     return BankContactResponse.builder()
         .id(bankContact.getId())
-        .owner(UserProfileResponse.from(bankContact.getOwner()))
         .bank(BankResponse.from(bankContact.getBank()))
         .name(bankContact.getName())
         .accountNumber(bankContact.getAccountNumber())

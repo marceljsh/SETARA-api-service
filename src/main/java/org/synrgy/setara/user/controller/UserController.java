@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ public class UserController {
     value = "/me/balance",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<BaseResponse<UserBalanceResponse>> getOwnBalance(User user) {
+  public ResponseEntity<BaseResponse<UserBalanceResponse>> getOwnBalance(@AuthenticationPrincipal User user) {
     log.info("Request to fetch balance for User({})", user.getId());
 
     UserBalanceResponse userBalance = userService.fetchUserBalance(user);
