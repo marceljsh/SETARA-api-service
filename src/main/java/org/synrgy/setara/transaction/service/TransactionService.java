@@ -17,5 +17,7 @@ public interface TransactionService {
 
     Page<MutationResponse> getAllMutation(User user, MutationRequest request, int page, int size);
 
+    byte[] generateAllMutationReport(User user);
+
     MutationDetailResponse getMutationDetail(User user, UUID transactionId);
 }

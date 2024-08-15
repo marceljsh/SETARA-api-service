@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.TransactionService;
@@ -101,6 +103,13 @@ public class TransactionController {
         List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
         BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/generate-all-mutation-report")
+    public ResponseEntity<Resource> generateAllMutationReport(@AuthenticationPrincipal User user) {
+        byte[] reportContent = transactionService.generateAllMutationReport(user);
+        ByteArrayResource resource = new ByteArrayResource(reportContent);
+        return ResponseEntity.ok(resource);
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")

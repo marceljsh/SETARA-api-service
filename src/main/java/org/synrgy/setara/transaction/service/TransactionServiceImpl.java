@@ -3,11 +3,15 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.util.JRSaver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.repository.SavedAccountRepository;
@@ -28,6 +32,8 @@ import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -356,6 +362,36 @@ public class TransactionServiceImpl implements TransactionService {
                 .formattedDate(transaction.getTime().format(dateFormatter))
                 .formattedTime(transaction.getTime().format(timeFormatter))
                 .build());
+    }
+
+    @Override
+    public byte[] generateAllMutationReport(User user) {
+        JasperReport jasperReport;
+        try {
+            jasperReport = (JasperReport) JRLoader.loadObject(ResourceUtils.getFile("mutationReport.jasper"));
+        } catch (JRException | FileNotFoundException e) {
+            try {
+                File file = ResourceUtils.getFile("classpath:jasper/mutationReport.jrxml");
+                jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+                JRSaver.saveObject(jasperReport, "mutationReport.jasper");
+            } catch (FileNotFoundException | JRException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        // TODO: fill the parameters
+
+        JasperPrint jasperPrint;
+        byte[] reportContent;
+        try {
+            jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        }
+
+        return reportContent;
     }
 
     @Override
