@@ -1,15 +1,26 @@
 package org.synrgy.setara.transaction.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.util.JRSaver;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.synrgy.setara.transaction.dto.ReceiptDTO;
 import org.synrgy.setara.transaction.dto.TransferResponse;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.model.TransactionType;
+import org.synrgy.setara.user.model.User;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
-public class ReceiptServiceImpl implements ReceiptService {
+@Slf4j
+public class JasperServiceImpl implements JasperService {
 
     @Override
     public byte[] generateReceipt(Transaction transaction, TransferResponse response) {
@@ -73,5 +85,50 @@ public class ReceiptServiceImpl implements ReceiptService {
         } catch (JRException e) {
             throw new RuntimeException("Failed to generate receipt", e);
         }
+    }
+
+    @Override
+    public boolean generateAllMutationReport(User user) {
+        JasperReport jasperReport;
+        try {
+            jasperReport = (JasperReport) JRLoader
+                    .loadObject(ResourceUtils.getFile("MutationReport.jasper"));
+        } catch (JRException | FileNotFoundException e) {
+            try {
+                File file = ResourceUtils.getFile("classpath:reports/MutationReport.jrxml");
+                jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+                JRSaver.saveObject(jasperReport, "MutationReport.jasper");
+            } catch (FileNotFoundException | JRException ex) {
+                throw new RuntimeException(ex); // TODO: change exception
+            }
+        }
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("noRek", String.valueOf(user.getAccountNumber()));
+        parameters.put("name", String.valueOf(user.getName()));
+        parameters.put("currency", "IDR");
+
+        JasperPrint jasperPrint;
+        byte[] reportContent;
+        try {
+            jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
+        } catch (JRException e) {
+            throw new RuntimeException("Failed to generate report", e); // TODO: change exception
+        }
+
+        try {
+            String pdfFileName = "mutasi_rekening_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
+            Path pdfPath = Paths.get(System.getProperty("user.home"), "Downloads", pdfFileName);
+
+            Files.write(pdfPath, reportContent);
+
+            log.info("PDF saved to: {}", pdfPath.toAbsolutePath());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating or saving report PDF", e); //TODO: change exception
+        }
+
+        return true;
     }
 }

@@ -10,8 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.service.JasperService;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +30,7 @@ import java.util.UUID;
 @Slf4j
 public class TransactionController {
     private final TransactionService transactionService;
+    private final JasperService jasperService;
 
     @Operation(
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -100,6 +104,13 @@ public class TransactionController {
         Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(user, request, page, size);
         List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
         BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/generate-all-mutation-report")
+    public ResponseEntity<BaseResponse<String>> generateAllMutationReport(@AuthenticationPrincipal User user) {
+        boolean success = jasperService.generateAllMutationReport(user);
+        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate All Mutation Report");
         return ResponseEntity.ok(response);
     }
 
