@@ -42,14 +42,16 @@
         <query language="sql"><![CDATA[]]></query>
     </dataset>
     <query language="sql"><![CDATA[]]></query>
+    <parameter name="noRek" class="java.lang.String"/>
+    <parameter name="name" class="java.lang.String"/>
     <background splitType="Stretch"/>
     <title height="92" splitType="Stretch">
-        <element kind="staticText" uuid="cc5db0dc-406e-44f2-a561-cc59cf4d0514" x="320" y="27" width="226" height="40" forecolor="#000000" backcolor="#FFFFFF" fontName="DejaVu Sans" fontSize="24.0">
+        <element kind="staticText" uuid="cc5db0dc-406e-44f2-a561-cc59cf4d0514" x="320" y="27" width="226" height="40" forecolor="#000000" backcolor="#FFFFFF" fontName="Arial" fontSize="24.0" markup="none">
             <text><![CDATA[MUTASI REKENING]]></text>
         </element>
     </title>
     <pageHeader height="46" splitType="Stretch">
-        <element kind="staticText" uuid="1ac08cd1-1e68-4057-b41e-0794e906fc91" x="0" y="5" width="180" height="21" forecolor="#115DA9" markup="" fontName="DejaVu Sans" fontSize="18.0">
+        <element kind="staticText" uuid="1ac08cd1-1e68-4057-b41e-0794e906fc91" x="0" y="5" width="180" height="21" forecolor="#115DA9" fontName="Arial" fontSize="18.0" markup="none">
             <text><![CDATA[Detail Rekening]]></text>
         </element>
         <element kind="line" uuid="529459e2-83d7-40d2-815f-6cbcc6caa550" x="0" y="36" width="560" height="2" forecolor="#D9D9D9">
@@ -57,15 +59,15 @@
         </element>
     </pageHeader>
     <columnHeader height="109" splitType="Stretch">
-        <element kind="textField" uuid="1ebf8555-9845-464d-a76b-799d8eafd099" x="4" y="5" width="552" height="35" fontName="DejaVu Sans" fontSize="16.0">
+        <element kind="textField" uuid="1ebf8555-9845-464d-a76b-799d8eafd099" x="4" y="5" width="552" height="35" fontName="Arial" fontSize="16.0">
             <expression><![CDATA["No. Rekening                             : "+$P{noRek}]]></expression>
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
         </element>
-        <element kind="textField" uuid="fe72eaad-f0fe-4882-b469-4dfec2b3c26e" x="4" y="40" width="552" height="35" fontName="DejaVu Sans" fontSize="16.0">
+        <element kind="textField" uuid="fe72eaad-f0fe-4882-b469-4dfec2b3c26e" x="4" y="40" width="552" height="35" fontName="Arial" fontSize="16.0">
             <expression><![CDATA["Nama                                         : "+$P{name}]]></expression>
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
         </element>
-        <element kind="textField" uuid="d0b7db18-e62b-4350-a7ea-143a68131269" x="4" y="75" width="552" height="35" fontName="DejaVu Sans" fontSize="16.0">
+        <element kind="textField" uuid="d0b7db18-e62b-4350-a7ea-143a68131269" x="4" y="74" width="552" height="35" fontName="Arial" fontSize="16.0">
             <expression><![CDATA["Mata Uang                                 : IDR"]]></expression>
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
         </element>

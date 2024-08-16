@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
 import org.springframework.data.domain.Page;
@@ -368,19 +369,24 @@ public class TransactionServiceImpl implements TransactionService {
     public byte[] generateAllMutationReport(User user) {
         JasperReport jasperReport;
         try {
-            jasperReport = (JasperReport) JRLoader.loadObject(ResourceUtils.getFile("mutationReport.jasper"));
+            jasperReport = (JasperReport) JRLoader
+                    .loadObject(ResourceUtils.getFile("MutationReport.jasper"));
         } catch (JRException | FileNotFoundException e) {
             try {
-                File file = ResourceUtils.getFile("classpath:jasper/mutationReport.jrxml");
+                File file = ResourceUtils.getFile("classpath:jasper/MutationReport.jrxml");
                 jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-                JRSaver.saveObject(jasperReport, "mutationReport.jasper");
+                JRSaver.saveObject(jasperReport, "MutationReport.jasper");
             } catch (FileNotFoundException | JRException ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException(ex); // TODO: change exception
             }
         }
 
+//        JRBeanCollectionDataSource mutationDataset = new JRBeanCollectionDataSource();
+
         Map<String, Object> parameters = new HashMap<>();
-        // TODO: fill the parameters
+        parameters.put("noRek", String.valueOf(user.getAccountNumber()));
+        parameters.put("name", String.valueOf(user.getName()));
+//        parameters.put("mutationDataset", String.valueOf(mutationDataset));
 
         JasperPrint jasperPrint;
         byte[] reportContent;
@@ -388,7 +394,7 @@ public class TransactionServiceImpl implements TransactionService {
             jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
             reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (JRException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // TODO: change exception
         }
 
         return reportContent;
