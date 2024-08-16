@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Payment_ReceiptA4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="abe9c78f-26b2-4e42-b116-e8fa1eb5af3f">
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <parameter name="noRek" class="java.lang.String"/>
+    <parameter name="name" class="java.lang.String"/>
+    <parameter name="currency" class="java.lang.String"/>
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="83" splitType="Stretch">
+            <image>
+                <reportElement x="20" y="10" width="213" height="61" uuid="ac6848b1-9295-48d2-8371-f752eac1f280">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <imageExpression><![CDATA["reports/logo-setara.png"]]></imageExpression>
+            </image>
+            <staticText>
+                <reportElement x="324" y="21" width="243" height="38" uuid="843c01d2-e64e-4a7d-9291-fe30929879d9"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="24" isBold="true"/>
+                </textElement>
+                <text><![CDATA[MUTASI REKENING]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="53" splitType="Stretch">
+            <staticText>
+                <reportElement x="20" y="30" width="150" height="23" forecolor="#115DA9" uuid="788c0486-2c20-4bc5-ada2-04f4aabc9569"/>
+                <textElement>
+                    <font fontName="Arial" size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Detail Transaksi]]></text>
+            </staticText>
+        </band>
+    </pageHeader>
+    <columnHeader>
+        <band height="23" splitType="Stretch">
+            <line>
+                <reportElement x="20" y="10" width="514" height="2" forecolor="#D9D9D9" uuid="58d53fdb-eab3-4c7d-a10b-1d0bf6733822">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <graphicElement>
+                    <pen lineWidth="2.0"/>
+                </graphicElement>
+            </line>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="325" splitType="Stretch">
+            <staticText>
+                <reportElement x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[No. Rekening                                :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="280" y="0" width="260" height="24" uuid="aba2e3e3-fdf2-4ed4-b7ae-cf064f8eaede"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{noRek}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="20" y="30" width="250" height="24" uuid="51ff7df8-1cc7-4138-93ed-5d564c8c36b0"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Nama                                            :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="280" y="30" width="260" height="24" uuid="78c13409-ff9c-4935-91b7-3e5c22c4c703"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{name}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="20" y="60" width="250" height="24" uuid="e80e4c7f-bec2-4fa4-b5cb-f5feaad29755"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Mata Uang                                    :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="280" y="60" width="260" height="24" uuid="8f89cb13-7eb5-4f91-b62a-022a34030e7c"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="16"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{currency}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <columnFooter>
+        <band height="50" splitType="Stretch"/>
+    </columnFooter>
+    <pageFooter>
+        <band height="54" splitType="Stretch"/>
+    </pageFooter>
+    <summary>
+        <band height="42" splitType="Stretch"/>
+    </summary>
+</jasperReport>

@@ -3,17 +3,11 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.engine.util.JRSaver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.repository.SavedAccountRepository;
@@ -34,8 +28,6 @@ import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final SavedAccountRepository savedAccountRepository;
     private final MerchantRepository merchantRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ReceiptService receiptService;
+    private final JasperService jasperService;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
@@ -245,7 +237,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         try {
-            byte[] receiptPdf = receiptService.generateReceipt(transaction, response);
+            byte[] receiptPdf = jasperService.generateReceipt(transaction, response);
 
             // Specify the path to save the PDF
             String pdfFileName = "transfer_receipt_" + transaction.getReferenceNumber() + ".pdf";
@@ -390,41 +382,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .formattedDate(transaction.getTime().format(dateFormatter))
                 .formattedTime(transaction.getTime().format(timeFormatter))
                 .build());
-    }
-
-    @Override
-    public byte[] generateAllMutationReport(User user) {
-        JasperReport jasperReport;
-        try {
-            jasperReport = (JasperReport) JRLoader
-                    .loadObject(ResourceUtils.getFile("MutationReport.jasper"));
-        } catch (JRException | FileNotFoundException e) {
-            try {
-                File file = ResourceUtils.getFile("classpath:jasper/MutationReport.jrxml");
-                jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-                JRSaver.saveObject(jasperReport, "MutationReport.jasper");
-            } catch (FileNotFoundException | JRException ex) {
-                throw new RuntimeException(ex); // TODO: change exception
-            }
-        }
-
-//        JRBeanCollectionDataSource mutationDataset = new JRBeanCollectionDataSource();
-
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("noRek", String.valueOf(user.getAccountNumber()));
-        parameters.put("name", String.valueOf(user.getName()));
-//        parameters.put("mutationDataset", String.valueOf(mutationDataset));
-
-        JasperPrint jasperPrint;
-        byte[] reportContent;
-        try {
-            jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-            reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
-        } catch (JRException e) {
-            throw new RuntimeException(e); // TODO: change exception
-        }
-
-        return reportContent;
     }
 
     @Override

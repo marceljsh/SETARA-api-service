@@ -14,6 +14,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.service.JasperService;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @Slf4j
 public class TransactionController {
     private final TransactionService transactionService;
+    private final JasperService jasperService;
 
     @Operation(
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -106,10 +108,10 @@ public class TransactionController {
     }
 
     @GetMapping("/generate-all-mutation-report")
-    public ResponseEntity<Resource> generateAllMutationReport(@AuthenticationPrincipal User user) {
-        byte[] reportContent = transactionService.generateAllMutationReport(user);
-        ByteArrayResource resource = new ByteArrayResource(reportContent);
-        return ResponseEntity.ok(resource);
+    public ResponseEntity<BaseResponse<String>> generateAllMutationReport(@AuthenticationPrincipal User user) {
+        boolean success = jasperService.generateAllMutationReport(user);
+        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate All Mutation Report");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")
