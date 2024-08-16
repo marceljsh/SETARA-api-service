@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.validation.ValidUUID;
-import org.synrgy.setara.vendor.controller.doc.FetchAllBanks;
+import org.synrgy.setara.vendor.controller.doc.GetAllBanksDoc;
 import org.synrgy.setara.vendor.controller.doc.FetchAllEwallets;
-import org.synrgy.setara.vendor.controller.doc.FetchSingleMerchant;
-import org.synrgy.setara.vendor.controller.doc.MerchantId;
+import org.synrgy.setara.vendor.controller.doc.GetMerchantByIdDoc;
 import org.synrgy.setara.vendor.dto.BankResponse;
 import org.synrgy.setara.vendor.dto.EwalletResponse;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
@@ -49,7 +48,7 @@ public class VendorController {
     return ResponseEntity.ok(BaseResponse.success("OK", ewalletService.fetchAll()));
   }
 
-  @FetchAllBanks
+  @GetAllBanksDoc
   @GetMapping(
     value = "/banks",
     produces = MediaType.APPLICATION_JSON_VALUE
@@ -60,17 +59,12 @@ public class VendorController {
     return ResponseEntity.ok(BaseResponse.success("OK", bankService.fetchAll()));
   }
 
-  @FetchSingleMerchant
+  @GetMerchantByIdDoc
   @GetMapping(
     value = "/merchants/{id}",
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<BaseResponse<MerchantResponse>> getMerchantById(
-    @MerchantId
-    @ValidUUID
-    @PathVariable("id")
-    String id
-  ) {
+  public ResponseEntity<BaseResponse<MerchantResponse>> getMerchantById(@ValidUUID @PathVariable("id") String id) {
     log.info("Request to fetch merchant by id: {}", id);
 
     UUID merchantId = UUID.fromString(id);

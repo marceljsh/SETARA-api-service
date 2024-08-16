@@ -1,5 +1,6 @@
 package org.synrgy.setara.vendor.controller.doc;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,5 +43,11 @@ import java.lang.annotation.Target;
     )
   )
 })
-public @interface FetchSingleMerchant {
+@Parameter(
+  name = "id",
+  description = "ID of the merchant",
+  required = true,
+  example = "25e27af8-6b74-40b8-a1a2-7f9400cbbe88"
+)
+public @interface GetMerchantByIdDoc {
 }

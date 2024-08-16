@@ -42,5 +42,5 @@ import java.lang.annotation.Target;
     )
   )
 )
-public @interface FetchAllBanks {
+public @interface GetAllBanksDoc {
 }

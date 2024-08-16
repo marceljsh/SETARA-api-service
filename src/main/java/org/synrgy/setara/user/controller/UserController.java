@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.user.controller.doc.GetOwnBalanceDoc;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.service.UserService;
@@ -23,6 +24,7 @@ public class UserController {
 
   private final UserService userService;
 
+  @GetOwnBalanceDoc
   @GetMapping(
     value = "/me/balance",
     produces = MediaType.APPLICATION_JSON_VALUE
