@@ -37,7 +37,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
   @Query("SELECT t FROM Transaction t WHERE t.user = :user AND t.time BETWEEN :startDate AND :endDate AND " +
           "(:transactionCategory = 'ALL_TRANSACTIONS' OR " +
-          "(:transactionCategory = 'OUTGOING' AND t.type IN ('TRANSFER', 'TOP_UP')) OR " +
+          "(:transactionCategory = 'OUTGOING' AND t.type IN ('TRANSFER', 'TOP_UP', 'QRPAYMENT')) OR " +
           "(:transactionCategory = 'INCOMING' AND t.type = 'DEPOSIT'))")
   Page<Transaction> findByUserAndTimeBetweenAndTransactionCategory(@Param("user") User user,
                                                                    @Param("startDate") LocalDateTime startDate,

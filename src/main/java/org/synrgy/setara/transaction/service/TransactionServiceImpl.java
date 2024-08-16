@@ -3,7 +3,6 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final SavedAccountRepository savedAccountRepository;
     private final MerchantRepository merchantRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ReceiptService receiptService;
+    private final JasperService jasperService;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
@@ -238,7 +237,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         try {
-            byte[] receiptPdf = receiptService.generateReceipt(transaction, response);
+            byte[] receiptPdf = jasperService.generateReceipt(transaction, response);
 
             // Specify the path to save the PDF
             String pdfFileName = "transfer_receipt_" + transaction.getReferenceNumber() + ".pdf";
