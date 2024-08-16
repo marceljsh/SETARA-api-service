@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.validation.ValidUUID;
 import org.synrgy.setara.vendor.controller.doc.GetAllBanksDoc;
-import org.synrgy.setara.vendor.controller.doc.FetchAllEwallets;
+import org.synrgy.setara.vendor.controller.doc.GetAllEwalletsDoc;
 import org.synrgy.setara.vendor.controller.doc.GetMerchantByIdDoc;
 import org.synrgy.setara.vendor.dto.BankResponse;
 import org.synrgy.setara.vendor.dto.EwalletResponse;
@@ -37,7 +37,7 @@ public class VendorController {
   private final EwalletService ewalletService;
   private final MerchantService merchantService;
 
-  @FetchAllEwallets
+  @GetAllEwalletsDoc
   @GetMapping(
     value = "/ewallets",
     produces = MediaType.APPLICATION_JSON_VALUE
@@ -57,6 +57,16 @@ public class VendorController {
     log.info("Request to fetch all banks");
 
     return ResponseEntity.ok(BaseResponse.success("OK", bankService.fetchAll()));
+  }
+
+  @GetMapping(
+    value = "/banks/get-bca",
+    produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity<BaseResponse<BankResponse>> getBca() {
+    log.info("Request to fetch BCA bank");
+
+    return ResponseEntity.ok(BaseResponse.success("OK", bankService.fetchBca()));
   }
 
   @GetMerchantByIdDoc

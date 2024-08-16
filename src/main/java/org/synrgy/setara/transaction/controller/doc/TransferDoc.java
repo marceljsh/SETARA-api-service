@@ -1,14 +1,13 @@
-package org.synrgy.setara.contact.controller.doc;
+package org.synrgy.setara.transaction.controller.doc;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
-import org.synrgy.setara.transaction.dto.TopUpRequest;
+import org.synrgy.setara.transaction.dto.TransferRequest;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,22 +17,28 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Operation(
-  summary = "Toggle favorite status of a bank contact",
+  summary = "Top up an e-wallet using phone number",
   requestBody = @RequestBody(
     required = true,
     content = @Content(
       mediaType = MediaType.APPLICATION_JSON_VALUE,
-      schema = @Schema(implementation = TopUpRequest.class),
+      schema = @Schema(implementation = TransferRequest.class),
       examples = @ExampleObject(
         value = """
         {
-          "favorite": "true"
+          "dest_bank_id": "123e4567-e89b-12d3-a456-426614174000",
+          "dest_account_number": "1234567890",
+          "amount": 250000,
+          "mpin": "123456",
+          "note": "For da goods",
+          "name": "John Doe",
+          "save_contact": true
         }"""
       )
     )
   ),
   responses = @ApiResponse(
-    responseCode = "200",
+    responseCode = "201",
     description = "Successful operation",
     content = @Content(
       mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -42,17 +47,20 @@ import java.lang.annotation.Target;
         {
           "success": true,
           "message": "OK",
-          "data": null
+          "data": {
+            "reference_number": "<ref-no>",
+            "unique_code": "<unique-code>",
+            "transaction_time": "2020-01-01T00:00:00Z",
+            "bank_name": "Tahapan BCA",
+            "account_number": "1234567890",
+            "amount": 250000,
+            "admin_fee": 2500,
+            "note": "For da goods"
+          }
         }"""
       )
     )
   )
 )
-@Parameter(
-  name = "id",
-  description = "ID of the bank contact",
-  required = true,
-  example = "123e4567-e89b-12d3-a456-426614174000"
-)
-public @interface ToggleFavoriteBankContactDoc {
+public @interface TransferDoc {
 }

@@ -87,11 +87,11 @@ public class TransactionServiceImpl implements TransactionService {
     validateBalance(owner.getBalance(), totalAmount);
 
     EwalletUser target = getEwalletUser(request.getEwalletId(), request.getPhoneNumber());
-    Transaction transaction = createTransaction(owner, target, null, null, TransactionType.TOP_UP,
+    Transaction topUpTx = createTransaction(owner, target, null, null, TransactionType.TOP_UP,
       request.getAmount(), ADMIN_FEE, request.getPhoneNumber(), request.getNote(), TOP_UP_PREFIX);
 
     userRepo.updateBalanceById(owner.getId(), owner.getBalance().subtract(totalAmount));
-    txRepo.save(transaction);
+    txRepo.save(topUpTx);
 
     if (request.isSaveContact()) {
       EwalletContact newContact = EwalletContact.builder()
@@ -102,7 +102,7 @@ public class TransactionServiceImpl implements TransactionService {
       ecRepo.save(newContact);
     }
 
-    return TopUpResponse.of(transaction, target.getName());
+    return TopUpResponse.of(topUpTx, target.getName());
   }
 
   @Override
@@ -163,13 +163,13 @@ public class TransactionServiceImpl implements TransactionService {
     validateBalance(owner.getBalance(), request.getAmount());
     Merchant merchant = getMerchantById(request.getMerchantId());
 
-    Transaction transaction = createTransaction(owner, null, null, merchant, TransactionType.QR_PAYMENT,
+    Transaction qrPayTx = createTransaction(owner, null, null, merchant, TransactionType.QR_PAYMENT,
       request.getAmount(), BigDecimal.ZERO, null, request.getNote(), TRADE_PREFIX);
 
-    txRepo.save(transaction);
+    txRepo.save(qrPayTx);
     userRepo.updateBalanceById(owner.getId(), owner.getBalance().subtract(request.getAmount()));
 
-    return QRPaymentResponse.from(transaction);
+    return QRPaymentResponse.from(qrPayTx);
   }
 
   @Override
@@ -178,7 +178,7 @@ public class TransactionServiceImpl implements TransactionService {
     validateYearAndMonth(year, month);
 
     List<Transaction> expenseTransactions = txRepo.findMonthlyReportMultipleTypes(owner.getId(),
-      List.of(TransactionType.TRANSFER, TransactionType.TOP_UP), month, year);
+      List.of(TransactionType.TRANSFER, TransactionType.TOP_UP, TransactionType.QR_PAYMENT), month, year);
 
     List<Transaction> incomeTransactions = txRepo.findMonthlyReportSingleTypes(owner.getId(),
       TransactionType.DEPOSIT, month, year);

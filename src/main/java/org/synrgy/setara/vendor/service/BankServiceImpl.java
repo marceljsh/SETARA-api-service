@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.vendor.dto.BankResponse;
+import org.synrgy.setara.vendor.exception.BankNotFoundException;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.repository.BankRepository;
 
@@ -44,6 +45,16 @@ public class BankServiceImpl implements BankService {
         .stream()
         .map(BankResponse::from)
         .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BankResponse fetchBca() {
+    log.debug("Fetching BCA bank");
+
+    return bankRepo.findByName("Tahapan BCA")
+        .map(BankResponse::from)
+        .orElseThrow(() -> new BankNotFoundException("BCA bank not found"));
   }
 
 }

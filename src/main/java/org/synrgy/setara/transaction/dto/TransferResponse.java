@@ -12,17 +12,12 @@ import java.time.LocalDateTime;
 public class TransferResponse {
 
   private String referenceNumber;
-
   private String uniqueCode;
-
   private LocalDateTime transactionTime;
-
   private String bankName;
-
   private String accountNumber;
-
   private BigDecimal amount;
-
+  private BigDecimal adminFee;
   private String note;
 
   public static TransferResponse from(Transaction tx) {
@@ -33,6 +28,7 @@ public class TransferResponse {
         .bankName(tx.getBank().getName())
         .accountNumber(tx.getDestAccountNumber())
         .amount(tx.getAmount())
+        .adminFee(tx.getAdminFee())
         .note(tx.getNote())
         .build();
   }

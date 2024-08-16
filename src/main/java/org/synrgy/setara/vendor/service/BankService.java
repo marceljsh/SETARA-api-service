@@ -10,4 +10,6 @@ public interface BankService {
 
     List<BankResponse> fetchAll();
 
+    BankResponse fetchBca();
+
 }

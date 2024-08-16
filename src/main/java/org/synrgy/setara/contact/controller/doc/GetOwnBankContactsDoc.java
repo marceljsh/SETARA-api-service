@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
                 "name": "Tahapan BCA"
               },
               "name": "Putra Wijaya",
-              "account_number": ""2946145032"",
+              "account_number": "2946145032",
               "image_path": "/setara-api-service/images/bank-contacts/Putra-Wijaya.png",
               "favorite": false
             }

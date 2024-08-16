@@ -1,7 +1,6 @@
-package org.synrgy.setara.contact.controller.doc;
+package org.synrgy.setara.transaction.controller.doc;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +17,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Operation(
-  summary = "Toggle favorite status of a bank contact",
+  summary = "Top up an e-wallet using phone number",
   requestBody = @RequestBody(
     required = true,
     content = @Content(
@@ -27,13 +26,19 @@ import java.lang.annotation.Target;
       examples = @ExampleObject(
         value = """
         {
-          "favorite": "true"
+          "mpin": "123456",
+          "ewallet_id": "123e4567-e89b-12d3-a456-426614174000",
+          "phone_number": "081234567890",
+          "amount": 250000,
+          "note": "Thx for the gift",
+          "name": "John Doe",
+          "save_contact": true
         }"""
       )
     )
   ),
   responses = @ApiResponse(
-    responseCode = "200",
+    responseCode = "201",
     description = "Successful operation",
     content = @Content(
       mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -42,17 +47,21 @@ import java.lang.annotation.Target;
         {
           "success": true,
           "message": "OK",
-          "data": null
+          "data": {
+            "reference_number": "<ref-no>",
+            "unique_code": "<unique-code>",
+            "transaction_time": "2020-01-01T00:00:00Z",
+            "ewallet_name": "OVO",
+            "phone_number": "081234567890",
+            "name": "John Doe",
+            "note": "Thx for the gift",
+            "amount": 250000,
+            "admin_fee": 2500
+          }
         }"""
       )
     )
   )
 )
-@Parameter(
-  name = "id",
-  description = "ID of the bank contact",
-  required = true,
-  example = "123e4567-e89b-12d3-a456-426614174000"
-)
-public @interface ToggleFavoriteBankContactDoc {
+public @interface TopUpDoc {
 }

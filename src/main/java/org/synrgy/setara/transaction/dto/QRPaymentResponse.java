@@ -11,16 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 public class QRPaymentResponse {
 
-  private String merchantName;
-
-  private LocalDateTime transactionTime;
-
   private String referenceNumber;
-
   private String uniqueCode;
-
+  private String merchantName;
+  private LocalDateTime transactionTime;
   private BigDecimal amount;
-
   private String note;
 
   public static QRPaymentResponse from(Transaction tx) {

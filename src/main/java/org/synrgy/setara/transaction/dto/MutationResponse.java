@@ -12,12 +12,12 @@ import java.util.UUID;
 @Builder
 public class MutationResponse {
 
-  private UUID transactionId;
+  private String referenceNumber;
   private String uniqueCode;
+  private UUID transactionId;
   private String transactionType;
   private BigDecimal totalAmount;
   private LocalDateTime transactionTime;
-  private String referenceNumber;
   private String destination;
 
   public static MutationResponse from(Transaction tx) {

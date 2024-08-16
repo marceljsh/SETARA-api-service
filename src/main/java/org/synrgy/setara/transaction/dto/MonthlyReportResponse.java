@@ -10,13 +10,9 @@ import java.math.BigDecimal;
 public class MonthlyReportResponse {
 
   private int month;
-
   private int year;
-
   private BigDecimal income;
-
   private BigDecimal expense;
-
   private BigDecimal gap;
 
   public static MonthlyReportResponse of(int month, int year, BigDecimal income, BigDecimal expense) {
