@@ -17,7 +17,6 @@ import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
 import org.synrgy.setara.vendor.model.Ewallet;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

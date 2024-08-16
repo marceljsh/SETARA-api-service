@@ -7,6 +7,8 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.synrgy.setara.common.model.Auditable;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -27,6 +29,8 @@ public class Merchant extends Auditable {
 
     @Column(name = "image_path")
     private String imagePath;
+
+    private BigDecimal amount;
 
     @Column(name = "qris_code", columnDefinition = "TEXT", length = 512)
     private String qrisCode;
