@@ -1,4 +1,4 @@
-package org.synrgy.setara.contact.controller.media;
+package org.synrgy.setara.user.controller.doc;
 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -11,7 +11,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ApiResponse(
@@ -24,23 +24,13 @@ import java.lang.annotation.Target;
       {
         "success": true,
         "message": "OK",
-        "data": [
-          {
-            "id": "c5bd74b7-8b9d-4e25-b825-d56275b59312",
-            "ewallet": {
-              "id": "f0a62a14-636c-4a88-aa29-5fd30d30272d",
-              "name": "OVO",
-              "image_path": "/setara-api-service/images/ewallet/OVO.png"
-            },
-            "name": "Andre Benjamin",
-            "phone_number": "081398765432",
-            "image_path": "/setara-api-service/images/ewallet-user/AndreBenjamin.jpg"
-            "favorite": false
-          }
-        ]
+        "data": {
+          "checkTime": "2024-08-15T06:02:00.228Z",
+          "balance": 15000000
+        }
       }"""
     )
   )
 )
-public @interface FetchEwalletContacts {
+public @interface FetchUserBalance {
 }

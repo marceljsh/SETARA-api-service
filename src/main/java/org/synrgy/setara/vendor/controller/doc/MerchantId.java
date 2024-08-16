@@ -1,4 +1,4 @@
-package org.synrgy.setara.vendor.controller.media;
+package org.synrgy.setara.vendor.controller.doc;
 
 import io.swagger.v3.oas.annotations.Parameter;
 

@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.synrgy.setara.auth.controller.media.AuthReq;
-import org.synrgy.setara.auth.controller.media.AuthRes;
+import org.synrgy.setara.auth.controller.doc.SignInDoc;
 import org.synrgy.setara.auth.dto.AuthResponse;
 import org.synrgy.setara.auth.dto.LoginRequest;
 import org.synrgy.setara.auth.service.AuthService;
@@ -30,13 +29,13 @@ public class AuthController {
   private final AuthenticationManager authManager;
   private final AuthService authService;
 
-  @AuthRes
+  @SignInDoc
   @PostMapping(
     value = "/sign-in",
     consumes = MediaType.APPLICATION_JSON_VALUE,
     produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<BaseResponse<AuthResponse>> signIn(@AuthReq @RequestBody LoginRequest request) {
+  public ResponseEntity<BaseResponse<AuthResponse>> signIn(@RequestBody LoginRequest request) {
     log.info("Request to sign in for {}", request.getSignature());
 
     UsernamePasswordAuthenticationToken token =

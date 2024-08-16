@@ -1,5 +1,6 @@
-package org.synrgy.setara.auth.controller.media;
+package org.synrgy.setara.contact.controller.doc;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,18 +25,16 @@ import java.lang.annotation.Target;
       {
         "success": true,
         "message": "OK",
-        "data": {
-          "user": {
-            "name": "Andhika Putra",
-            "account_number": "2891376451",
-            "balance": 15000000,
-            "image_path": "/setara-api-service/images/user/Andhika-Putra.png"
-          },
-          "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnb2QiLCJpYXQiOjE3MjAxOTQzNzYsImV4cCI6MTcyMDE5Nzk3Nn0.SXkMYJXPrpGfnz8FX4n3I0IUeKlQdLjvXZUSypAe1Ig"
-        }
+        "data": null
       }"""
     )
   )
 )
-public @interface AuthRes {
+@Parameter(
+  name = "id",
+  description = "ID of the e-wallet contact to toggle",
+  required = true,
+  example = "123e4567-e89b-12d3-a456-426614174000"
+)
+public @interface ToggleFavoriteEwalletContactDoc {
 }
