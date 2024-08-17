@@ -15,9 +15,12 @@ import org.synrgy.setara.transaction.exception.TransactionExceptions;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.repository.TransactionRepository;
 import org.synrgy.setara.user.exception.UserExceptions;
+import org.synrgy.setara.user.model.EwalletUser;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.EwalletUserRepository;
 import org.synrgy.setara.user.repository.UserRepository;
+import org.synrgy.setara.vendor.model.Merchant;
+import org.synrgy.setara.vendor.repository.MerchantRepository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +41,7 @@ public class JasperServiceImpl implements JasperService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final EwalletUserRepository ewalletUserRepository;
+    private final MerchantRepository merchantRepository;
 
     @Override
     public boolean generateReceipt(User user, UUID transactionId) {
@@ -62,14 +66,20 @@ public class JasperServiceImpl implements JasperService {
                 break;
 
             case TOP_UP:
-                recipientName = "-";
+                EwalletUser ewalletUser = ewalletUserRepository.findByEwalletIdAndPhoneNumber(
+                                transaction.getEwallet().getId(),
+                                transaction.getDestinationPhoneNumber())
+                        .orElseThrow(() -> new UserExceptions.UserNotFoundException("E-wallet user not found with phone number: " + transaction.getDestinationPhoneNumber()));
+                recipientName = ewalletUser.getName().toUpperCase();
                 recipientNumber = transaction.getDestinationPhoneNumber();
                 transactionType = "TOP UP SALDO";
                 break;
 
             case QRPAYMENT:
-                recipientName = "-";
-                recipientNumber = "-";
+                Merchant merchant = merchantRepository.findById(transaction.getDestinationIdQris().getId())
+                        .orElseThrow(() -> new TransactionExceptions.MerchantNotFoundException("Merchant with ID " + transaction.getDestinationIdQris().getId() + " not found"));
+                recipientName = merchant.getName();
+                recipientNumber = merchant.getNmid();
                 transactionType = "PEMBAYARAN QR";
                 break;
 
