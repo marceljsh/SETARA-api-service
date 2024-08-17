@@ -121,4 +121,13 @@ public class TransactionController {
         MutationDetailResponse response = transactionService.getMutationDetail(user, transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
     }
+
+    @GetMapping("/generate-receipt/{transactionId}")
+    public ResponseEntity<BaseResponse<String>> generateReceipt(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID transactionId) {
+        boolean success = jasperService.generateReceipt(user, transactionId);
+        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate Transaction Receipt");
+        return ResponseEntity.ok(response);
+    }
 }
