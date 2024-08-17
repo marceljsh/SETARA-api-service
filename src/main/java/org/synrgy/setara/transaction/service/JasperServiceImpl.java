@@ -53,8 +53,8 @@ public class JasperServiceImpl implements JasperService {
             throw new TransactionExceptions.TransactionNotOwnedByUser("Transaction is not owned by user");
         }
 
-        String recipientNumber = null;
-        String recipientName = null;
+        String recipientNumber;
+        String recipientName;
         String transactionType;
 
         switch (transaction.getType()) {
