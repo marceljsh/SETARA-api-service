@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpResponse {
+    private String idTransaction;
     private UserDto user;
     private UserEwalletDto userEwallet;
     private BigDecimal amount;

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class MerchantTransactionResponse {
+    private String idTransaction;
     private SourceUserDTO sourceUser;
     private DestinationUserDTO destinationUser;
     private BigDecimal amount;
