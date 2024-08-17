@@ -116,6 +116,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
 
         return TopUpResponse.builder()
+                .idTransaction(transaction.getId().toString())
                 .user(TopUpResponse.UserDto.builder()
                         .accountNumber(user.getAccountNumber())
                         .name(user.getName())
@@ -217,7 +218,8 @@ public class TransactionServiceImpl implements TransactionService {
             });
         }
 
-        TransferResponse response = TransferResponse.builder()
+        return TransferResponse.builder()
+                .idTransaction(transaction.getId().toString())
                 .sourceUser(TransferResponse.UserDTO.builder()
                         .name(user.getName())
                         .bank(user.getBank().getName())
@@ -235,28 +237,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .totalAmount(totalAmount)
                 .note(request.getNote())
                 .build();
-
-        try {
-            byte[] receiptPdf = jasperService.generateReceipt(transaction, response);
-
-            // Specify the path to save the PDF
-            String pdfFileName = "transfer_receipt_" + transaction.getReferenceNumber() + ".pdf";
-            Path pdfPath = Paths.get("src/main/resources/receipts/", pdfFileName);
-
-            // Create directories if they do not exist
-            Files.createDirectories(pdfPath.getParent());
-
-            // Save the PDF file to the specified path
-            Files.write(pdfPath, receiptPdf);
-
-            // Optionally, you can log the location of the saved file
-            log.info("PDF saved to: " + pdfPath.toAbsolutePath().toString());
-
-        } catch (Exception e) {
-            log.error("Error generating or saving receipt PDF", e);
-        }
-
-        return response;
     }
 
     @Override
@@ -336,6 +316,7 @@ public class TransactionServiceImpl implements TransactionService {
         String bankName = bank != null ? bank.getName() : "Unknown";
 
         return MerchantTransactionResponse.builder()
+                .idTransaction(transaction.getId().toString())
                 .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
                         .name(user.getName())
                         .bank(bankName)
