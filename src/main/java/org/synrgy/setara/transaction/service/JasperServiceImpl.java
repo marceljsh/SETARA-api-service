@@ -42,6 +42,7 @@ public class JasperServiceImpl implements JasperService {
     private final UserRepository userRepository;
     private final EwalletUserRepository ewalletUserRepository;
     private final MerchantRepository merchantRepository;
+    private static final String UNKNOWN = "Unknown";
 
     @Override
     public boolean generateReceipt(User user, UUID transactionId) {
@@ -84,9 +85,9 @@ public class JasperServiceImpl implements JasperService {
                 break;
 
             default:
-                recipientName = "Unknown";
-                recipientNumber = "Unknown";
-                transactionType = "Unknown";
+                recipientName = UNKNOWN;
+                recipientNumber = UNKNOWN;
+                transactionType = UNKNOWN;
                 break;
         }
 
