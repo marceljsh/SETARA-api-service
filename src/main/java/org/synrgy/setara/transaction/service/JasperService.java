@@ -7,6 +7,6 @@ import java.util.UUID;
 public interface JasperService {
     boolean generateReceipt(User user, UUID transactionId);
 
-    boolean generateAllMutationReport(User user);
+    byte[] generateAllMutationReport(User user);
 }
 

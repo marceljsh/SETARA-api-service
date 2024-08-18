@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.user.model.User;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TransactionService {
@@ -18,4 +19,6 @@ public interface TransactionService {
     Page<MutationResponse> getAllMutation(User user, MutationRequest request, int page, int size);
 
     MutationDetailResponse getMutationDetail(User user, UUID transactionId);
+
+    List<MutationDatasetResponse> getMutationDataset(User user);
 }

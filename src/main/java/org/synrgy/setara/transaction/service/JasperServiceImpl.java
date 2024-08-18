@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -43,6 +42,7 @@ public class JasperServiceImpl implements JasperService {
     private final EwalletUserRepository ewalletUserRepository;
     private final MerchantRepository merchantRepository;
     private static final String UNKNOWN = "Unknown";
+    private final TransactionService transactionService;
 
     @Override
     public boolean generateReceipt(User user, UUID transactionId) {
@@ -167,7 +167,7 @@ public class JasperServiceImpl implements JasperService {
     }
 
     @Override
-    public boolean generateAllMutationReport(User user) {
+    public byte[] generateAllMutationReport(User user) {
         JasperReport jasperReport;
         try {
             jasperReport = (JasperReport) JRLoader
@@ -178,14 +178,17 @@ public class JasperServiceImpl implements JasperService {
                 jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
                 JRSaver.saveObject(jasperReport, "MutationReport.jasper");
             } catch (FileNotFoundException | JRException ex) {
-                throw new RuntimeException(ex); // TODO: change exception
+                throw new JasperReportExceptions.ReportFailedToLoadException("Failed to load or compile the JasperReport template");
             }
         }
+
+        JRBeanCollectionDataSource mutationDataset = new JRBeanCollectionDataSource(transactionService.getMutationDataset(user));
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("noRek", String.valueOf(user.getAccountNumber()));
         parameters.put("name", String.valueOf(user.getName()));
         parameters.put("currency", "IDR");
+        parameters.put("mutationDataset", mutationDataset);
 
         JasperPrint jasperPrint;
         byte[] reportContent;
@@ -193,21 +196,9 @@ public class JasperServiceImpl implements JasperService {
             jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
             reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (JRException e) {
-            throw new RuntimeException("Failed to generate report", e); // TODO: change exception
+            throw new JasperReportExceptions.ReportFillOrExportException("Failed to fill report or export to PDF");
         }
 
-        try {
-            String pdfFileName = "mutasi_rekening_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
-            Path pdfPath = Paths.get(System.getProperty("user.home"), "Downloads", pdfFileName);
-
-            Files.write(pdfPath, reportContent);
-
-            log.info("PDF saved to: {}", pdfPath.toAbsolutePath());
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating or saving report PDF", e); //TODO: change exception
-        }
-
-        return true;
+        return reportContent;
     }
 }
