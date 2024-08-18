@@ -12,6 +12,7 @@ import org.synrgy.setara.vendor.util.CodeGenerator;
 import org.synrgy.setara.vendor.util.QRCodeGenerator;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +45,7 @@ public class MerchantServiceImpl implements MerchantService {
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
                         .address("Ruko Summarecon Bandung")
+                        .amount(BigDecimal.valueOf(15500))
                         .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
                         .build()
         );
@@ -108,6 +110,7 @@ public class MerchantServiceImpl implements MerchantService {
                 .terminalId(merchant.getTerminalId())
                 .address(merchant.getAddress())
                 .imagePath(merchant.getImagePath())
+                .amount(merchant.getAmount())
                 .qrisCode(merchant.getQrisCode())
                 .build();
     }

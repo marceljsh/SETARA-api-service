@@ -1,11 +1,11 @@
 package org.synrgy.setara.transaction.service;
 
-import org.synrgy.setara.transaction.dto.TransferResponse;
-import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.user.model.User;
 
+import java.util.UUID;
+
 public interface JasperService {
-    byte[] generateReceipt(Transaction transaction, TransferResponse response);
+    boolean generateReceipt(User user, UUID transactionId);
 
     byte[] generateAllMutationReport(User user);
 }

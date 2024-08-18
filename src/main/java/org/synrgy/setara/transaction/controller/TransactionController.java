@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.JasperService;
@@ -127,5 +125,14 @@ public class TransactionController {
             @PathVariable UUID transactionId) {
         MutationDetailResponse response = transactionService.getMutationDetail(user, transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
+    }
+
+    @GetMapping("/generate-receipt/{transactionId}")
+    public ResponseEntity<BaseResponse<String>> generateReceipt(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID transactionId) {
+        boolean success = jasperService.generateReceipt(user, transactionId);
+        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate Transaction Receipt");
+        return ResponseEntity.ok(response);
     }
 }
