@@ -178,7 +178,7 @@ public class JasperServiceImpl implements JasperService {
                 jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
                 JRSaver.saveObject(jasperReport, "MutationReport.jasper");
             } catch (FileNotFoundException | JRException ex) {
-                throw new RuntimeException(ex); // TODO: change exception
+                throw new JasperReportExceptions.ReportFailedToLoadException("Failed to load or compile the JasperReport template");
             }
         }
 
@@ -196,7 +196,7 @@ public class JasperServiceImpl implements JasperService {
             jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
             reportContent = JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (JRException e) {
-            throw new RuntimeException("Failed to generate report", e); // TODO: change exception
+            throw new JasperReportExceptions.ReportFillOrExportException("Failed to fill report or export to PDF");
         }
 
         return reportContent;
