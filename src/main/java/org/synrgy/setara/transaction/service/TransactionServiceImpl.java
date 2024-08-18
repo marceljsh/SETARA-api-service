@@ -3,6 +3,7 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.TransactionException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +30,11 @@ import org.synrgy.setara.vendor.repository.EwalletRepository;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -50,7 +51,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final SavedAccountRepository savedAccountRepository;
     private final MerchantRepository merchantRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JasperService jasperService;
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
@@ -437,16 +437,84 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<MutationDatasetResponse> getMutationDataset(User user) {
-        MutationDatasetResponse mutationData = MutationDatasetResponse.builder()
-                .dateAndTime("1")
-                .description("2")
-                .nominal("3")
-                .build();
-
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH.mm");
         List<MutationDatasetResponse> mutationDataset = new ArrayList<>();
-        mutationDataset.add(mutationData);
+
+        List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        for (Transaction transaction : transactions) {
+            LocalDateTime transactionTime = transaction.getTime();
+            String time = transactionTime.format(timeFormatter);
+            String monthName = getMonthNameInIndonesian(transactionTime.getMonth());
+            String dateAndTime = String.format("%s %s %s,%n%s WIB", transactionTime.getDayOfMonth(), monthName, transactionTime.getYear(), time);
+
+            TransactionType transactionType = transaction.getType();
+            String formattedTransactionType;
+            String companyName = "";
+            String name;
+            if (transactionType.equals(TransactionType.TRANSFER)) {
+                formattedTransactionType = "Transfer";
+                companyName = " " + transaction.getBank().getName();
+                User receiver = userRepository.findByAccountNumber(transaction.getDestinationAccountNumber())
+                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+                name = " ke " +  receiver.getName();
+            } else if (transactionType.equals(TransactionType.TOP_UP)) {
+                formattedTransactionType = "Top Up";
+                companyName = " " + transaction.getEwallet().getName();
+                EwalletUser receiver = ewalletUserRepository.findByPhoneNumberAndEwallet(transaction.getDestinationPhoneNumber(), transaction.getEwallet())
+                        .orElseThrow(() -> new TransactionExceptions.DestinationEwalletUserNotFoundException("not found eWalletUser with number " + transaction.getDestinationPhoneNumber() + " and eWalletId" + transaction.getEwallet().getId()));
+                name = " ke " +  receiver.getName();
+            } else if (transactionType.equals(TransactionType.QRPAYMENT)) {
+                formattedTransactionType = "Qr Payment";
+                name = " ke " +  transaction.getDestinationIdQris().getName();
+            } else {
+                formattedTransactionType = "Deposit";
+                companyName = " " + transaction.getBank().getName();
+                String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
+                Transaction transfer = transactionRepository.findByReferenceNumber(referenceNumber)
+                        .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + " not found"));
+                User sender = userRepository.findByAccountNumber(transfer.getDestinationAccountNumber())
+                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+                name = " dari " +  sender.getName();
+            }
+            String description = String.format("%s%n%s%s%s", transaction.getUniqueCode(), formattedTransactionType, companyName, name);
+
+            BigDecimal amount = transaction.getAmount();
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+            symbols.setGroupingSeparator('.');
+            DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+            String formattedAmount = formatter.format(amount);
+            String type = "-";
+            if (transactionType.equals(TransactionType.DEPOSIT)) {
+                type = "+";
+            }
+            String nominal = String.format("%s RP. %s", type, formattedAmount);
+
+            mutationDataset.add(MutationDatasetResponse.builder()
+                    .dateAndTime(dateAndTime)
+                    .description(description)
+                    .nominal(nominal)
+                    .build());
+        }
 
         return mutationDataset;
+    }
+
+    private static String getMonthNameInIndonesian(Month month) {
+        return switch (month) {
+            case JANUARY -> "Januari";
+            case FEBRUARY -> "Februari";
+            case MARCH -> "Maret";
+            case APRIL -> "April";
+            case MAY -> "Mei";
+            case JUNE -> "Juni";
+            case JULY -> "Juli";
+            case AUGUST -> "Agustus";
+            case SEPTEMBER -> "September";
+            case OCTOBER -> "Oktober";
+            case NOVEMBER -> "November";
+            case DECEMBER -> "Desember";
+        };
     }
 
     private void validateMpin(String mpin, User user) {

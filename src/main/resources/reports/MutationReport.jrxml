@@ -83,7 +83,7 @@
         </band>
     </columnHeader>
     <detail>
-        <band height="400" splitType="Stretch">
+        <band height="600" splitType="Stretch">
             <staticText>
                 <reportElement x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
                 <textElement verticalAlignment="Middle">
@@ -165,16 +165,16 @@
                         <jr:detailCell style="Table_TD" height="60">
                             <box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
                             <textField>
-                                <reportElement x="0" y="0" width="140" height="60" uuid="4fa41f13-6b4d-4f5f-b8ed-6ddf8886dcbf"/>
-                                <box padding="0">
+                                <reportElement x="0" y="0" width="140" height="60" forecolor="#1C1C1E" uuid="4fa41f13-6b4d-4f5f-b8ed-6ddf8886dcbf"/>
+                                <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                                     <leftPen lineWidth="2.5" lineStyle="Solid" lineColor="#FFFFFF"/>
                                     <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                                     <rightPen lineWidth="2.5" lineStyle="Solid" lineColor="#FFFFFF"/>
                                 </box>
-                                <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font fontName="Arial&#xD;&#xA;" size="12"/>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font fontName="Arial" size="12"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{dateAndTime}]]></textFieldExpression>
                             </textField>
@@ -200,7 +200,7 @@
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="60">
                             <textField>
-                                <reportElement x="0" y="0" width="270" height="60" uuid="05a0c312-96d3-4f9b-8ba9-1eb0ab01e60d"/>
+                                <reportElement x="0" y="0" width="270" height="60" forecolor="#1C1C1E" uuid="05a0c312-96d3-4f9b-8ba9-1eb0ab01e60d"/>
                                 <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -208,8 +208,8 @@
                                     <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                                     <rightPen lineWidth="2.5" lineStyle="Solid" lineColor="#FFFFFF"/>
                                 </box>
-                                <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font fontName="Arial&#xD;&#xA;" size="12"/>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font fontName="Arial" size="12"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
                             </textField>
@@ -235,7 +235,7 @@
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="60">
                             <textField>
-                                <reportElement x="0" y="0" width="150" height="60" uuid="e9f50483-7a99-4e9c-8935-6a16ee297a8a"/>
+                                <reportElement x="0" y="0" width="150" height="60" forecolor="#1C1C1E" uuid="e9f50483-7a99-4e9c-8935-6a16ee297a8a"/>
                                 <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -243,8 +243,8 @@
                                     <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                                     <rightPen lineWidth="2.5" lineStyle="Solid" lineColor="#FFFFFF"/>
                                 </box>
-                                <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font fontName="Arial&#xD;&#xA;" size="12"/>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font fontName="Arial" size="12"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{nominal}]]></textFieldExpression>
                             </textField>
@@ -254,13 +254,4 @@
             </componentElement>
         </band>
     </detail>
-    <columnFooter>
-        <band height="50" splitType="Stretch"/>
-    </columnFooter>
-    <pageFooter>
-        <band height="54" splitType="Stretch"/>
-    </pageFooter>
-    <summary>
-        <band height="42" splitType="Stretch"/>
-    </summary>
 </jasperReport>

@@ -110,7 +110,7 @@ public class TransactionController {
 
     @GetMapping("/generate-all-mutation-report")
     public ResponseEntity<byte[]> generateAllMutationReport(@AuthenticationPrincipal User user) {
-        String pdfFileName = "mutasi_rekening" + ".pdf";
+        String pdfFileName = "Mutasi Rekening (" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")) + ").pdf";
         byte[] reportContent = jasperService.generateAllMutationReport(user);
 
         return ResponseEntity.ok()
