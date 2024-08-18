@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.service.JasperService;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
@@ -132,11 +133,16 @@ public class TransactionController {
     }
 
     @GetMapping("/generate-receipt/{transactionId}")
-    public ResponseEntity<BaseResponse<String>> generateReceipt(
+    public ResponseEntity<byte[]> generateReceipt(
             @AuthenticationPrincipal User user,
             @PathVariable UUID transactionId) {
-        boolean success = jasperService.generateReceipt(user, transactionId);
-        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate Transaction Receipt");
-        return ResponseEntity.ok(response);
+        Transaction transaction = transactionService.getByTransactionId(transactionId);
+        String pdfFileName = "transaction_receipt_" + transaction.getReferenceNumber() + ".pdf";
+        byte[] reportContent = jasperService.generateReceipt(user, transactionId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pdfFileName + "\"")
+                .body(reportContent);
     }
 }

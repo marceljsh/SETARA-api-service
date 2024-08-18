@@ -45,7 +45,7 @@ public class JasperServiceImpl implements JasperService {
     private final TransactionService transactionService;
 
     @Override
-    public boolean generateReceipt(User user, UUID transactionId) {
+    public byte[] generateReceipt(User user, UUID transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
 
@@ -135,20 +135,7 @@ public class JasperServiceImpl implements JasperService {
             throw new JasperReportExceptions.ReportFillOrExportException("Failed to fill report or export to PDF");
         }
 
-        try {
-            String pdfFileName = "transaction_receipt_" + transaction.getReferenceNumber() + ".pdf";
-            Path pdfPath = Paths.get(System.getProperty("user.home"), "Downloads", pdfFileName);
-
-            Files.write(pdfPath, reportContent);
-
-            log.info("PDF saved to: {}", pdfPath.toAbsolutePath());
-
-            return true;
-
-        } catch (IOException e) {
-            log.error("Failed to save the PDF file", e);
-            return false;
-        }
+        return reportContent;
     }
 
     @NotNull
