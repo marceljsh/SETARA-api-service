@@ -449,6 +449,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         List<Transaction> transactions = transactionRepository.findByUser(user);
 
+        if (transactions.isEmpty()) {
+            mutationDataset.add(MutationDatasetResponse.builder()
+                    .dateAndTime("")
+                    .description("")
+                    .nominal("")
+                    .build());
+        }
+
         for (Transaction transaction : transactions) {
             LocalDateTime transactionTime = transaction.getTime();
             String time = transactionTime.format(timeFormatter);
