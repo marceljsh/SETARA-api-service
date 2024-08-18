@@ -8,11 +8,19 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.synrgy.setara.common.dto.BaseResponse;
+import org.synrgy.setara.user.exception.SearchExceptions;
 import org.synrgy.setara.user.exception.UserExceptions;
 
 @ControllerAdvice(basePackages = "org.synrgy.setara.user")
 public class UserAdvice {
     private static final Logger log = LoggerFactory.getLogger(UserAdvice.class);
+
+    @ExceptionHandler(SearchExceptions.SearchNotFoundException.class)
+    public ResponseEntity<BaseResponse<String>> handleSearchNotFoundException(SearchExceptions.SearchNotFoundException ex) {
+        log.error("Search not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Search not found");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(UserExceptions.UserNotFoundException.class)
     public ResponseEntity<BaseResponse<String>> handleUserNotFoundException(UserExceptions.UserNotFoundException ex) {

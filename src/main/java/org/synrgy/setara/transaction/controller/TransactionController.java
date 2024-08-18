@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.service.JasperService;
 import org.synrgy.setara.transaction.service.TransactionService;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,6 @@ import org.synrgy.setara.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -134,11 +133,16 @@ public class TransactionController {
     }
 
     @GetMapping("/generate-receipt/{transactionId}")
-    public ResponseEntity<BaseResponse<String>> generateReceipt(
+    public ResponseEntity<byte[]> generateReceipt(
             @AuthenticationPrincipal User user,
             @PathVariable UUID transactionId) {
-        boolean success = jasperService.generateReceipt(user, transactionId);
-        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate Transaction Receipt");
-        return ResponseEntity.ok(response);
+        Transaction transaction = transactionService.getByTransactionId(transactionId);
+        String pdfFileName = "transaction_receipt_" + transaction.getReferenceNumber() + ".pdf";
+        byte[] reportContent = jasperService.generateReceipt(user, transactionId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pdfFileName + "\"")
+                .body(reportContent);
     }
 }

@@ -9,6 +9,8 @@ import org.synrgy.setara.contact.dto.FavoriteEwalletRequest;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
+import org.synrgy.setara.contact.exception.SavedAccountExceptions;
+import org.synrgy.setara.contact.exception.SavedEwalletExceptions;
 import org.synrgy.setara.contact.exception.SavedEwalletExceptions.*;
 import org.synrgy.setara.contact.model.SavedEwalletUser;
 import org.synrgy.setara.contact.repository.SavedEwalletUserRepository;
@@ -92,14 +94,11 @@ public class SavedEwalletUserServiceImpl implements SavedEwalletUserService {
     @Override
     @Transactional
     public FavoriteResponse putFavoriteEwalletUser(FavoriteEwalletRequest request) {
-        Optional<SavedEwalletUser> optionalSavedEwalletUser = savedEwalletUserRepo.findById(request.getIdTersimpan());
-        if (optionalSavedEwalletUser.isPresent()) {
-            SavedEwalletUser savedEwalletUser = optionalSavedEwalletUser.get();
-            savedEwalletUser.setFavorite(request.isFavorite());
-            savedEwalletUserRepo.save(savedEwalletUser);
-            return new FavoriteResponse(request.getIdTersimpan(), request.isFavorite());
-        } else {
-            throw new EwalletUserNotFoundException("Saved e-wallet user with id " + request.getIdTersimpan() + " not found");
-        }
+        SavedEwalletUser savedEwalletUser = savedEwalletUserRepo.findById(request.getIdTersimpan())
+                .orElseThrow(() -> new SavedEwalletExceptions.EwalletUserNotFoundException("Saved ewallet user with ID " + request.getIdTersimpan() + " not found"));
+
+        savedEwalletUser.setFavorite(request.isFavorite());
+        savedEwalletUserRepo.save(savedEwalletUser);
+        return new FavoriteResponse(request.getIdTersimpan(), request.isFavorite());
     }
 }

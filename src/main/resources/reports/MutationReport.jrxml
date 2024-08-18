@@ -10,6 +10,9 @@
     <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
     <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
     <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <property name="net.sf.jasperreports.export.pdf.font.embed" value="true"/>
+    <style name="NunitoSans" fontName="Nunito Sans" pdfFontName="reports/NunitoSans-Regular.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+    <style name="NunitoSansBold" fontName="Nunito Sans Bold" pdfFontName="reports/NunitoSans-Bold.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
     <style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
         <box>
             <pen lineWidth="0.5" lineColor="#000000"/>
@@ -50,7 +53,7 @@
                 <imageExpression><![CDATA["reports/logo-setara.png"]]></imageExpression>
             </image>
             <staticText>
-                <reportElement x="324" y="21" width="243" height="38" uuid="843c01d2-e64e-4a7d-9291-fe30929879d9"/>
+                <reportElement style="NunitoSansBold" x="324" y="21" width="243" height="38" uuid="843c01d2-e64e-4a7d-9291-fe30929879d9"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="24" isBold="true"/>
                 </textElement>
@@ -61,7 +64,7 @@
     <pageHeader>
         <band height="53" splitType="Stretch">
             <staticText>
-                <reportElement x="20" y="30" width="150" height="23" forecolor="#115DA9" uuid="788c0486-2c20-4bc5-ada2-04f4aabc9569"/>
+                <reportElement style="NunitoSansBold" x="20" y="30" width="150" height="23" forecolor="#115DA9" uuid="788c0486-2c20-4bc5-ada2-04f4aabc9569"/>
                 <textElement>
                     <font fontName="Arial" size="18" isBold="true"/>
                 </textElement>
@@ -85,42 +88,42 @@
     <detail>
         <band height="600" splitType="Stretch">
             <staticText>
-                <reportElement x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
+                <reportElement style="NunitoSansBold" x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16" isBold="true"/>
                 </textElement>
-                <text><![CDATA[No. Rekening                                :]]></text>
+                <text><![CDATA[No. Rekening				:]]></text>
             </staticText>
             <textField>
-                <reportElement x="280" y="0" width="260" height="24" uuid="aba2e3e3-fdf2-4ed4-b7ae-cf064f8eaede"/>
+                <reportElement style="NunitoSansBold" x="280" y="0" width="260" height="24" uuid="aba2e3e3-fdf2-4ed4-b7ae-cf064f8eaede"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{noRek}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="20" y="30" width="250" height="24" uuid="51ff7df8-1cc7-4138-93ed-5d564c8c36b0"/>
+                <reportElement style="NunitoSansBold" x="20" y="30" width="250" height="24" uuid="51ff7df8-1cc7-4138-93ed-5d564c8c36b0"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16" isBold="true"/>
                 </textElement>
-                <text><![CDATA[Nama                                            :]]></text>
+                <text><![CDATA[Nama					:]]></text>
             </staticText>
             <textField>
-                <reportElement x="280" y="30" width="260" height="24" uuid="78c13409-ff9c-4935-91b7-3e5c22c4c703"/>
+                <reportElement style="NunitoSansBold" x="280" y="30" width="260" height="24" uuid="78c13409-ff9c-4935-91b7-3e5c22c4c703"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{name}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="20" y="60" width="250" height="24" uuid="e80e4c7f-bec2-4fa4-b5cb-f5feaad29755"/>
+                <reportElement style="NunitoSansBold" x="20" y="60" width="250" height="24" uuid="e80e4c7f-bec2-4fa4-b5cb-f5feaad29755"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16" isBold="true"/>
                 </textElement>
-                <text><![CDATA[Mata Uang                                    :]]></text>
+                <text><![CDATA[Mata Uang				:]]></text>
             </staticText>
             <textField>
-                <reportElement x="280" y="60" width="260" height="24" uuid="8f89cb13-7eb5-4f91-b62a-022a34030e7c"/>
+                <reportElement style="NunitoSansBold" x="280" y="60" width="260" height="24" uuid="8f89cb13-7eb5-4f91-b62a-022a34030e7c"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="16"/>
                 </textElement>
@@ -148,7 +151,7 @@
                                 <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                             </box>
                             <staticText>
-                                <reportElement mode="Opaque" x="0" y="0" width="140" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="4adb3304-8571-433e-9845-8f2e9e5376b6"/>
+                                <reportElement style="NunitoSansBold" mode="Opaque" x="0" y="0" width="140" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="4adb3304-8571-433e-9845-8f2e9e5376b6"/>
                                 <box>
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -165,7 +168,7 @@
                         <jr:detailCell style="Table_TD" height="60">
                             <box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
                             <textField>
-                                <reportElement x="0" y="0" width="140" height="60" forecolor="#1C1C1E" uuid="4fa41f13-6b4d-4f5f-b8ed-6ddf8886dcbf"/>
+                                <reportElement style="NunitoSans" x="0" y="0" width="140" height="60" forecolor="#1C1C1E" uuid="4fa41f13-6b4d-4f5f-b8ed-6ddf8886dcbf"/>
                                 <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -184,7 +187,7 @@
                         <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
                         <jr:columnHeader style="Table_CH" height="30" rowSpan="1">
                             <staticText>
-                                <reportElement mode="Opaque" x="0" y="0" width="270" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="57f3080f-426f-4b94-af19-a746564db9f4"/>
+                                <reportElement style="NunitoSansBold" mode="Opaque" x="0" y="0" width="270" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="57f3080f-426f-4b94-af19-a746564db9f4"/>
                                 <box>
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -200,7 +203,7 @@
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="60">
                             <textField>
-                                <reportElement x="0" y="0" width="270" height="60" forecolor="#1C1C1E" uuid="05a0c312-96d3-4f9b-8ba9-1eb0ab01e60d"/>
+                                <reportElement style="NunitoSans" x="0" y="0" width="270" height="60" forecolor="#1C1C1E" uuid="05a0c312-96d3-4f9b-8ba9-1eb0ab01e60d"/>
                                 <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -219,7 +222,7 @@
                         <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
                         <jr:columnHeader style="Table_CH" height="30" rowSpan="1">
                             <staticText>
-                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="8f78ce6f-a3e2-464f-a25a-46f59d8880b6"/>
+                                <reportElement style="NunitoSansBold" mode="Opaque" x="0" y="0" width="150" height="30" forecolor="#115DA9" backcolor="#E4EDFF" uuid="8f78ce6f-a3e2-464f-a25a-46f59d8880b6"/>
                                 <box>
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -235,7 +238,7 @@
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="60">
                             <textField>
-                                <reportElement x="0" y="0" width="150" height="60" forecolor="#1C1C1E" uuid="e9f50483-7a99-4e9c-8935-6a16ee297a8a"/>
+                                <reportElement style="NunitoSans" x="0" y="0" width="150" height="60" forecolor="#1C1C1E" uuid="e9f50483-7a99-4e9c-8935-6a16ee297a8a"/>
                                 <box padding="6">
                                     <pen lineWidth="2.5" lineColor="#FFFFFF"/>
                                     <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
