@@ -8,11 +8,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.contact.exception.SavedEwalletExceptions.*;
+import org.synrgy.setara.contact.exception.SavedAccountExceptions.*;
+import org.synrgy.setara.contact.exception.SavedEwalletExceptions;
 
 @ControllerAdvice(basePackages = "org.synrgy.setara.contact")
-public class SavedEwalletAdvice {
-    private static final Logger log = LoggerFactory.getLogger(SavedEwalletAdvice.class);
+public class ContactAdvice {
+    private static final Logger log = LoggerFactory.getLogger(ContactAdvice.class);
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<BaseResponse<String>> handleUserNotFoundException(UserNotFoundException ex) {
@@ -21,15 +22,36 @@ public class SavedEwalletAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(EwalletUserNotFoundException.class)
-    public ResponseEntity<BaseResponse<String>> handleEwalletUserNotFoundException(EwalletUserNotFoundException ex) {
-        log.error("Ewallet user not found: {}", ex.getMessage(), ex);
-        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Ewallet user not found");
+    @ExceptionHandler(SavedAccountNotFoundException.class)
+    public ResponseEntity<BaseResponse<String>> handleSavedAccountNotFoundException(SavedAccountNotFoundException ex) {
+        log.error("Saved account not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Saved account not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(FavoriteUpdateException.class)
     public ResponseEntity<BaseResponse<String>> handleFavoriteUpdateException(FavoriteUpdateException ex) {
+        log.error("Favorite update error: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Favorite update error");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(SavedEwalletExceptions.UserNotFoundException.class)
+    public ResponseEntity<BaseResponse<String>> handleUserNotFoundException(SavedEwalletExceptions.UserNotFoundException ex) {
+        log.error("User not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "User not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(SavedEwalletExceptions.EwalletUserNotFoundException.class)
+    public ResponseEntity<BaseResponse<String>> handleEwalletUserNotFoundException(SavedEwalletExceptions.EwalletUserNotFoundException ex) {
+        log.error("Ewallet user not found: {}", ex.getMessage(), ex);
+        BaseResponse<String> response = BaseResponse.failure(HttpStatus.NOT_FOUND, "Ewallet user not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(SavedEwalletExceptions.FavoriteUpdateException.class)
+    public ResponseEntity<BaseResponse<String>> handleFavoriteUpdateException(SavedEwalletExceptions.FavoriteUpdateException ex) {
         log.error("Favorite update error: {}", ex.getMessage(), ex);
         BaseResponse<String> response = BaseResponse.failure(HttpStatus.BAD_REQUEST, "Favorite update error");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
