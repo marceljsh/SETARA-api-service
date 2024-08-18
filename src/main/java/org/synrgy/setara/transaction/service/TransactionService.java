@@ -1,6 +1,5 @@
 package org.synrgy.setara.transaction.service;
 
-import org.springframework.data.domain.Page;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.user.model.User;
 
@@ -16,7 +15,7 @@ public interface TransactionService {
 
     MerchantTransactionResponse merchantTransaction(User user, MerchantTransactionRequest request);
 
-    Page<MutationResponse> getAllMutation(User user, MutationRequest request, int page, int size);
+    MutationResponseWithPagination getAllMutation(User user, MutationRequest request, int page, int size);
 
     MutationDetailResponse getMutationDetail(User user, UUID transactionId);
 

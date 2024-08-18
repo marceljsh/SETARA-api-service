@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,6 @@ import org.synrgy.setara.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -98,15 +96,21 @@ public class TransactionController {
     }
 
     @PostMapping("/get-all-mutation")
-    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@AuthenticationPrincipal User user,
-                                                                               @RequestBody MutationRequest request,
-                                                                               @RequestParam(defaultValue = "0") int page,
-                                                                               @RequestParam(defaultValue = "10") int size) {
-        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(user, request, page, size);
-        List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
-        BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
+    public ResponseEntity<BaseResponse<MutationResponseWithPagination>> getAllMutation(@AuthenticationPrincipal User user,
+                                                                                       @RequestBody MutationRequest request,
+                                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        MutationResponseWithPagination mutationResponseWithPagination = (MutationResponseWithPagination) transactionService.getAllMutation(user, request, page, size);
+
+        BaseResponse<MutationResponseWithPagination> response = BaseResponse.success(
+                HttpStatus.OK,
+                mutationResponseWithPagination,
+                "Success Get All Mutation"
+        );
+
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/generate-all-mutation-report")
     public ResponseEntity<byte[]> generateAllMutationReport(@AuthenticationPrincipal User user) {
