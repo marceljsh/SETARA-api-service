@@ -3,7 +3,6 @@ package org.synrgy.setara.transaction.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.TransactionException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -338,7 +337,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<MutationResponse> getAllMutation(User user, MutationRequest request, int page, int size) {
+    public MutationResponseWithPagination getAllMutation(User user, MutationRequest request, int page, int size) {
         LocalDateTime startDateTime = request.getStartDate().atStartOfDay();
         LocalDateTime endDateTime = request.getEndDate().atTime(LocalTime.MAX);
 
@@ -346,12 +345,12 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Transaction> transactions = transactionRepository.findByUserAndTimeBetweenAndTransactionCategory(
-          user, startDateTime, endDateTime, transactionCategory, pageable);
+                user, startDateTime, endDateTime, transactionCategory, pageable);
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-        return transactions.map(transaction -> MutationResponse.builder()
+        List<MutationResponse> mutationResponses = transactions.map(transaction -> MutationResponse.builder()
                 .transactionId(transaction.getId())
                 .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
                 .type(formatTransactionType(transaction))
@@ -362,8 +361,16 @@ public class TransactionServiceImpl implements TransactionService {
                 .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
                 .formattedDate(transaction.getTime().format(dateFormatter))
                 .formattedTime(transaction.getTime().format(timeFormatter))
-                .build());
+                .build()).getContent();
+
+        return MutationResponseWithPagination.builder()
+                .mutationResponses(mutationResponses)
+                .page(transactions.getNumber())
+                .size(transactions.getSize())
+                .totalPages(transactions.getTotalPages())
+                .build();
     }
+
 
     @Override
     public MutationDetailResponse getMutationDetail(User user, UUID transactionId) {

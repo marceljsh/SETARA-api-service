@@ -98,15 +98,21 @@ public class TransactionController {
     }
 
     @PostMapping("/get-all-mutation")
-    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@AuthenticationPrincipal User user,
-                                                                               @RequestBody MutationRequest request,
-                                                                               @RequestParam(defaultValue = "0") int page,
-                                                                               @RequestParam(defaultValue = "10") int size) {
-        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(user, request, page, size);
-        List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
-        BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
+    public ResponseEntity<BaseResponse<MutationResponseWithPagination>> getAllMutation(@AuthenticationPrincipal User user,
+                                                                                       @RequestBody MutationRequest request,
+                                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        MutationResponseWithPagination mutationResponseWithPagination = (MutationResponseWithPagination) transactionService.getAllMutation(user, request, page, size);
+
+        BaseResponse<MutationResponseWithPagination> response = BaseResponse.success(
+                HttpStatus.OK,
+                mutationResponseWithPagination,
+                "Success Get All Mutation"
+        );
+
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/generate-all-mutation-report")
     public ResponseEntity<byte[]> generateAllMutationReport(@AuthenticationPrincipal User user) {
