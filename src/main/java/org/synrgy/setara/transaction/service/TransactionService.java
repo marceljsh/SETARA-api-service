@@ -1,6 +1,7 @@
 package org.synrgy.setara.transaction.service;
 
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.user.model.User;
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface TransactionService {
     MutationDetailResponse getMutationDetail(User user, UUID transactionId);
 
     List<MutationDatasetResponse> getMutationDataset(User user);
+
+    Transaction getByTransactionId(UUID transactionId);
 }

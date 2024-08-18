@@ -515,6 +515,12 @@ public class TransactionServiceImpl implements TransactionService {
         return mutationDataset;
     }
 
+    @Override
+    public Transaction getByTransactionId(UUID transactionId) {
+        return transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
+    }
+
     private static String getMonthNameInIndonesian(Month month) {
         return switch (month) {
             case JANUARY -> "Januari";
