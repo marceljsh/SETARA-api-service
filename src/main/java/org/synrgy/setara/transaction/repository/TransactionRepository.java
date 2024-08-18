@@ -26,6 +26,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
   @Query("UPDATE Transaction t SET t.deletedAt = null WHERE t.id = :id")
   void restoreById(@Param("id") UUID id);
 
+  List<Transaction> findByUser(User user);
+
   @Query(value = "SELECT * FROM tbl_transactions t WHERE t.user_id = :userId AND EXTRACT(MONTH FROM t.time) = :month AND EXTRACT(YEAR FROM t.time) = :year", nativeQuery = true)
   List<Transaction> findByUserAndMonthAndYear(@Param("userId") UUID userId, @Param("month") int month, @Param("year") int year);
 

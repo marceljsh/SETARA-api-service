@@ -6,12 +6,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.service.JasperService;
@@ -21,6 +20,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.synrgy.setara.user.model.User;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,21 +98,31 @@ public class TransactionController {
     }
 
     @PostMapping("/get-all-mutation")
-    public ResponseEntity<BaseResponse<List<MutationResponse>>> getAllMutation(@AuthenticationPrincipal User user,
-                                                                               @RequestBody MutationRequest request,
-                                                                               @RequestParam(defaultValue = "0") int page,
-                                                                               @RequestParam(defaultValue = "10") int size) {
-        Page<MutationResponse> mutationResponsePage = transactionService.getAllMutation(user, request, page, size);
-        List<MutationResponse> mutationResponses = mutationResponsePage.getContent();
-        BaseResponse<List<MutationResponse>> response = BaseResponse.success(HttpStatus.OK, mutationResponses, "Success Get All Mutation");
+    public ResponseEntity<BaseResponse<MutationResponseWithPagination>> getAllMutation(@AuthenticationPrincipal User user,
+                                                                                       @RequestBody MutationRequest request,
+                                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        MutationResponseWithPagination mutationResponseWithPagination = (MutationResponseWithPagination) transactionService.getAllMutation(user, request, page, size);
+
+        BaseResponse<MutationResponseWithPagination> response = BaseResponse.success(
+                HttpStatus.OK,
+                mutationResponseWithPagination,
+                "Success Get All Mutation"
+        );
+
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/generate-all-mutation-report")
-    public ResponseEntity<BaseResponse<String>> generateAllMutationReport(@AuthenticationPrincipal User user) {
-        boolean success = jasperService.generateAllMutationReport(user);
-        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate All Mutation Report");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<byte[]> generateAllMutationReport(@AuthenticationPrincipal User user) {
+        String pdfFileName = "Mutasi Rekening (" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")) + ").pdf";
+        byte[] reportContent = jasperService.generateAllMutationReport(user);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pdfFileName + "\"")
+                .body(reportContent);
     }
 
     @GetMapping("/get-mutation-detail/{transactionId}")
@@ -120,5 +131,14 @@ public class TransactionController {
             @PathVariable UUID transactionId) {
         MutationDetailResponse response = transactionService.getMutationDetail(user, transactionId);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK, response, "Success Get Mutation Detail"));
+    }
+
+    @GetMapping("/generate-receipt/{transactionId}")
+    public ResponseEntity<BaseResponse<String>> generateReceipt(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID transactionId) {
+        boolean success = jasperService.generateReceipt(user, transactionId);
+        BaseResponse<String> response = BaseResponse.success(HttpStatus.OK, success ? "successful" : "unsuccessful", "Success Generate Transaction Receipt");
+        return ResponseEntity.ok(response);
     }
 }

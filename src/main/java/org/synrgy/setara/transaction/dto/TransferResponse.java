@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransferResponse {
+    private String idTransaction;
     private UserDTO sourceUser;
     private UserDTO destinationUser;
     private BigDecimal amount;

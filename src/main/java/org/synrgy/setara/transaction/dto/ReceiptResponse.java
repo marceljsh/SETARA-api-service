@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceiptDTO {
+public class ReceiptResponse {
     private String referenceNumber;
     private String dateTime;
     private String transactionType;
