@@ -1,5 +1,6 @@
 package org.synrgy.setara.transaction.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -16,11 +17,7 @@ import org.synrgy.setara.user.model.User;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,8 +25,11 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class JasperServiceImpl implements JasperService {
+
+    private final TransactionService transactionService;
 
     @Override
     public byte[] generateReceipt(Transaction transaction, TransferResponse response) {
@@ -88,7 +88,7 @@ public class JasperServiceImpl implements JasperService {
     }
 
     @Override
-    public boolean generateAllMutationReport(User user) {
+    public byte[] generateAllMutationReport(User user) {
         JasperReport jasperReport;
         try {
             jasperReport = (JasperReport) JRLoader
@@ -103,10 +103,13 @@ public class JasperServiceImpl implements JasperService {
             }
         }
 
+        JRBeanCollectionDataSource mutationDataset = new JRBeanCollectionDataSource(transactionService.getMutationDataset(user));
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("noRek", String.valueOf(user.getAccountNumber()));
         parameters.put("name", String.valueOf(user.getName()));
         parameters.put("currency", "IDR");
+        parameters.put("mutationDataset", mutationDataset);
 
         JasperPrint jasperPrint;
         byte[] reportContent;
@@ -117,18 +120,6 @@ public class JasperServiceImpl implements JasperService {
             throw new RuntimeException("Failed to generate report", e); // TODO: change exception
         }
 
-        try {
-            String pdfFileName = "mutasi_rekening_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
-            Path pdfPath = Paths.get(System.getProperty("user.home"), "Downloads", pdfFileName);
-
-            Files.write(pdfPath, reportContent);
-
-            log.info("PDF saved to: {}", pdfPath.toAbsolutePath());
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating or saving report PDF", e); //TODO: change exception
-        }
-
-        return true;
+        return reportContent;
     }
 }

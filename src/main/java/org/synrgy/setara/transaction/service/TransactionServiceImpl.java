@@ -454,6 +454,20 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+    @Override
+    public List<MutationDatasetResponse> getMutationDataset(User user) {
+        MutationDatasetResponse mutationData = MutationDatasetResponse.builder()
+                .dateAndTime("1")
+                .description("2")
+                .nominal("3")
+                .build();
+
+        List<MutationDatasetResponse> mutationDataset = new ArrayList<>();
+        mutationDataset.add(mutationData);
+
+        return mutationDataset;
+    }
+
     private void validateMpin(String mpin, User user) {
         if (!passwordEncoder.matches(mpin, user.getMpin())) {
             throw new TransactionExceptions.InvalidMpinException("Invalid MPIN");

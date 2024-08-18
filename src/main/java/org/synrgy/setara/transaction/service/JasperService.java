@@ -7,6 +7,6 @@ import org.synrgy.setara.user.model.User;
 public interface JasperService {
     byte[] generateReceipt(Transaction transaction, TransferResponse response);
 
-    boolean generateAllMutationReport(User user);
+    byte[] generateAllMutationReport(User user);
 }
 
