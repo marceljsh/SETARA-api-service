@@ -6,13 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.synrgy.setara.contact.dto.FavoriteResponse;
 import org.synrgy.setara.contact.dto.SavedAccountResponse;
 import org.synrgy.setara.contact.dto.SavedEwalletAndAccountFinalResponse;
-import org.synrgy.setara.contact.exception.SavedAccountExceptions.SavedAccountNotFoundException;
+import org.synrgy.setara.contact.exception.SavedAccountExceptions;
 import org.synrgy.setara.contact.model.SavedAccount;
 import org.synrgy.setara.contact.repository.SavedAccountRepository;
 import org.synrgy.setara.user.model.User;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,14 +49,11 @@ public class SavedAccountServiceImpl implements SavedAccountService {
   @Override
   @Transactional
   public FavoriteResponse putFavoriteAccount(UUID idTersimpan, boolean isFavorite) {
-    Optional<SavedAccount> optionalSavedAccount = saRepo.findById(idTersimpan);
-    if (optionalSavedAccount.isPresent()) {
-      SavedAccount savedAccount = optionalSavedAccount.get();
-      savedAccount.setFavorite(isFavorite);
-      saRepo.save(savedAccount);
-      return new FavoriteResponse(idTersimpan, isFavorite);
-    } else {
-      throw new SavedAccountNotFoundException("SavedAccount with id " + idTersimpan + " not found");
-    }
+    SavedAccount savedAccount = saRepo.findById(idTersimpan)
+            .orElseThrow(() -> new SavedAccountExceptions.SavedAccountNotFoundException("Saved account with ID " + idTersimpan + " not found"));
+
+    savedAccount.setFavorite(isFavorite);
+    saRepo.save(savedAccount);
+    return new FavoriteResponse(idTersimpan, isFavorite);
   }
 }

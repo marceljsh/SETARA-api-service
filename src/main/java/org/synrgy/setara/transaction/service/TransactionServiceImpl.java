@@ -59,7 +59,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TopUpResponse topUp(User user, TopUpRequest request) {
         validateMpin(request.getMpin(), user);
 
-        if (request.getAmount().compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(MINIMUM_TOP_UP_AMOUNT) < 0) {
             throw new TransactionExceptions.InvalidTopUpAmountException("Top-up amount must be at least " + MINIMUM_TOP_UP_AMOUNT);
         }
 
@@ -139,7 +139,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransferResponse transferWithinBCA(User user, TransferRequest request) {
-        if (request.getAmount().compareTo(MINIMUM_TRANSFER_AMOUNT) < 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(MINIMUM_TRANSFER_AMOUNT) < 0) {
             throw new TransactionExceptions.InvalidTransferAmountException("Transfer amount must be at least " + MINIMUM_TRANSFER_AMOUNT);
         }
 
@@ -273,7 +273,7 @@ public class TransactionServiceImpl implements TransactionService {
     public MerchantTransactionResponse merchantTransaction(User user, MerchantTransactionRequest request) {
         validateMpin(request.getMpin(), user);
 
-        if (request.getAmount().compareTo(BigDecimal.ONE) < 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ONE) < 0) {
             throw new TransactionExceptions.InvalidTransactionAmountException("Transaction amount must be at least 1 rupiah");
         }
 
@@ -448,6 +448,14 @@ public class TransactionServiceImpl implements TransactionService {
         List<MutationDatasetResponse> mutationDataset = new ArrayList<>();
 
         List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        if (transactions.isEmpty()) {
+            mutationDataset.add(MutationDatasetResponse.builder()
+                    .dateAndTime("")
+                    .description("")
+                    .nominal("")
+                    .build());
+        }
 
         for (Transaction transaction : transactions) {
             LocalDateTime transactionTime = transaction.getTime();
