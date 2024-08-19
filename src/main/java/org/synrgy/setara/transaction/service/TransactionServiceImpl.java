@@ -240,15 +240,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public MonthlyReportResponse getMonthlyReport(User user, int month, int year) {
-        if (month < 1 || month > 12) {
-            throw new TransactionExceptions.InvalidMonthException("Invalid month. It must be between 1 and 12.");
-        }
-
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        if (year < 1900 || year > currentYear) {
-            throw new TransactionExceptions.InvalidYearException("Invalid year. It must be between 1900 and " + currentYear + ".");
-        }
-
         BigDecimal income = BigDecimal.valueOf(0);
         BigDecimal expense = BigDecimal.valueOf(0);
 

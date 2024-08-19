@@ -111,7 +111,6 @@ public class MerchantServiceImpl implements MerchantService {
                 .address(merchant.getAddress())
                 .imagePath(merchant.getImagePath())
                 .amount(merchant.getAmount())
-                .qrisCode(merchant.getQrisCode())
                 .build();
     }
 }

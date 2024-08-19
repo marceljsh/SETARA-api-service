@@ -18,5 +18,4 @@ public class MerchantResponse {
     private BigDecimal amount;
     private String imagePath;
     private String address;
-    private String qrisCode;
 }
