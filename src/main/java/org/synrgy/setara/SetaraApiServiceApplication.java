@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
+@PropertySource("file:${user.dir}/.env")//dont push
 public class SetaraApiServiceApplication {
 
 	public static void main(String[] args) {
