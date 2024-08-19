@@ -1,11 +1,14 @@
 package org.synrgy.setara.transaction.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,9 +18,6 @@ import org.synrgy.setara.transaction.dto.*;
 import org.synrgy.setara.transaction.model.Transaction;
 import org.synrgy.setara.transaction.service.JasperService;
 import org.synrgy.setara.transaction.service.TransactionService;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.synrgy.setara.user.model.User;
 
 import java.time.LocalDateTime;
@@ -101,7 +101,7 @@ public class TransactionController {
                                                                                        @RequestBody MutationRequest request,
                                                                                        @RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
-        MutationResponseWithPagination mutationResponseWithPagination = (MutationResponseWithPagination) transactionService.getAllMutation(user, request, page, size);
+        MutationResponseWithPagination mutationResponseWithPagination = transactionService.getAllMutation(user, request, page, size);
 
         BaseResponse<MutationResponseWithPagination> response = BaseResponse.success(
                 HttpStatus.OK,
@@ -111,7 +111,6 @@ public class TransactionController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/generate-all-mutation-report")
     public ResponseEntity<byte[]> generateAllMutationReport(@AuthenticationPrincipal User user) {

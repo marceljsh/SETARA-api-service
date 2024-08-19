@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import org.synrgy.setara.transaction.dto.ReceiptResponse;
 import org.synrgy.setara.transaction.exception.JasperReportExceptions;
 import org.synrgy.setara.transaction.exception.TransactionExceptions;
@@ -22,12 +25,8 @@ import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -37,6 +36,7 @@ import java.util.*;
 @Slf4j
 public class JasperServiceImpl implements JasperService {
 
+    private final ResourceLoader resourceLoader;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final EwalletUserRepository ewalletUserRepository;
@@ -113,13 +113,17 @@ public class JasperServiceImpl implements JasperService {
 
         JasperReport jasperReport;
         try {
-            jasperReport = (JasperReport) JRLoader.loadObject(ResourceUtils.getFile("Receipt.jasper"));
-        } catch (FileNotFoundException | JRException e) {
+            // Menggunakan ResourceLoader untuk mengakses file di classpath
+            Resource resource = resourceLoader.getResource("classpath:reports/Receipt.jasper");
+            jasperReport = (JasperReport) JRLoader.loadObject(resource.getInputStream());
+        } catch (IOException | JRException e) {
             try {
-                File file = ResourceUtils.getFile("classpath:reports/Receipt.jrxml");
-                jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+                // Jika file .jasper tidak ditemukan, compile dari .jrxml
+                Resource resource = resourceLoader.getResource("classpath:reports/Receipt.jrxml");
+                JasperDesign jasperDesign = JRXmlLoader.load(resource.getInputStream());
+                jasperReport = JasperCompileManager.compileReport(jasperDesign);
                 JRSaver.saveObject(jasperReport, "Receipt.jasper");
-            } catch (FileNotFoundException | JRException ex) {
+            } catch (IOException | JRException ex) {
                 throw new JasperReportExceptions.ReportFailedToLoadException("Failed to load or compile the JasperReport template");
             }
         }
@@ -157,14 +161,17 @@ public class JasperServiceImpl implements JasperService {
     public byte[] generateAllMutationReport(User user) {
         JasperReport jasperReport;
         try {
-            jasperReport = (JasperReport) JRLoader
-                    .loadObject(ResourceUtils.getFile("MutationReport.jasper"));
-        } catch (JRException | FileNotFoundException e) {
+            // Menggunakan ResourceLoader untuk mengakses file di classpath
+            Resource resource = resourceLoader.getResource("classpath:reports/MutationReport.jasper");
+            jasperReport = (JasperReport) JRLoader.loadObject(resource.getInputStream());
+        } catch (IOException | JRException e) {
             try {
-                File file = ResourceUtils.getFile("classpath:reports/MutationReport.jrxml");
-                jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+                // Compile dari .jrxml jika .jasper tidak ditemukan
+                Resource resource = resourceLoader.getResource("classpath:reports/MutationReport.jrxml");
+                JasperDesign jasperDesign = JRXmlLoader.load(resource.getInputStream());
+                jasperReport = JasperCompileManager.compileReport(jasperDesign);
                 JRSaver.saveObject(jasperReport, "MutationReport.jasper");
-            } catch (FileNotFoundException | JRException ex) {
+            } catch (IOException | JRException ex) {
                 throw new JasperReportExceptions.ReportFailedToLoadException("Failed to load or compile the JasperReport template");
             }
         }
