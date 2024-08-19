@@ -371,7 +371,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-
     @Override
     public MutationDetailResponse getMutationDetail(User user, UUID transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
