@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.synrgy.setara.security.filter.JwtAuthenticationFilter;
@@ -43,7 +44,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -58,9 +59,8 @@ public class SecurityConfig {
 
                             final Map<String, Object> body = new HashMap<>();
 
-                            body.put("status", false); // Menyelaraskan dengan format BaseResponse
+                            body.put("status", false);
                             body.put("message", "Full authentication is required to access this resource" + exception);
-                          
                             body.put("code", HttpServletResponse.SC_UNAUTHORIZED);
 
                             final ObjectMapper mapper = new ObjectMapper();

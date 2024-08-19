@@ -1,4 +1,4 @@
-package org.synrgy.setara.transaction.utils;
+package org.synrgy.setara.transaction.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import java.time.LocalDateTime;
@@ -7,6 +7,10 @@ import java.time.format.DateTimeFormatter;
 public class TransactionUtils {
 
     private static final int REFERENCE_NUMBER_LENGTH = 5;
+
+    private TransactionUtils() {
+        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
 
     public static String generateReferenceNumber(String typePrefix) {
         String randomDigits = RandomStringUtils.randomNumeric(REFERENCE_NUMBER_LENGTH);

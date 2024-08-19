@@ -1,11 +1,11 @@
 package org.synrgy.setara.vendor.service;
 
-import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
+
+import java.util.UUID;
 
 public interface MerchantService {
     void seedMerchant();
 
-    BaseResponse<MerchantResponse> getQrisData(MerchantRequest requestDTO);
+    MerchantResponse getQrisData(UUID idQris);
 }

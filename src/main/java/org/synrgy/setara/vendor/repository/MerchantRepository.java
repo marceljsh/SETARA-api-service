@@ -21,7 +21,6 @@ public interface MerchantRepository extends JpaRepository<Merchant, UUID> {
     @Query("UPDATE Ewallet e SET e.deletedAt = null WHERE e.id = :id")
     void restoreById(@Param("id") UUID id);
 
-    Optional<Merchant> findByQrisCode(String qrisCode);
     Optional<Merchant> findById(UUID id);
 
     Optional<Merchant> findByName(String name);

@@ -1,44 +1,51 @@
 package org.synrgy.setara.vendor.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.vendor.dto.MerchantRequest;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
+import org.synrgy.setara.vendor.exception.VendorExceptions;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 import org.synrgy.setara.vendor.util.CodeGenerator;
 import org.synrgy.setara.vendor.util.QRCodeGenerator;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-    @Autowired
-    private MerchantRepository merchantRepository;
+    private static final Logger log = LoggerFactory.getLogger(MerchantServiceImpl.class);
+    private final MerchantRepository merchantRepository;
+
+    private static final String QR_CODE_DIR = "src/main/resources/static/qrcodes/";
 
     @Override
     public void seedMerchant() {
         List<Merchant> merchants = Arrays.asList(
                 Merchant.builder()
-                        .merchant_name("SIOMAY MBA YU")
-                        .name("Ruko Summarecon Bekasi")
+                        .name("SIOMAY MBA YU")
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
                         .address("Ruko Summarecon Bekasi")
                         .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
                         .build(),
                 Merchant.builder()
-                        .merchant_name("Batagor Mba Sri")
-                        .name("Ruko Summarecon Bandung")
+                        .name("Batagor Mba Sri")
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
                         .address("Ruko Summarecon Bandung")
+                        .amount(BigDecimal.valueOf(15500))
                         .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
                         .build()
         );
@@ -46,26 +53,32 @@ public class MerchantServiceImpl implements MerchantService {
         for (Merchant merchant : merchants) {
             Optional<Merchant> existingMerchant = merchantRepository.findByName(merchant.getName());
             if (existingMerchant.isEmpty()) {
-                // Save merchant first to get the id_qris
-                Merchant savedMerchant = merchantRepository.save(merchant);
+                try {
+                    Merchant savedMerchant = merchantRepository.save(merchant);
 
-                // Generate QR code using id_qris
-                String qrisData = savedMerchant.getId().toString();
-                int qrCodeWidth = 400;  // Set the desired width
-                int qrCodeHeight = 400; // Set the desired height
+                    String qrisData = savedMerchant.getId().toString();
+                    int qrCodeWidth = 400;
+                    int qrCodeHeight = 400;
 
-                String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
-                String qrCodeImagePath = "D:\\QRCode\\" + savedMerchant.getMerchant_name() + "-qrcode.png";
-                QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
+                    String qrCodeBase64 = QRCodeGenerator.generateQRCodeBase64(qrisData, qrCodeWidth, qrCodeHeight);
 
-                // Update the merchant with the generated QR code and image path
-                savedMerchant.setQrisCode(qrCodeBase64);
-                savedMerchant.setImagePath(qrCodeImagePath);  // Assuming you want to store the image path
-                merchantRepository.save(savedMerchant);
+                    Path path = Paths.get(QR_CODE_DIR);
+                    if (!Files.exists(path)) {
+                        Files.createDirectories(path);
+                    }
 
-                System.out.println("Merchant with QRIS code " + savedMerchant.getName() + " has been saved.");
+                    String qrCodeImagePath = QR_CODE_DIR + savedMerchant.getName() + "-qrcode.png";
+                    QRCodeGenerator.generateQRCodeImage(qrisData, qrCodeWidth, qrCodeHeight, qrCodeImagePath);
+
+                    savedMerchant.setQrisCode(qrCodeBase64);
+                    merchantRepository.save(savedMerchant);
+
+                    log.info("Merchant with name {} has been saved with QR code.", savedMerchant.getName());
+                } catch (IOException e) {
+                    throw new VendorExceptions.QrCodeGenerationException("Failed to save QR code for merchant " + merchant.getName());
+                }
             } else {
-                System.out.println("Merchant with QRIS code " + merchant.getName() + " already exists.");
+                log.info("Merchant with name {} already exists.", merchant.getName());
             }
         }
     }
@@ -87,23 +100,18 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public BaseResponse<MerchantResponse> getQrisData(MerchantRequest requestDTO) {
-        Optional<Merchant> optionalMerchant = merchantRepository.findById(UUID.fromString(requestDTO.getId_qris()));
-        if (optionalMerchant.isPresent()) {
-            Merchant merchant = optionalMerchant.get();
-            MerchantResponse merchantResponse = MerchantResponse.builder()
-                    .merchant_name(merchant.getMerchant_name())
-                    .name(merchant.getName())
-                    .nmid(merchant.getNmid())
-                    .terminalId(merchant.getTerminalId())
-                    .address(merchant.getAddress())
-                    .image_path(merchant.getImagePath())
-                    .qris_code(merchant.getQrisCode())
-                    .build();
+    public MerchantResponse getQrisData(UUID idQris) {
+        Merchant merchant = merchantRepository.findById(idQris)
+                .orElseThrow(() -> new VendorExceptions.MerchantNotFoundException("Merchant with idQris: " + idQris + " not found"));
 
-            return BaseResponse.success(HttpStatus.OK, merchantResponse, "Merchant found.");
-        } else {
-            return BaseResponse.failure(HttpStatus.NOT_FOUND, "Merchant not found.");
-        }
+        return MerchantResponse.builder()
+                .name(merchant.getName())
+                .nmid(merchant.getNmid())
+                .terminalId(merchant.getTerminalId())
+                .address(merchant.getAddress())
+                .imagePath(merchant.getImagePath())
+                .amount(merchant.getAmount())
+                .qrisCode(merchant.getQrisCode())
+                .build();
     }
 }

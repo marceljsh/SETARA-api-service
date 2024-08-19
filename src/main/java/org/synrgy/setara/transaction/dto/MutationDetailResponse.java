@@ -1,16 +1,12 @@
 package org.synrgy.setara.transaction.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class MutationDetailResponse {
     private MutationUser sender;
     private MutationUser receiver;
@@ -20,13 +16,11 @@ public class MutationDetailResponse {
 
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MutationUser {
         private String name;
         private String accountNumber;
         private String imagePath;
-        private String bankName;
+        private String vendorName;
     }
 
 }

@@ -7,15 +7,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.synrgy.setara.common.dto.BaseResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
+import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,28 +30,24 @@ public class UserControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("test_signature");
-        SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
     void testGetBalance_Success() {
+        User user = new User();
+
         UserBalanceResponse userBalanceResponse = UserBalanceResponse.builder()
                 .checkTime(LocalDateTime.now())
                 .balance(BigDecimal.valueOf(100000))
                 .build();
 
-        when(userService.getBalance()).thenReturn(userBalanceResponse);
+        when(userService.getBalance(user)).thenReturn(userBalanceResponse);
 
-        ResponseEntity<BaseResponse<UserBalanceResponse>> response = userController.getBalance();
+        ResponseEntity<BaseResponse<UserBalanceResponse>> response = userController.getBalance(user);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Success Get Balance", response.getBody().getMessage());
+        assertEquals("Success Get Balance", Objects.requireNonNull(response.getBody()).getMessage());
         assertEquals(userBalanceResponse, response.getBody().getData());
     }
 }

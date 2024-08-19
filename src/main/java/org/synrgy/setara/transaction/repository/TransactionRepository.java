@@ -26,6 +26,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
   @Query("UPDATE Transaction t SET t.deletedAt = null WHERE t.id = :id")
   void restoreById(@Param("id") UUID id);
 
+  List<Transaction> findByUser(User user);
+
   @Query(value = "SELECT * FROM tbl_transactions t WHERE t.user_id = :userId AND EXTRACT(MONTH FROM t.time) = :month AND EXTRACT(YEAR FROM t.time) = :year", nativeQuery = true)
   List<Transaction> findByUserAndMonthAndYear(@Param("userId") UUID userId, @Param("month") int month, @Param("year") int year);
 
@@ -37,7 +39,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
   @Query("SELECT t FROM Transaction t WHERE t.user = :user AND t.time BETWEEN :startDate AND :endDate AND " +
           "(:transactionCategory = 'ALL_TRANSACTIONS' OR " +
-          "(:transactionCategory = 'OUTGOING' AND t.type IN ('TRANSFER', 'TOP_UP')) OR " +
+          "(:transactionCategory = 'OUTGOING' AND t.type IN ('TRANSFER', 'TOP_UP', 'QRPAYMENT')) OR " +
           "(:transactionCategory = 'INCOMING' AND t.type = 'DEPOSIT'))")
   Page<Transaction> findByUserAndTimeBetweenAndTransactionCategory(@Param("user") User user,
                                                                    @Param("startDate") LocalDateTime startDate,

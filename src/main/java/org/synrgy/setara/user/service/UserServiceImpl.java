@@ -3,13 +3,11 @@ package org.synrgy.setara.user.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.synrgy.setara.user.dto.SearchResponse;
 import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.user.exception.SearchExceptions.SearchNotFoundException;
-import org.synrgy.setara.user.exception.UserExceptions;
 import org.synrgy.setara.user.model.User;
 import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Bank;
@@ -17,7 +15,6 @@ import org.synrgy.setara.vendor.repository.BankRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +26,8 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final BankRepository bankRepo;
   private final UserRepository userRepository;
+
+  private static final String DEFAULT_IMAGE_PATH = "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png";
 
   @Override
   public void seedUser() {
@@ -44,7 +43,7 @@ public class UserServiceImpl implements UserService {
             "081234567890",
             "Kendrick Lamar",
             "itsjustbigme",
-            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
+            DEFAULT_IMAGE_PATH,
             "Compton, CA",
             BigDecimal.valueOf(1000000),
             "170687"
@@ -72,7 +71,7 @@ public class UserServiceImpl implements UserService {
             "081230987654",
             "John Smith",
             "john123",
-            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
+            DEFAULT_IMAGE_PATH,
             "New York, NY",
             BigDecimal.valueOf(100000),
             "123456"
@@ -86,7 +85,7 @@ public class UserServiceImpl implements UserService {
             "081234567891",
             "Andhika Putra",
             "andika12345",
-            "https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355550/SETARA_FC-8/kvc4rknrwpbpga67syko.png",
+            DEFAULT_IMAGE_PATH,
             "New York, NY",
             BigDecimal.valueOf(999999999),
             "120951"
@@ -127,11 +126,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserBalanceResponse getBalance() {
-    String signature = SecurityContextHolder.getContext().getAuthentication().getName();
-    User user = userRepository.findBySignature(signature)
-            .orElseThrow(() -> new UserExceptions.UserNotFoundException("User with signature " + signature + " not found"));
-
+  public UserBalanceResponse getBalance(User user) {
     return UserBalanceResponse.builder()
             .checkTime(LocalDateTime.now())
             .balance(user.getBalance())
@@ -140,16 +135,14 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public SearchResponse searchUserByNorek(String no) {
-    Optional<User> user = userRepository.findByAccountNumber(no);
-    if(user.isPresent()) {
-      SearchResponse response = SearchResponse.builder()
-              .no(no)
-              .name(user.get().getName())
-              .bank(user.get().getBank().getName())
-              .imagePath(user.get().getImagePath())
-              .build();
-      return response;
-    }
-    throw new SearchNotFoundException("No rekening " + no + " not found");
+    return userRepository.findByAccountNumber(no)
+            .map(user -> SearchResponse.builder()
+                    .no(no)
+                    .name(user.getName())
+                    .bank(user.getBank().getName())
+                    .imagePath(user.getImagePath())
+                    .build())
+            .orElseThrow(() -> new SearchNotFoundException("No rekening " + no + " not found"));
   }
+
 }

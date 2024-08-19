@@ -1,20 +1,26 @@
 package org.synrgy.setara.transaction.service;
 
-import org.springframework.data.domain.Page;
 import org.synrgy.setara.transaction.dto.*;
+import org.synrgy.setara.transaction.model.Transaction;
+import org.synrgy.setara.user.model.User;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TransactionService {
-    TopUpResponse topUp(TopUpRequest request);
+    TopUpResponse topUp(User user, TopUpRequest request);
 
-    TransferResponse transferWithinBCA(TransferRequest request);
+    TransferResponse transferWithinBCA(User user, TransferRequest request);
 
-    MonthlyReportResponse getMonthlyReport(int month, int year);
+    MonthlyReportResponse getMonthlyReport(User user, int month, int year);
 
-    MerchantTransactionResponse merchantTransaction(MerchantTransactionRequest request);
+    MerchantTransactionResponse merchantTransaction(User user, MerchantTransactionRequest request);
 
-    Page<MutationResponse> getAllMutation(MutationRequest request, int page, int size);
+    MutationResponseWithPagination getAllMutation(User user, MutationRequest request, int page, int size);
 
-    MutationDetailResponse getMutationDetail(UUID transactionId);
+    MutationDetailResponse getMutationDetail(User user, UUID transactionId);
+
+    List<MutationDatasetResponse> getMutationDataset(User user);
+
+    Transaction getByTransactionId(UUID transactionId);
 }
