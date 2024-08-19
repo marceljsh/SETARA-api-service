@@ -53,7 +53,6 @@ class MerchantControllerTest {
                 .terminalId("JYW")
                 .imagePath("/images/janesmith.png")
                 .address("Fernvale Rd.")
-                .qrisCode("qrisCode")
                 .build();
 
         when(merchantService.getQrisData(qrisId)).thenReturn(expectedResponse);
