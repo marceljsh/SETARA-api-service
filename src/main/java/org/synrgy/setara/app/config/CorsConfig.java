@@ -14,14 +14,15 @@ public class CorsConfig {
     private String allowedOrigin;
 
     @Bean
-    public WebMvcConfigurer getCorsConfiguration() {
+    public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(allowedOrigin)
+                        .allowedOrigins("allowedOrigin")
                         .allowedMethods("*")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // Allow credentials if needed
             }
         };
     }
