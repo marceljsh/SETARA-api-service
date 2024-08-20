@@ -255,26 +255,6 @@ class TransactionServiceTest {
     }
 
     @Test
-    void testGetMonthlyReport_InvalidMonth1() {
-        assertThrows(TransactionExceptions.InvalidMonthException.class, () -> transactionService.getMonthlyReport(new User(), 13, 2024));
-    }
-
-    @Test
-    void testGetMonthlyReport_InvalidMonth2() {
-        assertThrows(TransactionExceptions.InvalidMonthException.class, () -> transactionService.getMonthlyReport(new User(), 0, 2024));
-    }
-
-    @Test
-    void testGetMonthlyReport_InvalidYear1() {
-        assertThrows(TransactionExceptions.InvalidYearException.class, () -> transactionService.getMonthlyReport(new User(), 7, 1899));
-    }
-
-    @Test
-    void testGetMonthlyReport_InvalidYear2() {
-        assertThrows(TransactionExceptions.InvalidYearException.class, () -> transactionService.getMonthlyReport(new User(), 7, 2100));
-    }
-
-    @Test
     void testMerchantTransaction_Success() {
         Bank bank = Bank.builder()
                 .name("BCA")

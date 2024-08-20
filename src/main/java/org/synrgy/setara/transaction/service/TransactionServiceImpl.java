@@ -115,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
 
         return TopUpResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .user(TopUpResponse.UserDto.builder()
                         .accountNumber(user.getAccountNumber())
                         .name(user.getName())
@@ -218,7 +218,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return TransferResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .sourceUser(TransferResponse.UserDTO.builder()
                         .name(user.getName())
                         .bank(user.getBank().getName())
@@ -270,7 +270,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         UUID merchantId;
         try {
-            merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
+            merchantId = request.getIdQris();
         } catch (IllegalArgumentException e) {
             throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
         }
@@ -306,7 +306,7 @@ public class TransactionServiceImpl implements TransactionService {
         String bankName = bank != null ? bank.getName() : "Unknown";
 
         return MerchantTransactionResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
                         .name(user.getName())
                         .bank(bankName)
