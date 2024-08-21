@@ -444,6 +444,7 @@ class TransactionServiceTest {
                 .amount(BigDecimal.valueOf(100000))
                 .adminFee(BigDecimal.valueOf(1000))
                 .totalAmount(BigDecimal.valueOf(101000))
+                .note("Testing...")
                 .build();
 
         MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
@@ -505,6 +506,7 @@ class TransactionServiceTest {
                 .amount(BigDecimal.valueOf(100000))
                 .adminFee(BigDecimal.ZERO)
                 .totalAmount(BigDecimal.valueOf(100000))
+                .note("Testing...")
                 .build();
 
         MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
@@ -580,6 +582,7 @@ class TransactionServiceTest {
                 .amount(BigDecimal.valueOf(100000))
                 .adminFee(BigDecimal.ZERO)
                 .totalAmount(BigDecimal.valueOf(100000))
+                .note("Testing...")
                 .build();
 
         MutationDetailResponse response = transactionService.getMutationDetail(user, mutationDetailId);
