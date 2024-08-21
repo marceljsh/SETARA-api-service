@@ -36,6 +36,7 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -341,18 +342,19 @@ public class TransactionServiceImpl implements TransactionService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-        List<MutationResponse> mutationResponses = transactions.map(transaction -> MutationResponse.builder()
-                .transactionId(transaction.getId())
-                .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
-                .type(formatTransactionType(transaction))
-                .totalAmount(transaction.getTotalamount())
-                .time(transaction.getTime())
-                .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
-                .destinationAccountNumber(transaction.getDestinationAccountNumber())
-                .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
-                .formattedDate(transaction.getTime().format(dateFormatter))
-                .formattedTime(transaction.getTime().format(timeFormatter))
-                .build()).getContent();
+        List<MutationResponse> mutationResponses = transactions.stream()
+                .map(transaction -> MutationResponse.builder()
+                        .transactionId(transaction.getId())
+                        .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
+                        .type(formatTransactionType(transaction))
+                        .totalAmount(transaction.getTotalamount())
+                        .time(transaction.getTime())
+                        .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
+                        .destinationAccountNumber(transaction.getDestinationAccountNumber())
+                        .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
+                        .formattedDate(transaction.getTime().format(dateFormatter))
+                        .formattedTime(transaction.getTime().format(timeFormatter))
+                        .build()).sorted(Comparator.comparing(MutationResponse::getTime).reversed()).toList();
 
         return MutationResponseWithPagination.builder()
                 .mutationResponses(mutationResponses)
