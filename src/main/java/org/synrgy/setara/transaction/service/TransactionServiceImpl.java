@@ -36,6 +36,7 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -115,7 +116,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new TransactionExceptions.EwalletNotFoundException("E-wallet not found"));
 
         return TopUpResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .user(TopUpResponse.UserDto.builder()
                         .accountNumber(user.getAccountNumber())
                         .name(user.getName())
@@ -218,7 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return TransferResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .sourceUser(TransferResponse.UserDTO.builder()
                         .name(user.getName())
                         .bank(user.getBank().getName())
@@ -270,7 +271,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         UUID merchantId;
         try {
-            merchantId = UUID.fromString(String.valueOf(request.getIdQris()));
+            merchantId = request.getIdQris();
         } catch (IllegalArgumentException e) {
             throw new TransactionExceptions.MerchantNotFoundException("Invalid QRIS ID format: " + request.getIdQris());
         }
@@ -306,7 +307,7 @@ public class TransactionServiceImpl implements TransactionService {
         String bankName = bank != null ? bank.getName() : "Unknown";
 
         return MerchantTransactionResponse.builder()
-                .idTransaction(transaction.getId().toString())
+                .idTransaction(transaction.getId())
                 .sourceUser(MerchantTransactionResponse.SourceUserDTO.builder()
                         .name(user.getName())
                         .bank(bankName)
@@ -341,18 +342,19 @@ public class TransactionServiceImpl implements TransactionService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-        List<MutationResponse> mutationResponses = transactions.map(transaction -> MutationResponse.builder()
-                .transactionId(transaction.getId())
-                .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
-                .type(formatTransactionType(transaction))
-                .totalAmount(transaction.getTotalamount())
-                .time(transaction.getTime())
-                .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
-                .destinationAccountNumber(transaction.getDestinationAccountNumber())
-                .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
-                .formattedDate(transaction.getTime().format(dateFormatter))
-                .formattedTime(transaction.getTime().format(timeFormatter))
-                .build()).getContent();
+        List<MutationResponse> mutationResponses = transactions.stream()
+                .map(transaction -> MutationResponse.builder()
+                        .transactionId(transaction.getId())
+                        .uniqueCode(transaction.getUniqueCode().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
+                        .type(formatTransactionType(transaction))
+                        .totalAmount(transaction.getTotalamount())
+                        .time(transaction.getTime())
+                        .referenceNumber(transaction.getReferenceNumber().replaceAll("TRF-|DPT-|TOP-|MCH-", ""))
+                        .destinationAccountNumber(transaction.getDestinationAccountNumber())
+                        .destinationPhoneNumber(transaction.getDestinationPhoneNumber())
+                        .formattedDate(transaction.getTime().format(dateFormatter))
+                        .formattedTime(transaction.getTime().format(timeFormatter))
+                        .build()).sorted(Comparator.comparing(MutationResponse::getTime).reversed()).toList();
 
         return MutationResponseWithPagination.builder()
                 .mutationResponses(mutationResponses)
@@ -429,6 +431,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(transaction.getAmount())
                 .adminFee(transaction.getAdminFee())
                 .totalAmount(transaction.getTotalamount())
+                .note(transaction.getNote())
                 .build();
     }
 

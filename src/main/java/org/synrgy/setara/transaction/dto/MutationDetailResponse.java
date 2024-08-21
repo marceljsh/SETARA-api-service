@@ -13,6 +13,7 @@ public class MutationDetailResponse {
     private BigDecimal amount;
     private BigDecimal adminFee;
     private BigDecimal totalAmount;
+    private String note;
 
     @Data
     @Builder
