@@ -11,7 +11,6 @@ import org.synrgy.setara.vendor.repository.EwalletRepository;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,14 +31,6 @@ class EwalletServiceTest {
 
     @Test
     void testSeedEwallet_Success() {
-        List<Ewallet> ewallets = Arrays.asList(
-                Ewallet.builder().name("Ovo").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860518/SETARA_FC-8/NewOvo.png").build(),
-                Ewallet.builder().name("ShopeePay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860519/SETARA_FC-8/NewShopee.png").build(),
-                Ewallet.builder().name("GoPay").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860520/SETARA_FC-8/Newgopay.png").build(),
-                Ewallet.builder().name("DANA").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860518/SETARA_FC-8/NewDana.png").build(),
-                Ewallet.builder().name("LinkAja").imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722860517/SETARA_FC-8/Newlinkaja.png").build()
-        );
-
         when(ewalletRepo.existsByName(anyString())).thenReturn(false); // Mock all e-wallets as not existing
         ewalletService.seedEwallet();
 

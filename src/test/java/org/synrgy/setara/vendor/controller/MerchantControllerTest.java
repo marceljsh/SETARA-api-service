@@ -8,13 +8,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.user.dto.UserBalanceResponse;
 import org.synrgy.setara.vendor.dto.MerchantResponse;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.service.MerchantService;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
