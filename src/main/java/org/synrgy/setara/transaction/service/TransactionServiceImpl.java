@@ -431,6 +431,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(transaction.getAmount())
                 .adminFee(transaction.getAdminFee())
                 .totalAmount(transaction.getTotalamount())
+                .note(transaction.getNote())
                 .build();
     }
 
