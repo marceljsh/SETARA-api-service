@@ -10,9 +10,6 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="net.sf.jasperreports.export.pdf.font.embed" value="true"/>
-	<style name="NunitoSans" fontName="Nunito Sans" pdfFontName="reports/NunitoSans-Regular.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-	<style name="NunitoSansBold" fontName="Nunito Sans Bold" pdfFontName="reports/NunitoSans-Bold.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -38,9 +35,9 @@
 				<imageExpression><![CDATA["reports/logo-setara.png"]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="324" y="21" width="243" height="30" uuid="843c01d2-e64e-4a7d-9291-fe30929879d9"/>
+				<reportElement x="324" y="21" width="243" height="30" uuid="843c01d2-e64e-4a7d-9291-fe30929879d9"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="24" isBold="true"/>
+					<font size="24" isBold="true"/>
 				</textElement>
 				<text><![CDATA[BUKTI TRANSAKSI]]></text>
 			</staticText>
@@ -49,9 +46,9 @@
 	<pageHeader>
 		<band height="53" splitType="Stretch">
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="30" width="150" height="23" forecolor="#115DA9" uuid="788c0486-2c20-4bc5-ada2-04f4aabc9569"/>
+				<reportElement x="20" y="30" width="150" height="23" forecolor="#115DA9" uuid="788c0486-2c20-4bc5-ada2-04f4aabc9569"/>
 				<textElement>
-					<font fontName="Arial" size="18" isBold="true"/>
+					<font size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Detail Transaksi]]></text>
 			</staticText>
@@ -73,135 +70,135 @@
 	<detail>
 		<band height="325" splitType="Stretch">
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
+				<reportElement x="20" y="0" width="250" height="24" uuid="d563d12a-6586-4b5a-8f31-6a52e604ecf1"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Nomor Referensi			:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="0" width="260" height="24" uuid="aba2e3e3-fdf2-4ed4-b7ae-cf064f8eaede"/>
+				<reportElement x="280" y="0" width="260" height="24" uuid="aba2e3e3-fdf2-4ed4-b7ae-cf064f8eaede"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{referenceNumber}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="30" width="250" height="24" uuid="51ff7df8-1cc7-4138-93ed-5d564c8c36b0"/>
+				<reportElement x="20" y="30" width="250" height="24" uuid="51ff7df8-1cc7-4138-93ed-5d564c8c36b0"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Tanggal, Jam				:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="30" width="260" height="24" uuid="78c13409-ff9c-4935-91b7-3e5c22c4c703"/>
+				<reportElement x="280" y="30" width="260" height="24" uuid="78c13409-ff9c-4935-91b7-3e5c22c4c703"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{dateTime}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="60" width="250" height="24" uuid="e80e4c7f-bec2-4fa4-b5cb-f5feaad29755"/>
+				<reportElement x="20" y="60" width="250" height="24" uuid="e80e4c7f-bec2-4fa4-b5cb-f5feaad29755"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Jenis Transaksi			:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="60" width="260" height="24" uuid="8f89cb13-7eb5-4f91-b62a-022a34030e7c"/>
+				<reportElement x="280" y="60" width="260" height="24" uuid="8f89cb13-7eb5-4f91-b62a-022a34030e7c"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{transactionType}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="90" width="250" height="24" uuid="b4a9e1af-f51a-4a21-b1f3-49a364ac2ed7"/>
+				<reportElement x="20" y="90" width="250" height="24" uuid="b4a9e1af-f51a-4a21-b1f3-49a364ac2ed7"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Nama Penerima			:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="90" width="260" height="24" uuid="15a52668-4f25-4f32-b13f-e6f2af8d28cf"/>
+				<reportElement x="280" y="90" width="260" height="24" uuid="15a52668-4f25-4f32-b13f-e6f2af8d28cf"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{recipientName}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="120" width="250" height="24" uuid="d6eae1bc-9fd5-4c68-a07f-5887ffbbca4d"/>
+				<reportElement x="20" y="120" width="250" height="24" uuid="d6eae1bc-9fd5-4c68-a07f-5887ffbbca4d"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Nomor HP/ Bank Penerima	:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="120" width="260" height="24" uuid="f6173e74-8731-4c69-b9aa-bd37be7f57a6"/>
+				<reportElement x="280" y="120" width="260" height="24" uuid="f6173e74-8731-4c69-b9aa-bd37be7f57a6"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{recipientNumber}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="150" width="250" height="24" uuid="77b31a06-616b-4941-8b53-40f03588d7b9"/>
+				<reportElement x="20" y="150" width="250" height="24" uuid="77b31a06-616b-4941-8b53-40f03588d7b9"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Nominal					:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="150" width="260" height="24" uuid="324b1d25-9e4d-45af-a5a5-9b8b5cf15275"/>
+				<reportElement x="280" y="150" width="260" height="24" uuid="324b1d25-9e4d-45af-a5a5-9b8b5cf15275"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="180" width="250" height="24" uuid="33b43d61-d836-429f-8dd1-5b5cfcd6c66c"/>
+				<reportElement x="20" y="180" width="250" height="24" uuid="33b43d61-d836-429f-8dd1-5b5cfcd6c66c"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Biaya Admin				:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="180" width="260" height="24" uuid="8b456124-b38c-465b-bd95-d839d859ae91"/>
+				<reportElement x="280" y="180" width="260" height="24" uuid="8b456124-b38c-465b-bd95-d839d859ae91"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{adminFee}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="210" width="250" height="24" uuid="d087adfc-5b9d-42f7-bbfc-3dce444701fc"/>
+				<reportElement x="20" y="210" width="250" height="24" uuid="d087adfc-5b9d-42f7-bbfc-3dce444701fc"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Total						:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="210" width="260" height="24" uuid="80920733-1982-4c47-8f5b-156a36a62214"/>
+				<reportElement x="280" y="210" width="260" height="24" uuid="80920733-1982-4c47-8f5b-156a36a62214"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSansBold" x="20" y="240" width="250" height="24" uuid="a1011bc6-c93b-497d-9384-c55c7118ae7b"/>
+				<reportElement x="20" y="240" width="250" height="24" uuid="a1011bc6-c93b-497d-9384-c55c7118ae7b"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Status					:]]></text>
 			</staticText>
 			<textField>
-				<reportElement style="NunitoSans" x="280" y="240" width="260" height="24" uuid="63b41761-45fd-441d-b512-c33e5d1f4c94"/>
+				<reportElement x="280" y="240" width="260" height="24" uuid="63b41761-45fd-441d-b512-c33e5d1f4c94"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="16"/>
+					<font size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement style="NunitoSans" x="20" y="300" width="514" height="20" forecolor="#B3B3B3" uuid="4bc4e7c2-10a6-4ab1-b55c-c60a8f61d524"/>
+				<reportElement x="20" y="300" width="514" height="20" forecolor="#B3B3B3" uuid="4bc4e7c2-10a6-4ab1-b55c-c60a8f61d524"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Arial" size="12"/>
+					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Dokumen ini adalah Bukti Pembayaran Resmi Yang diterbitkan oleh PT Setara]]></text>
 			</staticText>

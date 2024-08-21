@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransferResponse {
-    private String idTransaction;
+    private UUID idTransaction;
     private UserDTO sourceUser;
     private UserDTO destinationUser;
     private BigDecimal amount;

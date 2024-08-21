@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpResponse {
-    private String idTransaction;
+    private UUID idTransaction;
     private UserDto user;
     private UserEwalletDto userEwallet;
     private BigDecimal amount;
