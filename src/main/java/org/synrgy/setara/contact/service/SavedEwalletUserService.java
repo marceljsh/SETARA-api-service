@@ -7,8 +7,6 @@ import org.synrgy.setara.contact.dto.SavedEwalletUserResponse;
 import org.synrgy.setara.user.model.User;
 
 public interface SavedEwalletUserService {
-//    void seedSavedEwalletUsers();
-
     SavedEwalletAndAccountFinalResponse<SavedEwalletUserResponse> getSavedEwalletUsers(User user, String ewalletName);
 
     FavoriteResponse putFavoriteEwalletUser(FavoriteEwalletRequest request);

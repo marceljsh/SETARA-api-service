@@ -6,10 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.synrgy.setara.common.dto.BaseResponse;
-import org.synrgy.setara.user.exception.UserExceptions;
 import org.synrgy.setara.vendor.exception.VendorExceptions;
 
 @RestControllerAdvice(basePackages = "org.synrgy.setara.vendor")

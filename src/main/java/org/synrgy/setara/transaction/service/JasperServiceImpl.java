@@ -25,11 +25,15 @@ import org.synrgy.setara.user.repository.UserRepository;
 import org.synrgy.setara.vendor.model.Merchant;
 import org.synrgy.setara.vendor.repository.MerchantRepository;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static org.synrgy.setara.transaction.util.TransactionUtils.getMonthNameInIndonesian;
 
 @Service
 @RequiredArgsConstructor
@@ -91,10 +95,18 @@ public class JasperServiceImpl implements JasperService {
                 break;
         }
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH.mm 'WIB'", new Locale("id", "ID"));
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH.mm 'WIB'");
+        Month month = transaction.getTime().getMonth();
+        String monthNameInIndonesian = getMonthNameInIndonesian(month);
+        String monthNameInEnglish = month.name().toLowerCase();
 
         String formattedDateTime = transaction.getTime().format(dateTimeFormatter);
+        formattedDateTime = formattedDateTime.replace(monthNameInEnglish, monthNameInIndonesian);
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        NumberFormat currencyFormatter = new DecimalFormat("#,###", symbols);
+
         String formattedAmount = currencyFormatter.format(transaction.getAmount());
         String formattedAdminFee = currencyFormatter.format(transaction.getAdminFee());
         String formattedTotal = currencyFormatter.format(transaction.getTotalamount());

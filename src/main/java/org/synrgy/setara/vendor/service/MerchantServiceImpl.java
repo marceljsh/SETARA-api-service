@@ -38,7 +38,7 @@ public class MerchantServiceImpl implements MerchantService {
                         .nmid(generateUniqueNmid())
                         .terminalId(generateUniqueTerminalId())
                         .address("Ruko Summarecon Bekasi")
-                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1724256350/SETARA_FC-8/mstl48rjmygskn649ddq.png")
                         .build(),
                 Merchant.builder()
                         .name("Batagor Mba Sri")
@@ -46,7 +46,7 @@ public class MerchantServiceImpl implements MerchantService {
                         .terminalId(generateUniqueTerminalId())
                         .address("Ruko Summarecon Bandung")
                         .amount(BigDecimal.valueOf(15500))
-                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1722355549/SETARA_FC-8/kctoxb5wzj3bu73durn2.png")
+                        .imagePath("https://res.cloudinary.com/dmuuypm2t/image/upload/v1724256160/SETARA_FC-8/rwqfsuhthtpazfhvmgio.png")
                         .build()
         );
 
