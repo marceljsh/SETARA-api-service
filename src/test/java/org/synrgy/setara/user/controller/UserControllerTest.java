@@ -19,7 +19,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class UserControllerTest {
+class UserControllerTest {
 
     @Mock
     private UserService userService;

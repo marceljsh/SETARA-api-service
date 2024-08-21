@@ -36,7 +36,8 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static org.synrgy.setara.transaction.util.TransactionUtils.getMonthNameInIndonesian;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,8 @@ public class TransactionServiceImpl implements TransactionService {
     private static final BigDecimal ADMIN_FEE = BigDecimal.valueOf(1000);
     private static final BigDecimal MINIMUM_TOP_UP_AMOUNT = BigDecimal.valueOf(10000);
     private static final BigDecimal MINIMUM_TRANSFER_AMOUNT = BigDecimal.valueOf(1);
+    private static final String NOT_FOUND = " not found";
+    private static final String USER_WITH_ACCOUNT_NUMBER = "User with account number ";
 
     @Override
     @Transactional
@@ -367,7 +370,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public MutationDetailResponse getMutationDetail(User user, UUID transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
+                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + NOT_FOUND));
 
         if (user != transaction.getUser()) {
            throw new TransactionExceptions.TransactionNotOwnedByUser("Transaction is not owned by user");
@@ -399,7 +402,7 @@ public class TransactionServiceImpl implements TransactionService {
             sender = mutationUser;
 
             User destinationUser = userRepository.findByAccountNumber(transaction.getDestinationAccountNumber())
-                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+                    .orElseThrow(() -> new TransactionExceptions.UserNotFoundException(USER_WITH_ACCOUNT_NUMBER + transaction.getDestinationAccountNumber() + NOT_FOUND));
 
             receiver = MutationDetailResponse.MutationUser.builder()
                     .name(destinationUser.getName())
@@ -407,11 +410,22 @@ public class TransactionServiceImpl implements TransactionService {
                     .imagePath(destinationUser.getImagePath())
                     .vendorName(transaction.getBank().getName())
                     .build();
+        } else if (transaction.getType() == TransactionType.QRPAYMENT) {
+            sender = mutationUser;
+
+            Merchant destinationUser = transaction.getDestinationIdQris();
+
+            receiver = MutationDetailResponse.MutationUser.builder()
+                    .name(destinationUser.getName())
+                    .accountNumber(destinationUser.getNmid())
+                    .imagePath(destinationUser.getImagePath())
+                    .vendorName(destinationUser.getTerminalId())
+                    .build();
         } else if (transaction.getType() == TransactionType.DEPOSIT) {
             String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
 
             Transaction transfer = transactionRepository.findByReferenceNumber(referenceNumber)
-                    .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + " not found"));
+                    .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + NOT_FOUND));
 
             User sourceUser = transfer.getUser();
 
@@ -464,7 +478,7 @@ public class TransactionServiceImpl implements TransactionService {
                 formattedTransactionType = "Transfer";
                 companyName = " " + transaction.getBank().getName();
                 User receiver = userRepository.findByAccountNumber(transaction.getDestinationAccountNumber())
-                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException(USER_WITH_ACCOUNT_NUMBER + transaction.getDestinationAccountNumber() + NOT_FOUND));
                 name = " ke " +  receiver.getName();
             } else if (transactionType.equals(TransactionType.TOP_UP)) {
                 formattedTransactionType = "Top Up";
@@ -480,9 +494,9 @@ public class TransactionServiceImpl implements TransactionService {
                 companyName = " " + transaction.getBank().getName();
                 String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
                 Transaction transfer = transactionRepository.findByReferenceNumber(referenceNumber)
-                        .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + " not found"));
+                        .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with reference number " + referenceNumber + NOT_FOUND));
                 User sender = userRepository.findByAccountNumber(transfer.getDestinationAccountNumber())
-                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException("User with account number " + transaction.getDestinationAccountNumber() + " not found"));
+                        .orElseThrow(() -> new TransactionExceptions.UserNotFoundException(USER_WITH_ACCOUNT_NUMBER + transaction.getDestinationAccountNumber() + NOT_FOUND));
                 name = " dari " +  sender.getName();
             }
             String description = String.format("%s%n%s%s%s", transaction.getUniqueCode(), formattedTransactionType, companyName, name);
@@ -511,24 +525,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction getByTransactionId(UUID transactionId) {
         return transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + " not found"));
-    }
-
-    private static String getMonthNameInIndonesian(Month month) {
-        return switch (month) {
-            case JANUARY -> "Januari";
-            case FEBRUARY -> "Februari";
-            case MARCH -> "Maret";
-            case APRIL -> "April";
-            case MAY -> "Mei";
-            case JUNE -> "Juni";
-            case JULY -> "Juli";
-            case AUGUST -> "Agustus";
-            case SEPTEMBER -> "September";
-            case OCTOBER -> "Oktober";
-            case NOVEMBER -> "November";
-            case DECEMBER -> "Desember";
-        };
+                .orElseThrow(() -> new TransactionExceptions.TransactionNotFoundException("Transaction with ID " + transactionId + NOT_FOUND));
     }
 
     private void validateMpin(String mpin, User user) {
