@@ -407,6 +407,17 @@ public class TransactionServiceImpl implements TransactionService {
                     .imagePath(destinationUser.getImagePath())
                     .vendorName(transaction.getBank().getName())
                     .build();
+        } else if (transaction.getType() == TransactionType.QRPAYMENT) {
+            sender = mutationUser;
+
+            Merchant destinationUser = transaction.getDestinationIdQris();
+
+            receiver = MutationDetailResponse.MutationUser.builder()
+                    .name(destinationUser.getName())
+                    .accountNumber(destinationUser.getNmid())
+                    .imagePath(destinationUser.getImagePath())
+                    .vendorName(destinationUser.getTerminalId())
+                    .build();
         } else if (transaction.getType() == TransactionType.DEPOSIT) {
             String referenceNumber = transaction.getReferenceNumber().replace("DPT", "TRF");
 
